@@ -1,4 +1,10 @@
-//main
+// main (UPDATED)
+// ✅ Changes:
+// 1) "Available Spaces" section moved to the very bottom (just before footer)
+// 2) Added CTA links on 2nd & 3rd floor sections to jump to #available-spaces
+// 3) Carousel images now show the FULL photo (no zoom/crop) while still feeling “full screen”
+//    using a blurred cover background + a sharp contain foreground (no empty ugly spaces)
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Building2,
@@ -29,7 +35,7 @@ export default function Home() {
         const v = heroVideoRef.current;
         if (!v) return;
         try {
-            v.currentTime = 1; // 👈 start from 1s (matches paused frame)
+            v.currentTime = 1; // start from 1s
             await v.play();
         } catch { }
     };
@@ -38,7 +44,7 @@ export default function Home() {
         const v = heroVideoRef.current;
         if (!v) return;
         v.pause();
-        v.currentTime = 2; // 👈 stay at 1-second mark when paused
+        v.currentTime = 2; // stay at 2s mark when paused
     };
 
     const buildingALinks: LinkItem[] = useMemo(
@@ -82,7 +88,9 @@ export default function Home() {
 
     // scroll reveal (no library)
     useEffect(() => {
-        const els = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+        const els = Array.from(
+            document.querySelectorAll<HTMLElement>("[data-reveal]")
+        );
         if (!els.length) return;
 
         els.forEach((el) => el.classList.add("reveal"));
@@ -106,16 +114,32 @@ export default function Home() {
     // ✅ Floor galleries (put your images in /public/available/...)
     const floor2Images = useMemo(
         () => [
-            { src: "/available/2nd-1.png", alt: "2nd floor office view", label: "Building A • 2nd Floor" },
-            { src: "/available/2nd-2.png", alt: "2nd floor workspace angle", label: "Building A • 2nd Floor" },
+            {
+                src: "/available/2nd-1.png",
+                alt: "2nd floor office view",
+                label: "Building A • 2nd Floor",
+            },
+            {
+                src: "/available/2nd-2.png",
+                alt: "2nd floor workspace angle",
+                label: "Building A • 2nd Floor",
+            },
         ],
         []
     );
 
     const floor3Images = useMemo(
         () => [
-            { src: "/available/3rd-1.png", alt: "3rd floor office view", label: "Building A • 3rd Floor" },
-            { src: "/available/3.png", alt: "3rd floor hallway / open space", label: "Building A • 3rd Floor" },
+            {
+                src: "/available/3rd-1.png",
+                alt: "3rd floor office view",
+                label: "Building A • 3rd Floor",
+            },
+            {
+                src: "/available/3.png",
+                alt: "3rd floor hallway / open space",
+                label: "Building A • 3rd Floor",
+            },
         ],
         []
     );
@@ -129,12 +153,9 @@ export default function Home() {
         <div className="min-h-screen bg-[#FAF6EA] text-slate-900 antialiased">
             {/* Apple/Stripe-ish ambient: clean + subtle */}
             <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-                {/* warm base */}
                 <div className="absolute inset-0 bg-gradient-to-b from-[#FFF7DE] via-[#FAF6EA] to-[#FAF6EA]" />
-                {/* soft golden light */}
                 <div className="absolute -top-56 left-1/2 h-[760px] w-[760px] -translate-x-1/2 rounded-full bg-[#FFD27A]/25 blur-[90px] animate-floatSlow" />
                 <div className="absolute -bottom-64 right-[-220px] h-[720px] w-[720px] rounded-full bg-[#FFB35A]/18 blur-[110px] animate-floatSlow2" />
-                {/* subtle grain */}
                 <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(#0f172a_1px,transparent_1px)] [background-size:54px_54px]" />
             </div>
 
@@ -264,7 +285,6 @@ export default function Home() {
                                     className="relative h-[410px] md:h-[440px]"
                                     onMouseEnter={playHeroVideo}
                                     onMouseLeave={pauseHeroVideo}
-                                    // mobile: tap to play/pause
                                     onClick={() => {
                                         const v = heroVideoRef.current;
                                         if (!v) return;
@@ -285,7 +305,6 @@ export default function Home() {
 
                                     <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7DE] via-[#FFF7DE]/20 to-transparent" />
 
-                                    {/* Optional: subtle "Hover to play" hint */}
                                     <div className="absolute top-5 left-5">
                                         <div className="rounded-2xl bg-white/70 backdrop-blur-xl ring-1 ring-black/10 px-3 py-2">
                                             <p className="text-[11px] tracking-[0.18em] text-slate-600 font-semibold">
@@ -319,7 +338,6 @@ export default function Home() {
                                 </div>
                             </MediaCard>
                         </div>
-
                     </div>
 
                     <div className="mt-14 md:mt-16 flex justify-center" data-reveal>
@@ -327,21 +345,6 @@ export default function Home() {
                     </div>
                 </Container>
             </section>
-
-            {/* <section className="relative py-20">
-                <Container>
-                    <div className="rounded-[32px] overflow-hidden shadow-[0_40px_120px_rgba(15,23,42,0.15)]">
-                        <video
-                            src="/videos/subha-shree-bhawan.mp4"
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            className="w-full h-[520px] object-contain bg-black"
-                        />
-                    </div>
-                </Container>
-            </section> */}
 
             {/* BUILDING A */}
             <SectionHeader title="Building A" subtitle="Seven floors of excellence" />
@@ -416,7 +419,7 @@ export default function Home() {
                 />
             </Section>
 
-            {/* ✅ 2ND FLOOR (carousel here) */}
+            {/* ✅ 2ND FLOOR */}
             <Section id="building-a-2nd">
                 <TwoCol
                     left={
@@ -426,6 +429,8 @@ export default function Home() {
                             title="Prime Office Space"
                             area="3,500 sq. ft."
                             phone="+977 980-8100067"
+                            ctaHref="#available-spaces"
+                            ctaText="Go to Available Floors"
                         />
                     }
                     right={
@@ -439,7 +444,7 @@ export default function Home() {
                 />
             </Section>
 
-            {/* ✅ 3RD FLOOR (carousel here) */}
+            {/* ✅ 3RD FLOOR */}
             <Section id="building-a-3rd" tone="soft">
                 <TwoCol
                     reverse
@@ -450,6 +455,8 @@ export default function Home() {
                             title="Prime Office Space"
                             area="3,500 sq. ft."
                             phone="+977 980-8100067"
+                            ctaHref="#available-spaces"
+                            ctaText="Go to Available Floors"
                         />
                     }
                     right={
@@ -474,7 +481,74 @@ export default function Home() {
                 </div>
             </Section>
 
-            {/* AVAILABLE SPACES */}
+            {/* BUILDING B */}
+            <SectionHeader title="Building B" subtitle="Connected excellence" />
+
+            <Section id="building-b-ground">
+                <TwoCol
+                    left={
+                        <>
+                            <Kicker text="GROUND FLOOR • BUILDING B" />
+                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                                Elements Restaurant
+                            </h3>
+                            <div data-reveal>
+                                <FeatureRow
+                                    icon={<Utensils className="h-5 w-5" />}
+                                    title="Fine Dining"
+                                    desc="Contemporary Nepali and international cuisine crafted with premium service."
+                                />
+                            </div>
+                        </>
+                    }
+                    right={<ImageCard src="/elements.jpg" alt="Elements Restaurant" fit="contain" zoom="scale-100" />}
+                />
+            </Section>
+
+            <Section id="building-b-1st" tone="soft">
+                <TwoCol
+                    reverse
+                    left={
+                        <>
+                            <Kicker text="1ST FLOOR • BUILDING B" />
+                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                                Swopna Chitra
+                            </h3>
+                            <div data-reveal>
+                                <FeatureRow
+                                    icon={<Film className="h-5 w-5" />}
+                                    title="Production House"
+                                    desc="Creative media production supporting high-quality storytelling."
+                                />
+                            </div>
+                        </>
+                    }
+                    right={<ImageCard src="/alogo.png" alt="Swopna Chitra" fit="contain" zoom="scale-100" />}
+                />
+            </Section>
+
+            <Section id="building-b-2nd">
+                <TwoCol
+                    left={
+                        <>
+                            <Kicker text="2ND FLOOR • BUILDING B" />
+                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                                Moon Technology
+                            </h3>
+                            <div data-reveal>
+                                <FeatureRow
+                                    icon={<Laptop className="h-5 w-5" />}
+                                    title="IT Solutions"
+                                    desc="Software, cloud and technology services for modern organizations."
+                                />
+                            </div>
+                        </>
+                    }
+                    right={<ImageCard src="/moon.jpeg" alt="Moon Technology" fit="contain" zoom="scale-100" />}
+                />
+            </Section>
+
+            {/* ✅✅ MOVED HERE: AVAILABLE SPACES AT VERY BOTTOM */}
             <Section id="available-spaces" tone="soft">
                 <div className="text-center mb-10 md:mb-12">
                     <div className="inline-flex items-center gap-2 rounded-full bg-white/60 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
@@ -540,80 +614,6 @@ export default function Home() {
                 </div>
             </Section>
 
-            {/* BUILDING B */}
-            <SectionHeader title="Building B" subtitle="Connected excellence" />
-
-            <Section id="building-b-ground">
-                <TwoCol
-                    left={
-                        <>
-                            <Kicker text="GROUND FLOOR • BUILDING B" />
-                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
-                                Elements Restaurant
-                            </h3>
-                            <div data-reveal>
-                                <FeatureRow
-                                    icon={<Utensils className="h-5 w-5" />}
-                                    title="Fine Dining"
-                                    desc="Contemporary Nepali and international cuisine crafted with premium service."
-                                />
-                            </div>
-                        </>
-                    }
-                    right={
-                        <ImageCard
-                            src="/elements.jpg"
-                            alt="Elements Restaurant"
-                            fit="contain"
-                            zoom="scale-100"
-                        />
-                    }
-                />
-            </Section>
-
-            <Section id="building-b-1st" tone="soft">
-                <TwoCol
-                    reverse
-                    left={
-                        <>
-                            <Kicker text="1ST FLOOR • BUILDING B" />
-                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
-                                Swopna Chitra
-                            </h3>
-                            <div data-reveal>
-                                <FeatureRow
-                                    icon={<Film className="h-5 w-5" />}
-                                    title="Production House"
-                                    desc="Creative media production supporting high-quality storytelling."
-                                />
-                            </div>
-                        </>
-                    }
-                    right={<ImageCard src="/alogo.png" alt="Swopna Chitra" fit="contain" zoom="scale-100" />}
-                />
-            </Section>
-
-            <Section id="building-b-2nd">
-                <TwoCol
-                    left={
-                        <>
-                            <Kicker text="2ND FLOOR • BUILDING B" />
-                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
-                                Moon Technology
-                            </h3>
-                            <div data-reveal>
-                                <FeatureRow
-                                    icon={<Laptop className="h-5 w-5" />}
-                                    title="IT Solutions"
-                                    desc="Software, cloud and technology services for modern organizations."
-                                />
-                            </div>
-                        </>
-                    }
-                    right={<ImageCard src="/moon.jpeg" alt="Moon Technology" fit="contain" zoom="scale-100" />}
-                />
-            </Section>
-
             {/* FOOTER */}
             <footer className="py-12 md:py-14">
                 <Container>
@@ -667,16 +667,14 @@ export default function Home() {
             <style>{`
         html { scroll-behavior: smooth; }
 
-        /* reveal: Stripe-ish */
-        .reveal { 
-          opacity: 0; 
-          transform: translateY(16px); 
+        .reveal {
+          opacity: 0;
+          transform: translateY(16px);
           filter: blur(6px);
           transition: opacity 900ms cubic-bezier(.2,.9,.2,1), transform 900ms cubic-bezier(.2,.9,.2,1), filter 900ms cubic-bezier(.2,.9,.2,1);
         }
         .reveal-in { opacity: 1; transform: translateY(0); filter: blur(0); }
 
-        /* float bg */
         @keyframes floatSlow {
           0%, 100% { transform: translate3d(-50%,0,0) scale(1); }
           50% { transform: translate3d(-50%,16px,0) scale(1.02); }
@@ -688,14 +686,12 @@ export default function Home() {
         .animate-floatSlow { animation: floatSlow 10s ease-in-out infinite; }
         .animate-floatSlow2 { animation: floatSlow2 11s ease-in-out infinite; }
 
-        /* mobile menu pop */
         @keyframes pop {
           0% { opacity: 0; transform: translateY(-8px) scale(.98); }
           100% { opacity: 1; transform: translateY(0) scale(1); }
         }
         .animate-pop { animation: pop 220ms ease-out; }
 
-        /* buttons: minimal, crisp */
         .btn-primary{
           display:inline-flex; align-items:center; gap:10px;
           border-radius: 18px;
@@ -893,7 +889,6 @@ function ImageCard({
     return (
         <MediaCard>
             <div className={`relative ${heightClass} overflow-hidden`}>
-                {/* soft canvas so contain doesn't look empty */}
                 <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-[#FFF2C7]/30 to-white/30" />
 
                 <img
@@ -934,19 +929,23 @@ function FeatureRow({ icon, title, desc }: { icon: React.ReactNode; title: strin
     );
 }
 
-/* ✅ Used for 2nd/3rd floor left info (same style as your old VacantFloorCard) */
+/* ✅ Left info + CTA link to available floors */
 function VacantFloorInfo({
     badge,
     floor,
     title,
     area,
     phone,
+    ctaHref,
+    ctaText,
 }: {
     badge: string;
     floor: string;
     title: string;
     area: string;
     phone: string;
+    ctaHref?: string;
+    ctaText?: string;
 }) {
     return (
         <div>
@@ -971,6 +970,14 @@ function VacantFloorInfo({
                     <span className="font-semibold">{phone}</span>
                 </div>
             </div>
+
+            {ctaHref && (
+                <div className="mt-6" data-reveal>
+                    <a href={ctaHref} className="btn-primary">
+                        {ctaText || "Go to Available Floors"} <ArrowRight className="h-4 w-4" />
+                    </a>
+                </div>
+            )}
         </div>
     );
 }
@@ -1023,7 +1030,10 @@ function SpaceCard({
     );
 }
 
-/* ✅ Carousel (FULL IMAGE ALWAYS VISIBLE by default) */
+/* ✅ Carousel: FULL photo visible (contain) + "full screen" feel (blurred cover background)
+   - No zoom/crop on the main image.
+   - No ugly empty space: background fills, foreground stays true to image.
+*/
 function FloorCarousel({
     images,
     title = "Available Floors",
@@ -1106,7 +1116,7 @@ function FloorCarousel({
             </div>
 
             {/* Slides */}
-            <div className="relative h-[280px] md:h-[360px]">
+            <div className="relative h-[320px] md:h-[520px]">
                 {images.map((img, idx) => {
                     const active = idx === i;
                     return (
@@ -1119,22 +1129,28 @@ function FloorCarousel({
                             ].join(" ")}
                             aria-hidden={!active}
                         >
-                            {/* soft canvas for contain */}
-                            <div className="absolute inset-0 bg-gradient-to-b from-white/45 via-[#FFF2C7]/28 to-white/30" />
+                            {/* Background fill (cover + blur) */}
+                            <img
+                                src={img.src}
+                                alt=""
+                                aria-hidden="true"
+                                className="absolute inset-0 h-full w-full object-cover blur-2xl scale-110 opacity-70"
+                            />
+                            {/* tint so it looks premium */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-white/15 via-[#FFF2C7]/18 to-white/20" />
 
+                            {/* Foreground (FULL image visible, no zoom, no crop) */}
                             <img
                                 src={img.src}
                                 alt={img.alt}
                                 className={[
                                     "absolute inset-0 h-full w-full",
-                                    fit === "contain" ? "object-contain p-6" : "object-cover",
-                                    "transition-transform duration-[1400ms] ease-[cubic-bezier(.2,.9,.2,1)]",
-                                    active ? "scale-[1.01]" : "scale-100",
+                                    fit === "contain" ? "object-contain" : "object-cover",
                                 ].join(" ")}
                             />
 
                             {/* soft fade overlays */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7DE]/45 via-transparent to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7DE]/35 via-transparent to-transparent" />
                             <div className="absolute inset-0 bg-gradient-to-r from-black/[0.06] via-transparent to-black/[0.06]" />
 
                             {/* Label */}
