@@ -355,20 +355,21 @@ export default function Home() {
                         <>
                             <Kicker text="GROUND FLOOR • BUILDING A" />
                             <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
-                                Tesla Clinic & Himalayan Java
+                                Himalayan Java & Tesla Clinic
                             </h3>
 
                             <div data-reveal className="space-y-4">
-                                <FeatureRow
-                                    icon={<Stethoscope className="h-5 w-5" />}
-                                    title="Tesla Clinic"
-                                    desc="Professional healthcare services with modern facilities and experienced practitioners."
-                                />
                                 <FeatureRow
                                     icon={<Coffee className="h-5 w-5" />}
                                     title="Himalayan Java"
                                     desc="Premium coffee experience with warm Nepali hospitality."
                                 />
+                                <FeatureRow
+                                    icon={<Stethoscope className="h-5 w-5" />}
+                                    title="Tesla Clinic"
+                                    desc="Professional healthcare services with modern facilities and experienced practitioners."
+                                />
+
                             </div>
                         </>
                     }
@@ -399,7 +400,7 @@ export default function Home() {
                                 <FeatureRow
                                     icon={<ShieldCheck className="h-5 w-5" />}
                                     title="Security Operations Center"
-                                    desc="Modern monitoring and security services for organizations and enterprises."
+                                    desc="Vairav Technology is a powerhouse of cybersecurity."
                                 />
                             </div>
                         </>
@@ -518,7 +519,7 @@ export default function Home() {
                                 <FeatureRow
                                     icon={<Film className="h-5 w-5" />}
                                     title="Production House"
-                                    desc="Creative media production supporting high-quality storytelling."
+                                    desc="Dreams into Frames"
                                 />
                             </div>
                         </>
