@@ -1,864 +1,818 @@
-import { useEffect, useState } from 'react'
-import { Building2, Stethoscope, Coffee, ShieldCheck, DoorOpen, Dumbbell, Utensils, Film, Laptop, Phone, Mail, MapPin, Star, ArrowRight, Sun, Moon } from 'lucide-react'
+import React, { useEffect, useMemo, useState } from "react";
+import {
+    Building2,
+    Stethoscope,
+    Coffee,
+    ShieldCheck,
+    Utensils,
+    Film,
+    Laptop,
+    Phone,
+    Mail,
+    MapPin,
+    Star,
+    ArrowRight,
+    Menu,
+    X,
+    ChevronDown,
+} from "lucide-react";
+
+type LinkItem = { href: string; label: string };
 
 export default function Home() {
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-    const [theme, setTheme] = useState<'light' | 'dark'>('dark')
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [navShadow, setNavShadow] = useState(false);
 
+    const buildingALinks: LinkItem[] = useMemo(
+        () => [
+            { href: "#building-a-ground", label: "Ground Floor" },
+            { href: "#building-a-1st", label: "1st Floor" },
+            { href: "#building-a-2nd", label: "2nd Floor" },
+            { href: "#building-a-3rd", label: "3rd Floor" },
+            { href: "#building-a-gym", label: "Gym (4th–6th)" },
+        ],
+        []
+    );
+
+    const buildingBLinks: LinkItem[] = useMemo(
+        () => [
+            { href: "#building-b-ground", label: "Ground Floor" },
+            { href: "#building-b-1st", label: "1st Floor" },
+            { href: "#building-b-2nd", label: "2nd Floor" },
+        ],
+        []
+    );
+
+    // subtle nav elevation on scroll
     useEffect(() => {
-        // Check for saved preference or use system preference
-        const savedTheme = localStorage.getItem('theme')
-        if (savedTheme === 'light' || savedTheme === 'dark') {
-            setTheme(savedTheme)
-        } else {
-            // Check system preference
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-            setTheme(prefersDark ? 'dark' : 'light')
-        }
-    }, [])
+        const onScroll = () => setNavShadow(window.scrollY > 10);
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
 
+    // close mobile menu on anchor click
     useEffect(() => {
-        // Apply theme to document
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
-        localStorage.setItem('theme', theme)
-    }, [theme])
+        const handler = (e: Event) => {
+            const target = e.target as HTMLElement | null;
+            const a = target?.closest("a");
+            if (a?.getAttribute("href")?.startsWith("#")) setMenuOpen(false);
+        };
+        document.addEventListener("click", handler);
+        return () => document.removeEventListener("click", handler);
+    }, []);
 
+    // scroll reveal (no library)
     useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            setMousePosition({ x: e.clientX, y: e.clientY })
-        }
+        const els = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+        if (!els.length) return;
 
-        window.addEventListener('mousemove', handleMouseMove)
-        return () => window.removeEventListener('mousemove', handleMouseMove)
-    }, [])
+        els.forEach((el) => el.classList.add("reveal"));
 
-    const toggleTheme = () => {
-        setTheme(prev => prev === 'dark' ? 'light' : 'dark')
-    }
+        const io = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        (entry.target as HTMLElement).classList.add("reveal-in");
+                        io.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.14 }
+        );
+
+        els.forEach((el) => io.observe(el));
+        return () => io.disconnect();
+    }, []);
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-hidden cursor-none transition-colors duration-300">
-            {/* Custom Cursor */}
-            <div
-                className="fixed pointer-events-none z-50 mix-blend-difference"
-                style={{
-                    left: `${mousePosition.x}px`,
-                    top: `${mousePosition.y}px`,
-                    transform: 'translate(-50%, -50%)',
-                }}
-            >
-                <div className="transition-all duration-200">
-                    <div className="w-8 h-8 border-2 border-black dark:border-white rounded-full"></div>
-                    <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-black dark:bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-                </div>
+        <div className="min-h-screen bg-[#f7f7f8] text-slate-900 antialiased">
+            {/* Minimal, Apple-like ambient */}
+            <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+                <div className="absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-white blur-3xl" />
+                <div className="absolute inset-0 opacity-[0.04] [background-image:radial-gradient(#0f172a_1px,transparent_1px)] [background-size:44px_44px]" />
             </div>
 
-            {/* Mouse Trail Effect */}
-            <div
-                className="fixed pointer-events-none z-40 w-96 h-96 rounded-full opacity-20 blur-3xl bg-gradient-to-br from-black dark:from-white to-transparent"
-                style={{
-                    left: `${mousePosition.x}px`,
-                    top: `${mousePosition.y}px`,
-                    transform: 'translate(-50%, -50%)',
-                    transition: 'all 0.3s ease-out',
-                }}
-            ></div>
-
-            {/* Navigation Bar */}
-            <nav className="fixed top-0 left-0 right-0 z-30 pointer-events-auto bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-white/10">
+            {/* NAV */}
+            <nav
+                className={[
+                    "fixed top-0 left-0 right-0 z-40",
+                    "bg-white/80 backdrop-blur-xl",
+                    "border-b border-black/5",
+                    navShadow ? "shadow-[0_12px_40px_rgba(15,23,42,0.08)]" : "",
+                ].join(" ")}
+            >
                 <div className="max-w-7xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
-                        <a href="#hero" className="text-xl font-bold tracking-tight hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer">
-                            Subha Shree Bhawan
+                        <a href="#hero" className="inline-flex items-center gap-3">
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-black/[0.04] ring-1 ring-black/10">
+                                <Building2 className="h-4 w-4 text-slate-900" />
+                            </span>
+                            <span className="text-[15px] md:text-base font-semibold tracking-tight">
+                                Subha Shree Bhawan
+                            </span>
                         </a>
 
-                        <div className="flex items-center gap-4">
-                            <div className="hidden md:flex items-center gap-1">
-                                <div className="relative group/dropdown">
-                                    <button className="px-4 py-2 text-sm tracking-wider hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer">
-                                        BUILDING A
-                                    </button>
-                                    <div className="absolute top-full left-0 mt-2 w-48 bg-white/95 dark:bg-black/95 backdrop-blur-md border border-gray-200 dark:border-white/20 opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-200">
-                                        <a href="#building-a-ground" className="block px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer border-b border-gray-200 dark:border-white/10">Ground Floor</a>
-                                        <a href="#building-a-1st" className="block px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer border-b border-gray-200 dark:border-white/10">1st Floor</a>
-                                        <a href="#building-a-2nd" className="block px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer border-b border-gray-200 dark:border-white/10">2nd Floor</a>
-                                        <a href="#building-a-3rd" className="block px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer border-b border-gray-200 dark:border-white/10">3rd Floor</a>
-                                        <a href="#building-a-gym" className="block px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer">Gym (4th-6th)</a>
-                                    </div>
-                                </div>
+                        {/* Desktop */}
+                        <div className="hidden md:flex items-center gap-1">
+                            <NavDropdown label="Building A" items={buildingALinks} />
+                            <NavDropdown label="Building B" items={buildingBLinks} />
+                            <a
+                                href="#available-spaces"
+                                className="px-3 py-2 text-[12px] tracking-[0.18em] font-medium text-slate-600 hover:text-slate-900 rounded-2xl hover:bg-black/[0.04] transition"
+                            >
+                                AVAILABLE SPACES
+                            </a>
 
-                                <div className="relative group/dropdown">
-                                    <button className="px-4 py-2 text-sm tracking-wider hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer">
-                                        BUILDING B
-                                    </button>
-                                    <div className="absolute top-full left-0 mt-2 w-48 bg-white/95 dark:bg-black/95 backdrop-blur-md border border-gray-200 dark:border-white/20 opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-200">
-                                        <a href="#building-b-ground" className="block px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer border-b border-gray-200 dark:border-white/10">Ground Floor</a>
-                                        <a href="#building-b-1st" className="block px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer border-b border-gray-200 dark:border-white/10">1st Floor</a>
-                                        <a href="#building-b-2nd" className="block px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer">2nd Floor</a>
-                                    </div>
-                                </div>
+                            <a
+                                href="#available-spaces"
+                                className="ml-2 inline-flex items-center gap-2 rounded-2xl bg-slate-900 text-white px-4 py-2 text-sm font-semibold shadow-[0_18px_50px_rgba(2,6,23,0.18)] hover:opacity-95 transition"
+                            >
+                                Book a Viewing <ArrowRight className="h-4 w-4" />
+                            </a>
+                        </div>
 
-                                <a href="#available-spaces" className="px-4 py-2 text-sm tracking-wider hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer">
-                                    AVAILABLE SPACES
+                        {/* Mobile */}
+                        <button
+                            onClick={() => setMenuOpen((p) => !p)}
+                            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-black/[0.04] ring-1 ring-black/10 hover:bg-black/[0.06] transition"
+                            aria-label="Open menu"
+                        >
+                            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                        </button>
+                    </div>
+
+                    {/* Mobile panel */}
+                    {menuOpen && (
+                        <div className="md:hidden mt-4 rounded-3xl bg-white ring-1 ring-black/10 shadow-[0_26px_80px_rgba(15,23,42,0.12)] overflow-hidden">
+                            <div className="p-4 space-y-3">
+                                <MobileGroup title="Building A" items={buildingALinks} />
+                                <MobileGroup title="Building B" items={buildingBLinks} />
+
+                                <a
+                                    href="#available-spaces"
+                                    className="block rounded-2xl bg-black/[0.04] ring-1 ring-black/10 px-4 py-3 text-sm font-semibold"
+                                >
+                                    Available Spaces
+                                </a>
+
+                                <a
+                                    href="#available-spaces"
+                                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 text-white px-4 py-3 text-sm font-semibold shadow-[0_18px_50px_rgba(2,6,23,0.18)]"
+                                >
+                                    Book a Viewing <ArrowRight className="h-4 w-4" />
                                 </a>
                             </div>
-
-                            {/* Theme Toggle */}
-                            <button
-                                onClick={toggleTheme}
-                                className="p-2 rounded-full border border-gray-300 dark:border-white/20 hover:bg-gray-100 dark:hover:bg-white/10 transition-all cursor-pointer"
-                                aria-label="Toggle theme"
-                            >
-                                {theme === 'dark' ? (
-                                    <Sun className="w-5 h-5" />
-                                ) : (
-                                    <Moon className="w-5 h-5" />
-                                )}
-                            </button>
                         </div>
-                    </div>
+                    )}
                 </div>
             </nav>
 
-            {/* Hero Section */}
-            <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-                <div className="absolute inset-0">
-                    <img
-                        src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920"
-                        alt="Building"
-                        className="w-full h-full object-cover opacity-40 dark:opacity-40 scale-105 animate-[zoom_20s_ease-in-out_infinite]"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white dark:from-black dark:via-transparent dark:to-black"></div>
-                </div>
+            {/* HERO */}
+            <section id="hero" className="relative pt-28 pb-16">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="grid lg:grid-cols-12 gap-10 items-start">
+                        {/* Copy */}
+                        <div className="lg:col-span-7">
+                            <div
+                                data-reveal
+                                className="inline-flex items-center gap-2 rounded-full bg-black/[0.04] ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700"
+                            >
+                                <Star className="h-4 w-4 text-slate-900" />
+                                Premium commercial complex
+                            </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
-                    <div className="opacity-0 animate-[fadeInUp_1s_ease-out_0.2s_forwards]">
-                        <div className="inline-block mb-8 px-8 py-3 border border-gray-300 dark:border-white/30 backdrop-blur-sm">
-                            <span className="text-sm tracking-[0.3em] font-light">PREMIUM COMMERCIAL COMPLEX</span>
+                            <h1
+                                data-reveal
+                                className="mt-6 text-[44px] leading-[1.06] md:text-[64px] md:leading-[1.03] font-extrabold tracking-tight"
+                            >
+                                Built for modern brands.
+                                <span className="block text-slate-500 font-extrabold">
+                                    Designed to feel premium.
+                                </span>
+                            </h1>
+
+                            <p
+                                data-reveal
+                                className="mt-6 text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl"
+                            >
+                                Subha Shree Bhawan in Baluwatar offers a refined, professional environment for offices,
+                                premium services, and growth-ready businesses.
+                            </p>
+
+                            <div data-reveal className="mt-10 flex flex-wrap gap-3">
+                                <a
+                                    href="#available-spaces"
+                                    className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 text-white px-6 py-3 text-sm font-semibold shadow-[0_18px_50px_rgba(2,6,23,0.18)] hover:opacity-95 transition"
+                                >
+                                    View Available Spaces <ArrowRight className="h-4 w-4" />
+                                </a>
+
+                                <a
+                                    href="#building-a-ground"
+                                    className="inline-flex items-center gap-2 rounded-2xl bg-white ring-1 ring-black/10 px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-black/[0.02] transition"
+                                >
+                                    Explore Floors <ChevronDown className="h-4 w-4" />
+                                </a>
+                            </div>
+
+                            <div data-reveal className="mt-12 grid sm:grid-cols-3 gap-3 max-w-2xl">
+                                <InfoTile title="Buildings" value="2 connected" icon={<Building2 className="h-4 w-4" />} />
+                                <InfoTile title="Location" value="Baluwatar" icon={<MapPin className="h-4 w-4" />} />
+                                <InfoTile title="Positioning" value="Premium" icon={<Star className="h-4 w-4" />} />
+                            </div>
+                        </div>
+
+                        {/* Hero visual */}
+                        <div className="lg:col-span-5" data-reveal>
+                            <div className="rounded-[28px] bg-white ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.12)] overflow-hidden">
+                                <div className="relative h-[420px]">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=2400"
+                                        alt="Subha Shree Bhawan"
+                                        className="absolute inset-0 h-full w-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent" />
+
+                                    <div className="absolute left-5 right-5 bottom-5">
+                                        <div className="rounded-2xl bg-white/80 backdrop-blur-xl ring-1 ring-black/10 p-4">
+                                            <p className="text-xs tracking-[0.18em] text-slate-500">CONTACT</p>
+                                            <div className="mt-2 grid gap-1 text-sm text-slate-700">
+                                                <div className="flex items-center gap-2">
+                                                    <Phone className="h-4 w-4 text-slate-400" /> +977 980-8100067
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Mail className="h-4 w-4 text-slate-400" /> buddhalife.np@gmail.com
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* micro highlights */}
+                                <div className="p-5 border-t border-black/5">
+                                    <div className="grid grid-cols-3 gap-3 text-sm">
+                                        <MiniStat title="Café" value="Himalayan Java" icon={<Coffee className="h-4 w-4" />} />
+                                        <MiniStat title="Clinic" value="Tesla Clinic" icon={<Stethoscope className="h-4 w-4" />} />
+                                        <MiniStat title="Floors" value="Office-ready" icon={<Laptop className="h-4 w-4" />} />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <h1 className="text-7xl md:text-9xl font-bold tracking-tighter mb-8 opacity-0 animate-[fadeInUp_1s_ease-out_0.4s_forwards]">
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 dark:from-white dark:via-gray-300 dark:to-white">
-                            Subha Shree Bhawan
-                        </span>
-                    </h1>
-
-                    <div className="flex items-center justify-center gap-6 mb-12 opacity-0 animate-[fadeInUp_1s_ease-out_0.6s_forwards]">
-                        <div className="h-px w-24 bg-gradient-to-r from-transparent to-gray-900 dark:to-white"></div>
-                        <Star className="w-6 h-6" />
-                        <div className="h-px w-24 bg-gradient-to-l from-transparent to-gray-900 dark:to-white"></div>
+                    <div className="mt-14 flex justify-center" data-reveal>
+                        <div className="h-10 w-[2px] bg-gradient-to-b from-black/20 to-transparent" />
                     </div>
+                </div>
+            </section>
 
-                    <p className="text-2xl md:text-3xl font-light text-gray-700 dark:text-gray-300 mb-12 max-w-3xl mx-auto opacity-0 animate-[fadeInUp_1s_ease-out_0.8s_forwards]">
-                        Where Business Meets Excellence in Nepal
+            {/* BUILDING A */}
+            <SectionHeader title="Building A" subtitle="Seven floors of excellence" />
+
+            <section id="building-a-ground" className="py-16">
+                <div className="max-w-7xl mx-auto px-6">
+                    <TwoCol
+                        left={
+                            <>
+                                <Kicker text="GROUND FLOOR • BUILDING A" />
+                                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
+                                    Tesla Clinic & Himalayan Java
+                                </h3>
+
+                                <div data-reveal className="mt-8 space-y-4">
+                                    <FeatureRow
+                                        icon={<Stethoscope className="h-5 w-5" />}
+                                        title="Tesla Clinic"
+                                        desc="Professional healthcare services with modern facilities and experienced practitioners."
+                                    />
+                                    <FeatureRow
+                                        icon={<Coffee className="h-5 w-5" />}
+                                        title="Himalayan Java"
+                                        desc="Premium coffee experience with warm Nepali hospitality."
+                                    />
+                                </div>
+                            </>
+                        }
+                        right={
+                            <ImageCard
+                                src="/javatesla.png"
+                                alt="Tesla Clinic & Himalayan Java"
+                                footerLeft="FACILITIES"
+                                footerRight="Clinic + Café"
+                            />
+                        }
+                    />
+                </div>
+            </section>
+
+            <section id="building-a-1st" className="py-16 border-y border-black/5 bg-white">
+                <div className="max-w-7xl mx-auto px-6">
+                    <TwoCol
+                        left={<ImageCard src="/vairav.png" alt="Vairav Tech" footerLeft="FLOOR AREA" footerRight="3,500 sq. ft." />}
+                        right={
+                            <>
+                                <Kicker text="1ST FLOOR • BUILDING A" />
+                                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
+                                    Vairav Tech
+                                </h3>
+                                <div data-reveal className="mt-8">
+                                    <FeatureRow
+                                        icon={<ShieldCheck className="h-5 w-5" />}
+                                        title="Security Operations Center"
+                                        desc="Modern monitoring and security services for organizations and enterprises."
+                                    />
+                                </div>
+                            </>
+                        }
+                    />
+                </div>
+            </section>
+
+            <section id="building-a-2nd" className="py-16">
+                <div className="max-w-7xl mx-auto px-6">
+                    <VacantFloorCard
+                        badge="AVAILABLE"
+                        floor="2ND FLOOR • BUILDING A"
+                        title="Prime Office Space"
+                        image="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800"
+                        area="3,500 sq. ft."
+                        phone="+977 980-8100067"
+                    />
+                </div>
+            </section>
+
+            <section id="building-a-3rd" className="py-16 border-y border-black/5 bg-white">
+                <div className="max-w-7xl mx-auto px-6">
+                    <VacantFloorCard
+                        badge="AVAILABLE"
+                        floor="3RD FLOOR • BUILDING A"
+                        title="Prime Office Space"
+                        image="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1800"
+                        area="3,500 sq. ft."
+                        phone="+977 980-8100067"
+                    />
+                </div>
+            </section>
+
+            <section id="building-a-gym" className="py-16">
+                <div className="max-w-7xl mx-auto px-6 text-center">
+                    <Kicker text="4TH, 5TH AND 6TH FLOORS • BUILDING A" />
+                    <h3 data-reveal className="mt-6 text-4xl md:text-5xl font-extrabold tracking-tight">
+                        Premium Fitness Center
+                        <span className="block text-slate-500">Coming soon</span>
+                    </h3>
+                    <p data-reveal className="mt-4 text-slate-600">
+                        Three floors of wellness.
                     </p>
-
-                    <div className="flex flex-wrap justify-center gap-6 text-sm opacity-0 animate-[fadeInUp_1s_ease-out_1s_forwards]">
-                        <div className="flex items-center gap-3 px-6 py-4 border border-gray-300 dark:border-white/20 backdrop-blur-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-all duration-300 group">
-                            <Building2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                            <span className="tracking-wider">2 CONNECTED BUILDINGS</span>
-                        </div>
-                        <div className="flex items-center gap-3 px-6 py-4 border border-gray-300 dark:border-white/20 backdrop-blur-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-all duration-300 group">
-                            <MapPin className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                            <span className="tracking-wider">BALUWATAR, KATHMANDU</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-bounce">
-                    <div className="w-6 h-10 border-2 border-gray-400 dark:border-white/30 rounded-full flex items-start justify-center p-2">
-                        <div className="w-1 h-3 bg-gray-900 dark:bg-white rounded-full animate-[scroll_2s_ease-in-out_infinite]"></div>
-                    </div>
                 </div>
             </section>
 
-            {/* Building A Divider */}
-            <div className="relative py-24 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black"></div>
-                <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
-                    <h2 className="text-6xl md:text-7xl font-bold tracking-tighter mb-4">Building A</h2>
-                    <p className="text-xl text-gray-600 dark:text-gray-400 tracking-wider">SEVEN FLOORS OF EXCELLENCE</p>
-                </div>
-            </div>
-
-            {/* Building A - Ground Floor */}
-            <section id="building-a-ground" className="relative py-32 overflow-hidden group">
-                <div className="absolute inset-0">
-                    <img
-                        src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=1920"
-                        alt="Healthcare and Coffee"
-                        className="w-full h-full object-cover grayscale opacity-30 group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent dark:from-black dark:via-black/90 dark:to-transparent"></div>
-                </div>
-
-                <div className="relative z-10 max-w-7xl mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-16 items-center">
-                        <div className="space-y-8">
-                            <div className="inline-block px-4 py-2 border border-gray-300 dark:border-white/30 backdrop-blur-sm">
-                                <span className="text-xs tracking-[0.3em]">GROUND FLOOR • BUILDING A</span>
-                            </div>
-
-                            <h3 className="text-6xl md:text-7xl font-bold tracking-tight">
-                                Tesla Clinic &<br />Himalayan Java
-                            </h3>
-
-                            <div className="space-y-6">
-                                <div className="flex items-start gap-4 group/item hover:translate-x-2 transition-transform">
-                                    <div className="p-3 border border-gray-300 dark:border-white/20 group-hover/item:border-gray-400 dark:group-hover/item:border-white/40 transition-colors">
-                                        <Stethoscope className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xl font-semibold mb-2">Tesla Clinic</h4>
-                                        <p className="text-gray-700 dark:text-gray-400 leading-relaxed">Professional healthcare services with modern medical facilities and experienced practitioners</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-4 group/item hover:translate-x-2 transition-transform">
-                                    <div className="p-3 border border-gray-300 dark:border-white/20 group-hover/item:border-gray-400 dark:group-hover/item:border-white/40 transition-colors">
-                                        <Coffee className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xl font-semibold mb-2">Himalayan Java</h4>
-                                        <p className="text-gray-700 dark:text-gray-400 leading-relaxed">Premium coffee experience with authentic Nepali hospitality</p>
-                                    </div>
-                                </div>
-                            </div>
+            {/* AVAILABLE SPACES */}
+            <section id="available-spaces" className="py-16 bg-white border-y border-black/5">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="text-center mb-12">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-black/[0.04] ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
+                            Leasing
                         </div>
-
-                        <div className="relative">
-                            <div className="relative overflow-hidden border border-gray-300 dark:border-white/10 backdrop-blur-sm bg-gray-100 dark:bg-white/5 p-8 hover:border-gray-400 dark:hover:border-white/20 transition-all duration-500 group/card">
-                                <img
-                                    src="/javatesla.png"
-                                    alt="Healthcare"
-                                    className="w-full h-96 object-cover grayscale mb-8 group-hover/card:grayscale-0 transition-all duration-700"
-                                />
-                                <div className="space-y-4 text-sm">
-                                    {/* <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10"> */}
-                                    {/* <span className="text-gray-600 dark:text-gray-400 tracking-wider">FLOOR AREA</span>
-                    <span className="font-semibold">3,500 sq. ft.</span> */}
-                                    {/* </div> */}
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider">FACILITIES</span>
-                                        <span className="font-semibold">Clinic + Café</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Building A - 1st Floor */}
-            <section id="building-a-1st" className="relative py-32 overflow-hidden bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-950 group">
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute inset-0" style={{
-                        backgroundImage: `linear-gradient(45deg, currentColor 1px, transparent 1px), linear-gradient(-45deg, currentColor 1px, transparent 1px)`,
-                        backgroundSize: '40px 40px'
-                    }}></div>
-                </div>
-
-                <div className="relative z-10 max-w-7xl mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-16 items-center">
-                        <div className="relative order-2 md:order-1">
-                            <div className="relative overflow-hidden border border-gray-300 dark:border-white/10 backdrop-blur-sm bg-gray-100 dark:bg-white/5 p-8 hover:border-gray-400 dark:hover:border-white/20 transition-all duration-500 group/card">
-                                <img
-                                    src="/vairav.png"
-                                    alt="Security"
-                                    className="pl-25 w-100 h-100 object-cover grayscale mb-8 group-hover/card:grayscale-0 transition-all duration-700"
-                                />
-                                <div className="space-y-4 text-sm">
-                                    <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider">FLOOR AREA</span>
-                                        <span className="font-semibold">3,500 sq. ft.</span>
-                                    </div>
-                                    {/* <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400 tracking-wider">SERVICES</span>
-                    <span className="font-semibold">24/7 Security Solutions</span>
-                  </div> */}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-8 order-1 md:order-2">
-                            <div className="inline-block px-4 py-2 border border-gray-300 dark:border-white/30 backdrop-blur-sm">
-                                <span className="text-xs tracking-[0.3em]">1ST FLOOR • BUILDING A</span>
-                            </div>
-
-                            <h3 className="text-6xl md:text-7xl font-bold tracking-tight">
-                                Vairav<br />Tech
-                            </h3>
-
-                            <div className="space-y-6">
-                                <div className="flex items-start gap-4 group/item hover:translate-x-2 transition-transform">
-                                    <div className="p-3 border border-gray-300 dark:border-white/20 group-hover/item:border-gray-400 dark:group-hover/item:border-white/40 transition-colors">
-                                        <ShieldCheck className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xl font-semibold mb-2">The Leading Security Operation Center Sevice Provider</h4>
-                                        {/* <p className="text-gray-700 dark:text-gray-400 leading-relaxed">Comprehensive security solutions including armed guards and surveillance systems</p> */}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Building A - 2nd Floor (Vacant) */}
-            <section id="building-a-2nd" className="relative py-32 overflow-hidden group">
-                <div className="absolute inset-0">
-                    <img
-                        src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920"
-                        alt="Office Space"
-                        className="w-full h-full object-cover grayscale opacity-30 group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-l from-white via-white/90 to-transparent dark:from-black dark:via-black/90 dark:to-transparent"></div>
-                </div>
-
-                <div className="relative z-10 max-w-7xl mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-16 items-center">
-                        <div className="space-y-8">
-                            <div className="inline-block px-4 py-2 border border-gray-300 dark:border-white/30 backdrop-blur-sm">
-                                <span className="text-xs tracking-[0.3em]">2ND FLOOR • BUILDING A</span>
-                            </div>
-
-                            <div className="inline-flex items-center gap-3 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-bold tracking-wider animate-pulse">
-                                <Star className="w-5 h-5" />
-                                AVAILABLE FOR LEASE
-                            </div>
-
-                            <h3 className="text-6xl md:text-7xl font-bold tracking-tight">
-                                Prime Office<br />Space
-                            </h3>
-
-                            <div className="space-y-6">
-                                <div className="flex items-start gap-4 group/item hover:translate-x-2 transition-transform">
-                                    <div className="p-3 border border-gray-300 dark:border-white/20 group-hover/item:border-gray-400 dark:group-hover/item:border-white/40 transition-colors">
-                                        <DoorOpen className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xl font-semibold mb-2">Customizable Layout</h4>
-                                        <p className="text-gray-700 dark:text-gray-400 leading-relaxed">Open floor plan ready for your design vision</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="relative">
-                            <div className="relative overflow-hidden border border-gray-300 dark:border-white/10 backdrop-blur-sm bg-gray-100 dark:bg-white/5 p-8 hover:border-gray-400 dark:hover:border-white/20 transition-all duration-500">
-                                <img
-                                    src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800"
-                                    alt="Office"
-                                    className="w-full h-96 object-cover grayscale mb-8"
-                                />
-                                <div className="space-y-6 text-sm">
-                                    <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider">FLOOR AREA</span>
-                                        <span className="font-bold text-lg">3,500 sq. ft.</span>
-                                    </div>
-                                    {/* <div className="flex justify-between items-center pb-6 border-b border-gray-300 dark:border-white/10">
-                    <span className="text-gray-600 dark:text-gray-400 tracking-wider">MONTHLY RENT</span>
-                    <span className="font-bold text-2xl">NPR 2,50,000</span>
-                  </div> */}
-                                    <div className="pt-4 px-6 py-4 border border-gray-300 dark:border-white/20 bg-gray-200 dark:bg-white/5">
-                                        <p className="text-gray-600 dark:text-gray-400 mb-2 tracking-wider text-xs">CONTACT FOR VIEWING</p>
-                                        <p className="font-semibold">+977 980-8100067</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Building A - 3rd Floor (Vacant) */}
-            <section id="building-a-3rd" className="relative py-32 overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-black group">
-                <div className="relative z-10 max-w-7xl mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-16 items-center">
-                        <div className="relative order-2 md:order-1">
-                            <div className="relative overflow-hidden border border-gray-300 dark:border-white/10 backdrop-blur-sm bg-gray-100 dark:bg-white/5 p-8 hover:border-gray-400 dark:hover:border-white/20 transition-all duration-500">
-                                <img
-                                    src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800"
-                                    alt="Executive Office"
-                                    className="w-full h-96 object-cover grayscale mb-8"
-                                />
-                                <div className="space-y-6 text-sm">
-                                    <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider">FLOOR AREA</span>
-                                        <span className="font-bold text-lg">3,500 sq. ft.</span>
-                                    </div>
-                                    <div className="pt-4 px-6 py-4 border border-gray-300 dark:border-white/20 bg-gray-200 dark:bg-white/5">
-                                        <p className="text-gray-600 dark:text-gray-400 mb-2 tracking-wider text-xs">CONTACT FOR VIEWING</p>
-                                        <p className="font-semibold">+977 980-8100067</p>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-8 order-1 md:order-2">
-                            <div className="inline-block px-4 py-2 border border-gray-300 dark:border-white/30 backdrop-blur-sm">
-                                <span className="text-xs tracking-[0.3em]">3RD FLOOR • BUILDING A</span>
-                            </div>
-
-                            <div className="inline-flex items-center gap-3 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-bold tracking-wider animate-pulse">
-                                <Star className="w-5 h-5" />
-                                AVAILABLE FOR LEASE
-                            </div>
-
-                            <h3 className="text-6xl md:text-7xl font-bold tracking-tight">
-                                Prime Office<br />Space
-                            </h3>
-
-                            <div className="space-y-6">
-                                <div className="flex items-start gap-4 group/item hover:translate-x-2 transition-transform">
-                                    <div className="p-3 border border-gray-300 dark:border-white/20 group-hover/item:border-gray-400 dark:group-hover/item:border-white/40 transition-colors">
-                                        <Building2 className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xl font-semibold mb-2">Customizable Layout</h4>
-                                        <p className="text-gray-700 dark:text-gray-400 leading-relaxed">Open floor plan ready for your design vision</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Building A - Gym Section */}
-            <section id="building-a-gym" className="relative py-32 overflow-hidden">
-                <div className="absolute inset-0">
-                    <img
-                        src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920"
-                        alt="Gym"
-                        className="w-full h-full object-cover grayscale opacity-20"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white dark:from-black dark:via-transparent dark:to-black"></div>
-                </div>
-
-                <div className="relative z-10 max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-20">
-                        <div className="inline-block mb-8 px-4 py-2 border border-gray-300 dark:border-white/30 backdrop-blur-sm">
-                            <span className="text-xs tracking-[0.3em]">4TH, 5TH AND 6TH FLOORS • BUILDING A</span>
-                        </div>
-                        <h3 className="text-7xl md:text-8xl font-bold tracking-tighter mb-6">Premium Fitness Center  <br /> COMING SOON!!!</h3>
-                        <p className="text-xl text-gray-600 dark:text-gray-400 tracking-wider">THREE FLOORS OF WELLNESS</p>
-                    </div>
-
-                
-                </div>
-            </section>
-
-            {/* Available Spaces Section */}
-            <section id="available-spaces" className="relative py-32 overflow-hidden bg-white dark:bg-black">
-                <div className="absolute inset-0 opacity-5">
-                    <div className="absolute inset-0" style={{
-                        backgroundImage: `radial-gradient(circle, currentColor 1px, transparent 1px)`,
-                        backgroundSize: '50px 50px'
-                    }}></div>
-                </div>
-
-                <div className="relative z-10 max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-20">
-                        <div className="inline-block mb-8 px-8 py-3 border border-gray-300 dark:border-white/30 backdrop-blur-sm">
-                            <span className="text-sm tracking-[0.3em] font-light">INVESTMENT OPPORTUNITIES</span>
-                        </div>
-                        <h2 className="text-7xl md:text-8xl font-bold tracking-tighter mb-6">Available Spaces</h2>
-                        <p className="text-2xl text-gray-600 dark:text-gray-400 tracking-wider max-w-3xl mx-auto">
-                            Premium commercial floors ready for immediate occupancy
+                        <h2 data-reveal className="mt-5 text-4xl md:text-5xl font-extrabold tracking-tight">
+                            Available Spaces
+                        </h2>
+                        <p data-reveal className="mt-3 text-lg text-slate-600">
+                            Premium commercial floors ready for immediate occupancy.
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                        {/* Building A - 2nd Floor */}
-                        <div className="group relative overflow-hidden border border-gray-300 dark:border-white/20 bg-gradient-to-br from-gray-100 dark:from-white/5 to-transparent hover:border-gray-400 dark:hover:border-white/40 transition-all duration-500">
-                            <div className="absolute top-0 right-0 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-bold text-sm tracking-wider">
-                                AVAILABLE NOW
-                            </div>
-
-                            <div className="p-10">
-                                <div className="mb-8">
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 tracking-[0.3em] mb-3">BUILDING A</p>
-                                    <h3 className="text-5xl font-bold mb-4 tracking-tight">2nd Floor</h3>
-                                    <p className="text-xl text-gray-700 dark:text-gray-300 mb-6">Prime Office Space</p>
-                                </div>
-
-                                <div className="space-y-6 mb-8">
-                                    <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider text-sm">FLOOR AREA</span>
-                                        <span className="text-2xl font-bold">3,500 sq. ft.</span>
-                                    </div>
-
-                                    {/* <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider text-sm">MONTHLY RENT</span>
-                                        <span className="text-3xl font-bold">NPR 2,50,000</span>
-                                    </div> */}
-
-                                    <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider text-sm">TYPE</span>
-                                        <span className="font-semibold">FOR LEASE</span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3 mb-8">
-                                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
-                                        <ArrowRight className="w-4 h-4" />
-                                        <span>Open floor plan - customizable layout</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
-                                        <ArrowRight className="w-4 h-4" />
-                                        <span>Perfect for corporate offices</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
-                                        <ArrowRight className="w-4 h-4" />
-                                        <span>Tech companies & professional firms</span>
-                                    </div>
-                                </div>
-
-                                <div className="border border-gray-300 dark:border-white/20 bg-gray-200 dark:bg-white/5 p-6">
-                                    <p className="text-xs tracking-wider text-gray-600 dark:text-gray-400 mb-2">CONTACT FOR VIEWING</p>
-                                    <p className="text-lg font-bold">+977 9808100067</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Building A - 3rd Floor */}
-                        <div className="group relative overflow-hidden border border-gray-300 dark:border-white/20 bg-gradient-to-br from-gray-100 dark:from-white/5 to-transparent hover:border-gray-400 dark:hover:border-white/40 transition-all duration-500">
-                            {/* <div className="absolute top-0 right-0 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-bold text-sm tracking-wider">
-                                SPECIAL OFFER
-                            </div> */}
-
-                            <div className="p-10">
-                                <div className="mb-8">
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 tracking-[0.3em] mb-3">BUILDING A</p>
-                                    <h3 className="text-5xl font-bold mb-4 tracking-tight">3rd Floor</h3>
-                                    <p className="text-xl text-gray-700 dark:text-gray-300 mb-6">Prime Office Space</p>
-                                </div>
-
-                                <div className="space-y-6 mb-8">
-                                    <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider text-sm">FLOOR AREA</span>
-                                        <span className="text-2xl font-bold">3,500 sq. ft.</span>
-                                    </div>
-
-                                    <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider text-sm">TYPE</span>
-                                        <span className="font-semibold">FOR LEASE</span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3 mb-8">
-                                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
-                                        <ArrowRight className="w-4 h-4" />
-                                        <span>Customizable open floor plan</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
-                                        <ArrowRight className="w-4 h-4" />
-                                        <span>Ready for your design vision</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
-                                        <ArrowRight className="w-4 h-4" />
-                                        <span>Flexible lease terms available</span>
-                                    </div>
-                                </div>
-
-                                <div className="border border-gray-300 dark:border-white/20 bg-gray-200 dark:bg-white/5 p-6">
-                                    <p className="text-xs tracking-wider text-gray-600 dark:text-gray-400 mb-2">CONTACT FOR VIEWING</p>
-                                    <p className="text-lg font-bold">+977 9808100067</p>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="grid md:grid-cols-2 gap-5 max-w-6xl mx-auto" data-reveal>
+                        <SpaceCard
+                            building="BUILDING A"
+                            floor="2nd Floor"
+                            title="Prime Office Space"
+                            area="3,500 sq. ft."
+                            phone="+977 9808100067"
+                            email="buddhalife.np@gmail.com"
+                            tag="AVAILABLE NOW"
+                        />
+                        <SpaceCard
+                            building="BUILDING A"
+                            floor="3rd Floor"
+                            title="Prime Office Space"
+                            area="3,500 sq. ft."
+                            phone="+977 9808100067"
+                            email="buddhalife.np@gmail.com"
+                        />
                     </div>
 
-                    <div className="mt-16 text-center">
-                        <div className="inline-block border border-gray-300 dark:border-white/20 bg-gray-100 dark:bg-white/5 p-10 max-w-2xl">
-                            <h4 className="text-2xl font-bold mb-4 tracking-tight">Interested in Leasing?</h4>
-                            <p className="text-gray-700 dark:text-gray-400 mb-6 leading-relaxed">
-                                Schedule a viewing or request detailed floor plans and lease terms
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <div className="border border-gray-300 dark:border-white/30 px-8 py-4 hover:bg-gray-200 dark:hover:bg-white/5 transition-all">
-                                    <Phone className="w-5 h-5 inline mr-2" />
-                                    <span className="font-semibold">+977 9808100067</span>
-                                </div>
-                                <div className="border border-gray-300 dark:border-white/30 px-8 py-4 hover:bg-gray-200 dark:hover:bg-white/5 transition-all">
-                                    <Mail className="w-5 h-5 inline mr-2" />
-                                    <span className="font-semibold">buddhalife.np@gmail.com</span>
-                                </div>
+                    {/* Apple-like CTA strip */}
+                    <div className="mt-10 max-w-6xl mx-auto" data-reveal>
+                        <div className="rounded-[28px] bg-[#f7f7f8] ring-1 ring-black/10 p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                            <div>
+                                <h4 className="text-xl md:text-2xl font-extrabold tracking-tight">Request a viewing</h4>
+                                <p className="mt-2 text-slate-600">
+                                    Get floor plans and leasing terms. We’ll respond quickly.
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <a
+                                    href="#available-spaces"
+                                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/10 px-5 py-3 text-sm font-semibold hover:bg-black/[0.02] transition"
+                                >
+                                    Call <Phone className="h-4 w-4" />
+                                </a>
+                                <a
+                                    href="#available-spaces"
+                                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 text-white px-5 py-3 text-sm font-semibold shadow-[0_18px_50px_rgba(2,6,23,0.18)] hover:opacity-95 transition"
+                                >
+                                    Email <Mail className="h-4 w-4" />
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Building B Divider */}
-            <div className="relative py-24 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black"></div>
-                <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
-                    <h2 className="text-6xl md:text-7xl font-bold tracking-tighter mb-4">Building B</h2>
-                    <p className="text-xl text-gray-600 dark:text-gray-400 tracking-wider">CONNECTED EXCELLENCE</p>
-                </div>
-            </div>
+            {/* BUILDING B */}
+            <SectionHeader title="Building B" subtitle="Connected excellence" />
 
-            {/* Building B - Ground Floor */}
-            <section id="building-b-ground" className="relative py-32 overflow-hidden group">
-                <div className="absolute inset-0">
-                    <img
-                        src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920"
-                        alt="Restaurant"
-                        className="w-full h-full object-cover grayscale opacity-30 group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent dark:from-black dark:via-black/90 dark:to-transparent"></div>
-                </div>
-
-                <div className="relative z-10 max-w-7xl mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-16 items-center">
-                        <div className="space-y-8">
-                            <div className="inline-block px-4 py-2 border border-gray-300 dark:border-white/30 backdrop-blur-sm">
-                                <span className="text-xs tracking-[0.3em]">GROUND FLOOR • BUILDING B</span>
-                            </div>
-
-                            <h3 className="text-6xl md:text-7xl font-bold tracking-tight">
-                                Elements<br />Restaurant
-                            </h3>
-
-                            <div className="space-y-6">
-                                <div className="flex items-start gap-4 group/item hover:translate-x-2 transition-transform">
-                                    <div className="p-3 border border-gray-300 dark:border-white/20 group-hover/item:border-gray-400 dark:group-hover/item:border-white/40 transition-colors">
-                                        <Utensils className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xl font-semibold mb-2">Fine Dining Experience</h4>
-                                        <p className="text-gray-700 dark:text-gray-400 leading-relaxed">Contemporary Nepali and international cuisine crafted by award-winning chefs</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="relative">
-                            <div className="relative overflow-hidden border border-gray-300 dark:border-white/10 backdrop-blur-sm bg-gray-100 dark:bg-white/5 p-8 hover:border-gray-400 dark:hover:border-white/20 transition-all duration-500 group/card">
-                                <img
-                                    src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800"
-                                    alt="Restaurant"
-                                    className="w-full h-96 object-cover grayscale mb-8 group-hover/card:grayscale-0 transition-all duration-700"
-                                />
-                                <div className="space-y-4 text-sm">
-                                    {/* <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider">SEATING</span>
-                                        <span className="font-semibold">120 guests</span>
-                                    </div> */}
-                                    {/* <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider">HOURS</span>
-                                        <span className="font-semibold">11 AM - 11 PM</span>
-                                    </div> */}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Building B - 1st Floor */}
-            <section id="building-b-1st" className="relative py-32 overflow-hidden bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-950 group">
-                <div className="relative z-10 max-w-7xl mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-16 items-center">
-                        <div className="relative order-2 md:order-1">
-                            <div className="relative overflow-hidden border border-gray-300 dark:border-white/10 backdrop-blur-sm bg-gray-100 dark:bg-white/5 p-8 hover:border-gray-400 dark:hover:border-white/20 transition-all duration-500 group/card">
-                                <img
-                                    src="https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=800"
-                                    alt="Cinema"
-                                    className="w-full h-96 object-cover grayscale mb-8 group-hover/card:grayscale-0 transition-all duration-700"
-                                />
-                                <div className="space-y-4 text-sm">
-                                    {/* <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider">HALL SIZE</span>
-                                        <span className="font-semibold">2,500 sq. ft.</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider">TECHNOLOGY</span>
-                                        <span className="font-semibold">Dolby Sound</span>
-                                    </div> */}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-8 order-1 md:order-2">
-                            <div className="inline-block px-4 py-2 border border-gray-300 dark:border-white/30 backdrop-blur-sm">
-                                <span className="text-xs tracking-[0.3em]">1ST FLOOR • BUILDING B</span>
-                            </div>
-
-                            <h3 className="text-6xl md:text-7xl font-bold tracking-tight">
-                                Swopna<br />Chitra
-                            </h3>
-
-                            <div className="space-y-6">
-                                <div className="flex items-start gap-4 group/item hover:translate-x-2 transition-transform">
-                                    <div className="p-3 border border-gray-300 dark:border-white/20 group-hover/item:border-gray-400 dark:group-hover/item:border-white/40 transition-colors">
-                                        <Film className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xl font-semibold mb-2">Production House</h4>
-                                        {/* <p className="text-gray-700 dark:text-gray-400 leading-relaxed">Premium movie theater with state-of-the-art projection and sound</p> */}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Building B - 2nd Floor */}
-            <section id="building-b-2nd" className="relative py-32 overflow-hidden group">
-                <div className="absolute inset-0">
-                    <img
-                        src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1920"
-                        alt="Tech Office"
-                        className="w-full h-full object-cover grayscale opacity-30 group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-l from-white via-white/90 to-transparent dark:from-black dark:via-black/90 dark:to-transparent"></div>
-                </div>
-
-                <div className="relative z-10 max-w-7xl mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-16 items-center">
-                        <div className="space-y-8">
-                            <div className="inline-block px-4 py-2 border border-gray-300 dark:border-white/30 backdrop-blur-sm">
-                                <span className="text-xs tracking-[0.3em]">2ND FLOOR • BUILDING B</span>
-                            </div>
-
-                            <h3 className="text-6xl md:text-7xl font-bold tracking-tight">
-                                Moon<br />Technology
-                            </h3>
-
-                            <div className="space-y-6">
-                                <div className="flex items-start gap-4 group/item hover:translate-x-2 transition-transform">
-                                    <div className="p-3 border border-gray-300 dark:border-white/20 group-hover/item:border-gray-400 dark:group-hover/item:border-white/40 transition-colors">
-                                        <Laptop className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xl font-semibold mb-2">IT Solutions & Services</h4>
-                                        <p className="text-gray-700 dark:text-gray-400 leading-relaxed">Leading technology company providing software development and cloud solutions</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="relative">
-                            <div className="relative overflow-hidden border border-gray-300 dark:border-white/10 backdrop-blur-sm bg-gray-100 dark:bg-white/5 p-8 hover:border-gray-400 dark:hover:border-white/20 transition-all duration-500 group/card">
-                                <img
-                                    src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800"
-                                    alt="Tech Office"
-                                    className="w-full h-96 object-cover grayscale mb-8 group-hover/card:grayscale-0 transition-all duration-700"
-                                />
-                                <div className="space-y-4 text-sm">
-                                    {/* <div className="flex justify-between items-center pb-4 border-b border-gray-300 dark:border-white/10">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider">OFFICE AREA</span>
-                                        <span className="font-semibold">2,800 sq. ft.</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 dark:text-gray-400 tracking-wider">TEAM SIZE</span>
-                                        <span className="font-semibold">30+ Professionals</span>
-                                    </div> */}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Footer */}
-            <footer className="relative py-24 overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-black border-t border-gray-300 dark:border-white/10">
+            <section id="building-b-ground" className="py-16">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid md:grid-cols-3 gap-16 mb-16">
-                        <div>
-                            <h3 className="text-3xl font-bold mb-6 tracking-tight">Subha Shree Bhawan</h3>
-                            <p className="text-gray-700 dark:text-gray-400 leading-relaxed">
-                                Nepal's premier commercial complex offering world-class business spaces and amenities
-                            </p>
-                        </div>
+                    <TwoCol
+                        left={
+                            <>
+                                <Kicker text="GROUND FLOOR • BUILDING B" />
+                                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
+                                    Elements Restaurant
+                                </h3>
+                                <div data-reveal className="mt-8">
+                                    <FeatureRow
+                                        icon={<Utensils className="h-5 w-5" />}
+                                        title="Fine Dining"
+                                        desc="Contemporary Nepali and international cuisine crafted with premium service."
+                                    />
+                                </div>
+                            </>
+                        }
+                        right={
+                            <ImageCard
+                                src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800"
+                                alt="Elements Restaurant"
+                            />
+                        }
+                    />
+                </div>
+            </section>
 
-                        <div>
-                            <h4 className="text-xl font-semibold mb-6 tracking-wider">CONTACT</h4>
-                            <div className="space-y-4 text-gray-700 dark:text-gray-400">
-                                <div className="flex items-center gap-3 group hover:text-black dark:hover:text-white transition-colors">
-                                    <MapPin className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span>Kathmandu, Nepal</span>
+            <section id="building-b-1st" className="py-16 bg-white border-y border-black/5">
+                <div className="max-w-7xl mx-auto px-6">
+                    <TwoCol
+                        left={<ImageCard src="/alogo.png" alt="Swopna Chitra" />}
+                        right={
+                            <>
+                                <Kicker text="1ST FLOOR • BUILDING B" />
+                                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
+                                    Swopna Chitra
+                                </h3>
+                                <div data-reveal className="mt-8">
+                                    <FeatureRow
+                                        icon={<Film className="h-5 w-5" />}
+                                        title="Production House"
+                                        desc="Creative media production supporting high-quality storytelling."
+                                    />
                                 </div>
-                                <div className="flex items-center gap-3 group hover:text-black dark:hover:text-white transition-colors">
-                                    <Phone className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span>+977 980-8100067</span>
+                            </>
+                        }
+                    />
+                </div>
+            </section>
+
+            <section id="building-b-2nd" className="py-16">
+                <div className="max-w-7xl mx-auto px-6">
+                    <TwoCol
+                        left={
+                            <>
+                                <Kicker text="2ND FLOOR • BUILDING B" />
+                                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
+                                    Moon Technology
+                                </h3>
+                                <div data-reveal className="mt-8">
+                                    <FeatureRow
+                                        icon={<Laptop className="h-5 w-5" />}
+                                        title="IT Solutions"
+                                        desc="Software, cloud and technology services for modern organizations."
+                                    />
                                 </div>
-                                <div className="flex items-center gap-3 group hover:text-black dark:hover:text-white transition-colors">
-                                    <Mail className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span>buddhalife.np@gmail.com</span>
+                            </>
+                        }
+                        right={
+                            <ImageCard
+                                src="/moon.jpeg"
+                                alt="Moon Technology"
+                            />
+                        }
+                    />
+                </div>
+            </section>
+
+            {/* FOOTER */}
+            <footer className="py-14">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="rounded-[28px] bg-white ring-1 ring-black/10 p-8">
+                        <div className="grid md:grid-cols-3 gap-10">
+                            <div>
+                                <h3 className="text-xl font-extrabold tracking-tight">Subha Shree Bhawan</h3>
+                                <p className="mt-3 text-slate-600 leading-relaxed">
+                                    A premium commercial destination offering world-class business spaces and amenities.
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 className="text-xs font-semibold tracking-[0.18em] text-slate-500">CONTACT</h4>
+                                <div className="mt-4 space-y-3 text-slate-700">
+                                    <div className="flex items-center gap-3">
+                                        <MapPin className="h-5 w-5 text-slate-400" />
+                                        <span>Kathmandu, Nepal</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Phone className="h-5 w-5 text-slate-400" />
+                                        <span>+977 980-8100067</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Mail className="h-5 w-5 text-slate-400" />
+                                        <span>buddhalife.np@gmail.com</span>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div>
+                                <h4 className="text-xs font-semibold tracking-[0.18em] text-slate-500">FEATURES</h4>
+                                <ul className="mt-4 space-y-3 text-slate-700">
+                                    {["Prime location", "Modern infrastructure", "24/7 security", "Underground parking"].map((t) => (
+                                        <li key={t} className="flex items-center gap-2">
+                                            <ArrowRight className="h-4 w-4 text-slate-400" /> {t}
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
                         </div>
 
-                        <div>
-                            <h4 className="text-xl font-semibold mb-6 tracking-wider">FEATURES</h4>
-                            <ul className="space-y-3 text-gray-700 dark:text-gray-400">
-                                <li className="flex items-center gap-2 hover:text-black dark:hover:text-white transition-colors">
-                                    <ArrowRight className="w-4 h-4" /> Prime location</li>
-                                <li className="flex items-center gap-2 hover:text-black dark:hover:text-white transition-colors">
-                                    <ArrowRight className="w-4 h-4" /> Modern infrastructure</li>
-                                <li className="flex items-center gap-2 hover:text-black dark:hover:text-white transition-colors">
-                                    <ArrowRight className="w-4 h-4" /> 24/7 security</li>
-                                <li className="flex items-center gap-2 hover:text-black dark:hover:text-white transition-colors">
-                                    <ArrowRight className="w-4 h-4" /> Ungerground parking</li>
-                            </ul>
+                        <div className="mt-8 pt-6 border-t border-black/5 text-center text-slate-500 text-sm">
+                            &copy; 2026 Subha Shree Bhawan. All rights reserved.
                         </div>
-                    </div>
-
-                    <div className="pt-8 border-t border-gray-300 dark:border-white/10 text-center text-gray-500 text-sm">
-                        <p>&copy; 2026 Subha Shree Bhawan. All rights reserved.</p>
                     </div>
                 </div>
             </footer>
 
             <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes zoom {
-          0%, 100% {
-            transform: scale(1.05);
-          }
-          50% {
-            transform: scale(1.1);
-          }
-        }
-
-        @keyframes scroll {
-          0% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(8px);
-          }
-          100% {
-            transform: translateY(0);
-          }
-        }
-
-        html {
-          scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
+        .reveal { opacity: 0; transform: translateY(14px); transition: opacity 650ms ease, transform 650ms ease; }
+        .reveal-in { opacity: 1; transform: translateY(0); }
       `}</style>
         </div>
-    )
+    );
+}
+
+/* ================= Components ================= */
+
+function NavDropdown({ label, items }: { label: string; items: LinkItem[] }) {
+    return (
+        <div className="relative group">
+            <button className="px-3 py-2 text-[12px] tracking-[0.18em] font-medium text-slate-600 hover:text-slate-900 rounded-2xl hover:bg-black/[0.04] transition inline-flex items-center gap-2">
+                {label} <ChevronDown className="h-4 w-4 opacity-70" />
+            </button>
+
+            <div className="absolute top-full left-0 mt-2 w-64 rounded-3xl bg-white ring-1 ring-black/10 shadow-[0_26px_80px_rgba(15,23,42,0.12)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
+                {items.map((it, i) => (
+                    <a
+                        key={it.href}
+                        href={it.href}
+                        className={`block px-5 py-3 text-sm text-slate-700 hover:bg-black/[0.03] transition ${i !== items.length - 1 ? "border-b border-black/5" : ""
+                            }`}
+                    >
+                        {it.label}
+                    </a>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function MobileGroup({ title, items }: { title: string; items: LinkItem[] }) {
+    return (
+        <div className="rounded-2xl ring-1 ring-black/10 overflow-hidden bg-white">
+            <div className="px-4 py-3 bg-black/[0.03] text-[12px] tracking-[0.18em] text-slate-600 font-semibold">
+                {title}
+            </div>
+            <div>
+                {items.map((it, idx) => (
+                    <a
+                        key={it.href}
+                        href={it.href}
+                        className={`block px-4 py-3 text-sm text-slate-700 hover:bg-black/[0.03] transition ${idx !== items.length - 1 ? "border-b border-black/5" : ""
+                            }`}
+                    >
+                        {it.label}
+                    </a>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
+    return (
+        <div className="py-14">
+            <div className="max-w-7xl mx-auto px-6 text-center">
+                <h2 data-reveal className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                    {title}
+                </h2>
+                <p data-reveal className="mt-2 text-sm tracking-[0.18em] text-slate-500">
+                    {subtitle.toUpperCase()}
+                </p>
+            </div>
+        </div>
+    );
+}
+
+function Kicker({ text }: { text: string }) {
+    return (
+        <div className="inline-flex items-center rounded-full bg-black/[0.04] ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
+            {text}
+        </div>
+    );
+}
+
+function TwoCol({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
+    return <div className="grid md:grid-cols-2 gap-10 items-center">{left}{right}</div>;
+}
+
+function InfoTile({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
+    return (
+        <div className="rounded-3xl bg-white ring-1 ring-black/10 px-4 py-4 shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
+            <div className="flex items-center gap-2 text-xs tracking-[0.18em] text-slate-500 font-semibold">
+                <span className="text-slate-400">{icon}</span> {title.toUpperCase()}
+            </div>
+            <div className="mt-2 text-base font-semibold text-slate-900">{value}</div>
+        </div>
+    );
+}
+
+function MiniStat({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
+    return (
+        <div className="rounded-2xl bg-black/[0.03] ring-1 ring-black/10 p-3">
+            <div className="flex items-center justify-between">
+                <p className="text-xs tracking-[0.18em] text-slate-500 font-semibold">{title.toUpperCase()}</p>
+                <span className="text-slate-500">{icon}</span>
+            </div>
+            <p className="mt-2 font-semibold text-slate-900">{value}</p>
+        </div>
+    );
+}
+
+function ImageCard({
+    src,
+    alt,
+    footerLeft,
+    footerRight,
+}: {
+    src: string;
+    alt: string;
+    footerLeft?: string;
+    footerRight?: string;
+}) {
+    return (
+        <div className="rounded-[28px] bg-white ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden">
+            <div className="relative">
+                <img src={src} alt={alt} className="w-full h-80 object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-transparent to-transparent" />
+            </div>
+
+            {(footerLeft || footerRight) && (
+                <div className="p-5 border-t border-black/5">
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
+                            {footerLeft}
+                        </span>
+                        <span className="font-semibold text-slate-900">{footerRight}</span>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function FeatureRow({
+    icon,
+    title,
+    desc,
+}: {
+    icon: React.ReactNode;
+    title: string;
+    desc: string;
+}) {
+    return (
+        <div className="flex gap-4 rounded-3xl bg-white ring-1 ring-black/10 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)] hover:shadow-[0_22px_70px_rgba(15,23,42,0.08)] transition">
+            <div className="shrink-0 rounded-2xl bg-black/[0.03] ring-1 ring-black/10 p-3 text-slate-700">
+                {icon}
+            </div>
+            <div>
+                <h4 className="font-semibold text-slate-900">{title}</h4>
+                <p className="mt-1 text-sm text-slate-600 leading-relaxed">{desc}</p>
+            </div>
+        </div>
+    );
+}
+
+function VacantFloorCard({
+    badge,
+    floor,
+    title,
+    image,
+    area,
+    phone,
+}: {
+    badge: string;
+    floor: string;
+    title: string;
+    image: string;
+    area: string;
+    phone: string;
+}) {
+    return (
+        <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+                <Kicker text={floor} />
+
+                <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em]">
+                    {badge}
+                </div>
+
+                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
+                    {title}
+                </h3>
+
+                <div className="mt-6 rounded-3xl bg-white ring-1 ring-black/10 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)]">
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">FLOOR AREA</span>
+                        <span className="font-semibold">{area}</span>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between text-sm border-t border-black/5 pt-4">
+                        <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">CONTACT</span>
+                        <span className="font-semibold">{phone}</span>
+                    </div>
+                </div>
+            </div>
+
+            <ImageCard src={image} alt={title} footerLeft="STATUS" footerRight="Ready for lease" />
+        </div>
+    );
+}
+
+function SpaceCard({
+    building,
+    floor,
+    title,
+    area,
+    phone,
+    email,
+    tag,
+}: {
+    building: string;
+    floor: string;
+    title: string;
+    area: string;
+    phone: string;
+    email: string;
+    tag?: string;
+}) {
+    return (
+        <div className="relative rounded-[28px] bg-white ring-1 ring-black/10 p-7 shadow-[0_20px_70px_rgba(15,23,42,0.08)] hover:shadow-[0_28px_90px_rgba(15,23,42,0.10)] transition">
+            {tag && (
+                <div className="absolute top-4 right-4 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em]">
+                    {tag}
+                </div>
+            )}
+
+            <p className="text-xs tracking-[0.18em] text-slate-500 font-semibold">{building}</p>
+            <h3 className="mt-3 text-2xl font-extrabold tracking-tight">{floor}</h3>
+            <p className="mt-2 text-slate-600">{title}</p>
+
+            <div className="mt-6 space-y-3 text-sm">
+                <div className="flex items-center justify-between border-t border-black/5 pt-4">
+                    <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">FLOOR AREA</span>
+                    <span className="font-semibold">{area}</span>
+                </div>
+
+                <div className="flex flex-col gap-2 pt-3">
+                    <div className="inline-flex items-center gap-2 text-slate-700">
+                        <Phone className="h-4 w-4 text-slate-400" /> {phone}
+                    </div>
+                    <div className="inline-flex items-center gap-2 text-slate-700">
+                        <Mail className="h-4 w-4 text-slate-400" /> {email}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }
