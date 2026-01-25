@@ -399,7 +399,7 @@ export default function Home() {
                             <div data-reveal>
                                 <FeatureRow
                                     icon={<ShieldCheck className="h-5 w-5" />}
-                                    title="Security Operations Center"
+                                    title="The Leading Security Operation Center Service Provider"
                                     desc="Vairav Technology is a powerhouse of cybersecurity."
                                 />
                             </div>
