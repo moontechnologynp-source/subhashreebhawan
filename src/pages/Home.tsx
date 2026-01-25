@@ -1,5 +1,5 @@
 //main
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Building2,
     Stethoscope,
@@ -23,6 +23,23 @@ type LinkItem = { href: string; label: string };
 export default function Home() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [navShadow, setNavShadow] = useState(false);
+    const heroVideoRef = useRef<HTMLVideoElement | null>(null);
+
+    const playHeroVideo = async () => {
+        const v = heroVideoRef.current;
+        if (!v) return;
+        try {
+            v.currentTime = 1; // 👈 start from 1s (matches paused frame)
+            await v.play();
+        } catch { }
+    };
+
+    const pauseHeroVideo = () => {
+        const v = heroVideoRef.current;
+        if (!v) return;
+        v.pause();
+        v.currentTime = 2; // 👈 stay at 1-second mark when paused
+    };
 
     const buildingALinks: LinkItem[] = useMemo(
         () => [
@@ -65,9 +82,7 @@ export default function Home() {
 
     // scroll reveal (no library)
     useEffect(() => {
-        const els = Array.from(
-            document.querySelectorAll<HTMLElement>("[data-reveal]")
-        );
+        const els = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
         if (!els.length) return;
 
         els.forEach((el) => el.classList.add("reveal"));
@@ -87,6 +102,28 @@ export default function Home() {
         els.forEach((el) => io.observe(el));
         return () => io.disconnect();
     }, []);
+
+    // ✅ Floor galleries (put your images in /public/available/...)
+    const floor2Images = useMemo(
+        () => [
+            { src: "/available/2nd-1.png", alt: "2nd floor office view", label: "Building A • 2nd Floor" },
+            { src: "/available/2nd-2.png", alt: "2nd floor workspace angle", label: "Building A • 2nd Floor" },
+        ],
+        []
+    );
+
+    const floor3Images = useMemo(
+        () => [
+            { src: "/available/3rd-1.png", alt: "3rd floor office view", label: "Building A • 3rd Floor" },
+            { src: "/available/3.png", alt: "3rd floor hallway / open space", label: "Building A • 3rd Floor" },
+        ],
+        []
+    );
+
+    const allAvailableImages = useMemo(
+        () => [...floor2Images, ...floor3Images],
+        [floor2Images, floor3Images]
+    );
 
     return (
         <div className="min-h-screen bg-[#FAF6EA] text-slate-900 antialiased">
@@ -223,13 +260,39 @@ export default function Home() {
                         {/* Hero visual */}
                         <div className="lg:col-span-5" data-reveal>
                             <MediaCard>
-                                <div className="relative h-[410px] md:h-[440px]">
-                                    <img
-                                        src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=2400"
-                                        alt="Subha Shree Bhawan"
+                                <div
+                                    className="relative h-[410px] md:h-[440px]"
+                                    onMouseEnter={playHeroVideo}
+                                    onMouseLeave={pauseHeroVideo}
+                                    // mobile: tap to play/pause
+                                    onClick={() => {
+                                        const v = heroVideoRef.current;
+                                        if (!v) return;
+                                        if (v.paused) playHeroVideo();
+                                        else pauseHeroVideo();
+                                    }}
+                                >
+                                    <video
+                                        ref={heroVideoRef}
+                                        src="/videos/subha-shree-bhawan.mp4"
+                                        poster="/buildingA.png"
+                                        loop
+                                        muted
+                                        playsInline
+                                        preload="metadata"
                                         className="absolute inset-0 h-full w-full object-cover"
                                     />
+
                                     <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7DE] via-[#FFF7DE]/20 to-transparent" />
+
+                                    {/* Optional: subtle "Hover to play" hint */}
+                                    <div className="absolute top-5 left-5">
+                                        <div className="rounded-2xl bg-white/70 backdrop-blur-xl ring-1 ring-black/10 px-3 py-2">
+                                            <p className="text-[11px] tracking-[0.18em] text-slate-600 font-semibold">
+                                                HOVER TO PLAY
+                                            </p>
+                                        </div>
+                                    </div>
 
                                     <div className="absolute left-5 right-5 bottom-5">
                                         <div className="rounded-2xl bg-white/70 backdrop-blur-xl ring-1 ring-black/10 p-4">
@@ -256,6 +319,7 @@ export default function Home() {
                                 </div>
                             </MediaCard>
                         </div>
+
                     </div>
 
                     <div className="mt-14 md:mt-16 flex justify-center" data-reveal>
@@ -263,6 +327,21 @@ export default function Home() {
                     </div>
                 </Container>
             </section>
+
+            {/* <section className="relative py-20">
+                <Container>
+                    <div className="rounded-[32px] overflow-hidden shadow-[0_40px_120px_rgba(15,23,42,0.15)]">
+                        <video
+                            src="/videos/subha-shree-bhawan.mp4"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-[520px] object-contain bg-black"
+                        />
+                    </div>
+                </Container>
+            </section> */}
 
             {/* BUILDING A */}
             <SectionHeader title="Building A" subtitle="Seven floors of excellence" />
@@ -296,6 +375,9 @@ export default function Home() {
                             alt="Tesla Clinic & Himalayan Java"
                             footerLeft="FACILITIES"
                             footerRight="Clinic + Café"
+                            heightClass="h-96"
+                            crop="object-[50%_30%]"
+                            fit="cover"
                         />
                     }
                 />
@@ -325,30 +407,59 @@ export default function Home() {
                             alt="Vairav Tech"
                             footerLeft="FLOOR AREA"
                             footerRight="3,500 sq. ft."
+                            heightClass="h-125"
+                            crop="object-contain"
+                            zoom="scale-55"
+                            fit="contain"
                         />
                     }
                 />
             </Section>
 
+            {/* ✅ 2ND FLOOR (carousel here) */}
             <Section id="building-a-2nd">
-                <VacantFloorCard
-                    badge="AVAILABLE"
-                    floor="2ND FLOOR • BUILDING A"
-                    title="Prime Office Space"
-                    image="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800"
-                    area="3,500 sq. ft."
-                    phone="+977 980-8100067"
+                <TwoCol
+                    left={
+                        <VacantFloorInfo
+                            badge="AVAILABLE"
+                            floor="2ND FLOOR • BUILDING A"
+                            title="Prime Office Space"
+                            area="3,500 sq. ft."
+                            phone="+977 980-8100067"
+                        />
+                    }
+                    right={
+                        <FloorCarousel
+                            title="2nd Floor Gallery"
+                            images={floor2Images}
+                            intervalMs={5000}
+                            fit="contain"
+                        />
+                    }
                 />
             </Section>
 
+            {/* ✅ 3RD FLOOR (carousel here) */}
             <Section id="building-a-3rd" tone="soft">
-                <VacantFloorCard
-                    badge="AVAILABLE"
-                    floor="3RD FLOOR • BUILDING A"
-                    title="Prime Office Space"
-                    image="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1800"
-                    area="3,500 sq. ft."
-                    phone="+977 980-8100067"
+                <TwoCol
+                    reverse
+                    left={
+                        <VacantFloorInfo
+                            badge="AVAILABLE"
+                            floor="3RD FLOOR • BUILDING A"
+                            title="Prime Office Space"
+                            area="3,500 sq. ft."
+                            phone="+977 980-8100067"
+                        />
+                    }
+                    right={
+                        <FloorCarousel
+                            title="3rd Floor Gallery"
+                            images={floor3Images}
+                            intervalMs={5000}
+                            fit="contain"
+                        />
+                    }
                 />
             </Section>
 
@@ -377,24 +488,37 @@ export default function Home() {
                     </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-5 max-w-6xl mx-auto" data-reveal>
-                    <SpaceCard
-                        building="BUILDING A"
-                        floor="2nd Floor"
-                        title="Prime Office Space"
-                        area="3,500 sq. ft."
-                        phone="+977 9808100067"
-                        email="buddhalife.np@gmail.com"
-                        tag="AVAILABLE NOW"
-                    />
-                    <SpaceCard
-                        building="BUILDING A"
-                        floor="3rd Floor"
-                        title="Prime Office Space"
-                        area="3,500 sq. ft."
-                        phone="+977 9808100067"
-                        email="buddhalife.np@gmail.com"
-                    />
+                <div className="grid lg:grid-cols-12 gap-6 max-w-6xl mx-auto" data-reveal>
+                    {/* Left: cards */}
+                    <div className="lg:col-span-5 grid gap-5">
+                        <SpaceCard
+                            building="BUILDING A"
+                            floor="2nd Floor"
+                            title="Prime Office Space"
+                            area="3,500 sq. ft."
+                            phone="+977 9808100067"
+                            email="buddhalife.np@gmail.com"
+                            tag="AVAILABLE NOW"
+                        />
+                        <SpaceCard
+                            building="BUILDING A"
+                            floor="3rd Floor"
+                            title="Prime Office Space"
+                            area="3,500 sq. ft."
+                            phone="+977 9808100067"
+                            email="buddhalife.np@gmail.com"
+                        />
+                    </div>
+
+                    {/* Right: carousel (all available) */}
+                    <div className="lg:col-span-7">
+                        <FloorCarousel
+                            title="Available Floors Preview"
+                            images={allAvailableImages}
+                            intervalMs={5000}
+                            fit="contain"
+                        />
+                    </div>
                 </div>
 
                 <div className="mt-9 md:mt-10 max-w-6xl mx-auto" data-reveal>
@@ -438,8 +562,10 @@ export default function Home() {
                     }
                     right={
                         <ImageCard
-                            src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800"
+                            src="/elements.jpg"
                             alt="Elements Restaurant"
+                            fit="contain"
+                            zoom="scale-100"
                         />
                     }
                 />
@@ -463,7 +589,7 @@ export default function Home() {
                             </div>
                         </>
                     }
-                    right={<ImageCard src="/alogo.png" alt="Swopna Chitra" />}
+                    right={<ImageCard src="/alogo.png" alt="Swopna Chitra" fit="contain" zoom="scale-100" />}
                 />
             </Section>
 
@@ -484,7 +610,7 @@ export default function Home() {
                             </div>
                         </>
                     }
-                    right={<ImageCard src="/moon.jpeg" alt="Moon Technology" />}
+                    right={<ImageCard src="/moon.jpeg" alt="Moon Technology" fit="contain" zoom="scale-100" />}
                 />
             </Section>
 
@@ -603,21 +729,10 @@ export default function Home() {
 
 /* ================= Layout Helpers ================= */
 
-function Container({
-    children,
-    className = "",
-}: {
-    children: React.ReactNode;
-    className?: string;
-}) {
+function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
     return <div className={`max-w-7xl mx-auto px-5 sm:px-6 ${className}`}>{children}</div>;
 }
 
-/**
- * SOFT FADE SECTION:
- * - No "dirty pillow" blocks
- * - Just a gentle glow that blends into the page
- */
 function Section({
     id,
     tone = "base",
@@ -720,15 +835,7 @@ function Kicker({ text }: { text: string }) {
     );
 }
 
-function TwoCol({
-    left,
-    right,
-    reverse = false,
-}: {
-    left: React.ReactNode;
-    right: React.ReactNode;
-    reverse?: boolean;
-}) {
+function TwoCol({ left, right, reverse = false }: { left: React.ReactNode; right: React.ReactNode; reverse?: boolean }) {
     return (
         <div className="grid items-center gap-10 md:gap-12 lg:grid-cols-12">
             <div className={["lg:col-span-6", reverse ? "lg:order-2" : "lg:order-1"].join(" ")}>
@@ -769,16 +876,37 @@ function ImageCard({
     alt,
     footerLeft,
     footerRight,
+    crop = "object-center",
+    heightClass = "h-80",
+    zoom = "scale-110",
+    fit = "cover",
 }: {
     src: string;
     alt: string;
     footerLeft?: string;
     footerRight?: string;
+    crop?: string;
+    heightClass?: string;
+    zoom?: string;
+    fit?: "cover" | "contain";
 }) {
     return (
         <MediaCard>
-            <div className="relative">
-                <img src={src} alt={alt} className="w-full h-80 object-cover" />
+            <div className={`relative ${heightClass} overflow-hidden`}>
+                {/* soft canvas so contain doesn't look empty */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-[#FFF2C7]/30 to-white/30" />
+
+                <img
+                    src={src}
+                    alt={alt}
+                    className={[
+                        "absolute inset-0 h-full w-full",
+                        fit === "contain" ? "object-contain p-4" : "object-cover",
+                        crop,
+                        zoom,
+                    ].join(" ")}
+                />
+
                 <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7DE]/35 via-transparent to-transparent" />
             </div>
 
@@ -794,20 +922,10 @@ function ImageCard({
     );
 }
 
-function FeatureRow({
-    icon,
-    title,
-    desc,
-}: {
-    icon: React.ReactNode;
-    title: string;
-    desc: string;
-}) {
+function FeatureRow({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
     return (
         <div className="flex gap-4 rounded-3xl bg-white/55 ring-1 ring-black/10 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)] hover:-translate-y-[2px] hover:shadow-[0_26px_85px_rgba(15,23,42,0.10)] transition">
-            <div className="shrink-0 rounded-2xl bg-black/[0.03] ring-1 ring-black/10 p-3 text-slate-700">
-                {icon}
-            </div>
+            <div className="shrink-0 rounded-2xl bg-black/[0.03] ring-1 ring-black/10 p-3 text-slate-700">{icon}</div>
             <div className="min-w-0">
                 <h4 className="font-semibold text-slate-900">{title}</h4>
                 <p className="mt-1 text-sm text-slate-700 leading-relaxed">{desc}</p>
@@ -816,48 +934,43 @@ function FeatureRow({
     );
 }
 
-function VacantFloorCard({
+/* ✅ Used for 2nd/3rd floor left info (same style as your old VacantFloorCard) */
+function VacantFloorInfo({
     badge,
     floor,
     title,
-    image,
     area,
     phone,
 }: {
     badge: string;
     floor: string;
     title: string;
-    image: string;
     area: string;
     phone: string;
 }) {
     return (
-        <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div>
-                <Kicker text={floor} />
+        <div>
+            <Kicker text={floor} />
 
-                <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em] shadow-[0_18px_50px_rgba(2,6,23,0.16)]">
-                    {badge}
-                </div>
-
-                <h3 data-reveal className="mt-6 text-3xl md:text-4xl font-extrabold tracking-tight">
-                    {title}
-                </h3>
-
-                <div className="mt-7 rounded-3xl bg-white/55 ring-1 ring-black/10 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)]">
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">FLOOR AREA</span>
-                        <span className="font-semibold">{area}</span>
-                    </div>
-
-                    <div className="mt-4 flex items-center justify-between text-sm border-t border-black/5 pt-4">
-                        <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">CONTACT</span>
-                        <span className="font-semibold">{phone}</span>
-                    </div>
-                </div>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em] shadow-[0_18px_50px_rgba(2,6,23,0.16)]">
+                {badge}
             </div>
 
-            <ImageCard src={image} alt={title} footerLeft="STATUS" footerRight="Ready for lease" />
+            <h3 data-reveal className="mt-6 text-3xl md:text-4xl font-extrabold tracking-tight">
+                {title}
+            </h3>
+
+            <div className="mt-7 rounded-3xl bg-white/55 ring-1 ring-black/10 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)]">
+                <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">FLOOR AREA</span>
+                    <span className="font-semibold">{area}</span>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between text-sm border-t border-black/5 pt-4">
+                    <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">CONTACT</span>
+                    <span className="font-semibold">{phone}</span>
+                </div>
+            </div>
         </div>
     );
 }
@@ -904,6 +1017,162 @@ function SpaceCard({
                     <div className="inline-flex items-center gap-2 text-slate-800">
                         <Mail className="h-4 w-4 text-slate-500" /> {email}
                     </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ✅ Carousel (FULL IMAGE ALWAYS VISIBLE by default) */
+function FloorCarousel({
+    images,
+    title = "Available Floors",
+    intervalMs = 5000,
+    fit = "contain",
+}: {
+    images: { src: string; alt: string; label?: string }[];
+    title?: string;
+    intervalMs?: number;
+    fit?: "contain" | "cover";
+}) {
+    const [i, setI] = useState(0);
+    const [paused, setPaused] = useState(false);
+    const startX = React.useRef<number | null>(null);
+
+    const count = images.length;
+
+    useEffect(() => {
+        if (paused || count <= 1) return;
+        const t = window.setInterval(() => {
+            setI((p) => (p + 1) % count);
+        }, intervalMs);
+        return () => window.clearInterval(t);
+    }, [paused, count, intervalMs]);
+
+    const go = (next: number) => {
+        if (!count) return;
+        const n = (next + count) % count;
+        setI(n);
+    };
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        startX.current = e.touches[0].clientX;
+    };
+    const onTouchEnd = (e: React.TouchEvent) => {
+        if (startX.current == null) return;
+        const dx = e.changedTouches[0].clientX - startX.current;
+        startX.current = null;
+        if (Math.abs(dx) < 40) return;
+        if (dx < 0) go(i + 1);
+        else go(i - 1);
+    };
+
+    if (!images?.length) return null;
+
+    return (
+        <div
+            className="rounded-[28px] bg-white/55 ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden"
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+        >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 md:px-6 py-4 border-b border-black/5">
+                <div className="min-w-0">
+                    <p className="text-[11px] tracking-[0.18em] text-slate-500 font-semibold">GALLERY</p>
+                    <h4 className="mt-1 text-lg md:text-xl font-extrabold tracking-tight text-slate-900">{title}</h4>
+                </div>
+
+                {/* Controls */}
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => go(i - 1)}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/60 ring-1 ring-black/10 hover:bg-white/80 transition"
+                        aria-label="Previous"
+                    >
+                        <span className="text-slate-900 text-lg leading-none">‹</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => go(i + 1)}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/60 ring-1 ring-black/10 hover:bg-white/80 transition"
+                        aria-label="Next"
+                    >
+                        <span className="text-slate-900 text-lg leading-none">›</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Slides */}
+            <div className="relative h-[280px] md:h-[360px]">
+                {images.map((img, idx) => {
+                    const active = idx === i;
+                    return (
+                        <div
+                            key={img.src + idx}
+                            className={[
+                                "absolute inset-0",
+                                "transition-opacity duration-[900ms] ease-[cubic-bezier(.2,.9,.2,1)]",
+                                active ? "opacity-100" : "opacity-0",
+                            ].join(" ")}
+                            aria-hidden={!active}
+                        >
+                            {/* soft canvas for contain */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-white/45 via-[#FFF2C7]/28 to-white/30" />
+
+                            <img
+                                src={img.src}
+                                alt={img.alt}
+                                className={[
+                                    "absolute inset-0 h-full w-full",
+                                    fit === "contain" ? "object-contain p-6" : "object-cover",
+                                    "transition-transform duration-[1400ms] ease-[cubic-bezier(.2,.9,.2,1)]",
+                                    active ? "scale-[1.01]" : "scale-100",
+                                ].join(" ")}
+                            />
+
+                            {/* soft fade overlays */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7DE]/45 via-transparent to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/[0.06] via-transparent to-black/[0.06]" />
+
+                            {/* Label */}
+                            {img.label && (
+                                <div className="absolute left-5 bottom-5">
+                                    <div className="rounded-2xl bg-white/70 backdrop-blur-xl ring-1 ring-black/10 px-4 py-2">
+                                        <p className="text-xs font-semibold text-slate-800">{img.label}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+
+                {/* Dots */}
+                <div className="absolute bottom-4 right-5 flex items-center gap-2">
+                    {images.map((_, idx) => (
+                        <button
+                            key={idx}
+                            type="button"
+                            onClick={() => go(idx)}
+                            className={[
+                                "h-2.5 rounded-full transition-all",
+                                idx === i ? "w-8 bg-slate-900/80" : "w-2.5 bg-white/70 ring-1 ring-black/10 hover:bg-white/90",
+                            ].join(" ")}
+                            aria-label={`Go to slide ${idx + 1}`}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            {/* Footer strip */}
+            <div className="px-5 md:px-6 py-4 border-t border-black/5">
+                <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">SLIDE</span>
+                    <span className="font-semibold text-slate-900">
+                        {i + 1} / {count}
+                    </span>
                 </div>
             </div>
         </div>
