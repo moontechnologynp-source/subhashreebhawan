@@ -64,7 +64,9 @@ export default function Home() {
 
     // scroll reveal (no library)
     useEffect(() => {
-        const els = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+        const els = Array.from(
+            document.querySelectorAll<HTMLElement>("[data-reveal]")
+        );
         if (!els.length) return;
 
         els.forEach((el) => el.classList.add("reveal"));
@@ -78,7 +80,7 @@ export default function Home() {
                     }
                 });
             },
-            { threshold: 0.14 }
+            { threshold: 0.12 }
         );
 
         els.forEach((el) => io.observe(el));
@@ -86,26 +88,31 @@ export default function Home() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-[#f7f7f8] text-slate-900 antialiased">
-            {/* Minimal, Apple-like ambient */}
+        <div className="min-h-screen bg-[#FAF6EA] text-slate-900 antialiased">
+            {/* Apple/Stripe-ish ambient: clean + subtle */}
             <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-                <div className="absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-white blur-3xl" />
-                <div className="absolute inset-0 opacity-[0.04] [background-image:radial-gradient(#0f172a_1px,transparent_1px)] [background-size:44px_44px]" />
+                {/* warm base */}
+                <div className="absolute inset-0 bg-gradient-to-b from-[#FFF7DE] via-[#FAF6EA] to-[#FAF6EA]" />
+                {/* soft golden light */}
+                <div className="absolute -top-56 left-1/2 h-[760px] w-[760px] -translate-x-1/2 rounded-full bg-[#FFD27A]/25 blur-[90px] animate-floatSlow" />
+                <div className="absolute -bottom-64 right-[-220px] h-[720px] w-[720px] rounded-full bg-[#FFB35A]/18 blur-[110px] animate-floatSlow2" />
+                {/* subtle grain */}
+                <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(#0f172a_1px,transparent_1px)] [background-size:54px_54px]" />
             </div>
 
             {/* NAV */}
             <nav
                 className={[
                     "fixed top-0 left-0 right-0 z-40",
-                    "bg-white/80 backdrop-blur-xl",
+                    "bg-[#FFF7DE]/70 backdrop-blur-xl",
                     "border-b border-black/5",
-                    navShadow ? "shadow-[0_12px_40px_rgba(15,23,42,0.08)]" : "",
+                    navShadow ? "shadow-[0_14px_60px_rgba(15,23,42,0.10)]" : "",
                 ].join(" ")}
             >
-                <div className="max-w-7xl mx-auto px-6 py-4">
+                <Container className="py-4">
                     <div className="flex items-center justify-between">
-                        <a href="#hero" className="inline-flex items-center gap-3">
-                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-black/[0.04] ring-1 ring-black/10">
+                        <a href="#hero" className="inline-flex items-center gap-3 group">
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/55 ring-1 ring-black/10 group-hover:ring-black/20 transition">
                                 <Building2 className="h-4 w-4 text-slate-900" />
                             </span>
                             <span className="text-[15px] md:text-base font-semibold tracking-tight">
@@ -117,17 +124,15 @@ export default function Home() {
                         <div className="hidden md:flex items-center gap-1">
                             <NavDropdown label="Building A" items={buildingALinks} />
                             <NavDropdown label="Building B" items={buildingBLinks} />
+
                             <a
                                 href="#available-spaces"
-                                className="px-3 py-2 text-[12px] tracking-[0.18em] font-medium text-slate-600 hover:text-slate-900 rounded-2xl hover:bg-black/[0.04] transition"
+                                className="px-3 py-2 text-[12px] tracking-[0.18em] font-semibold text-slate-700 hover:text-slate-900 rounded-2xl hover:bg-black/[0.04] transition"
                             >
                                 AVAILABLE SPACES
                             </a>
 
-                            <a
-                                href="#available-spaces"
-                                className="ml-2 inline-flex items-center gap-2 rounded-2xl bg-slate-900 text-white px-4 py-2 text-sm font-semibold shadow-[0_18px_50px_rgba(2,6,23,0.18)] hover:opacity-95 transition"
-                            >
+                            <a href="#available-spaces" className="ml-2 btn-primary">
                                 Book a Viewing <ArrowRight className="h-4 w-4" />
                             </a>
                         </div>
@@ -135,7 +140,7 @@ export default function Home() {
                         {/* Mobile */}
                         <button
                             onClick={() => setMenuOpen((p) => !p)}
-                            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-black/[0.04] ring-1 ring-black/10 hover:bg-black/[0.06] transition"
+                            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/55 ring-1 ring-black/10 hover:bg-white/70 transition"
                             aria-label="Open menu"
                         >
                             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -144,39 +149,36 @@ export default function Home() {
 
                     {/* Mobile panel */}
                     {menuOpen && (
-                        <div className="md:hidden mt-4 rounded-3xl bg-white ring-1 ring-black/10 shadow-[0_26px_80px_rgba(15,23,42,0.12)] overflow-hidden">
+                        <div className="md:hidden mt-4 rounded-3xl bg-[#FFF7DE]/95 backdrop-blur-xl ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.14)] overflow-hidden animate-pop">
                             <div className="p-4 space-y-3">
                                 <MobileGroup title="Building A" items={buildingALinks} />
                                 <MobileGroup title="Building B" items={buildingBLinks} />
 
                                 <a
                                     href="#available-spaces"
-                                    className="block rounded-2xl bg-black/[0.04] ring-1 ring-black/10 px-4 py-3 text-sm font-semibold"
+                                    className="block rounded-2xl bg-black/[0.03] ring-1 ring-black/10 px-4 py-3 text-sm font-semibold"
                                 >
                                     Available Spaces
                                 </a>
 
-                                <a
-                                    href="#available-spaces"
-                                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 text-white px-4 py-3 text-sm font-semibold shadow-[0_18px_50px_rgba(2,6,23,0.18)]"
-                                >
+                                <a href="#available-spaces" className="btn-primary w-full justify-center">
                                     Book a Viewing <ArrowRight className="h-4 w-4" />
                                 </a>
                             </div>
                         </div>
                     )}
-                </div>
+                </Container>
             </nav>
 
             {/* HERO */}
-            <section id="hero" className="relative pt-28 pb-16">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid lg:grid-cols-12 gap-10 items-start">
+            <section id="hero" className="relative pt-28 md:pt-32 pb-14 md:pb-20">
+                <Container>
+                    <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-start">
                         {/* Copy */}
                         <div className="lg:col-span-7">
                             <div
                                 data-reveal
-                                className="inline-flex items-center gap-2 rounded-full bg-black/[0.04] ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700"
+                                className="inline-flex items-center gap-2 rounded-full bg-white/55 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700"
                             >
                                 <Star className="h-4 w-4 text-slate-900" />
                                 Premium commercial complex
@@ -184,39 +186,33 @@ export default function Home() {
 
                             <h1
                                 data-reveal
-                                className="mt-6 text-[44px] leading-[1.06] md:text-[64px] md:leading-[1.03] font-extrabold tracking-tight"
+                                className="mt-6 text-[42px] leading-[1.06] md:text-[64px] md:leading-[1.02] font-extrabold tracking-tight"
                             >
                                 Built for modern brands.
-                                <span className="block text-slate-500 font-extrabold">
+                                <span className="block text-slate-600 font-extrabold">
                                     Designed to feel premium.
                                 </span>
                             </h1>
 
                             <p
                                 data-reveal
-                                className="mt-6 text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl"
+                                className="mt-5 md:mt-6 text-lg md:text-xl text-slate-700 leading-relaxed max-w-2xl"
                             >
-                                Subha Shree Bhawan in Baluwatar offers a refined, professional environment for offices,
-                                premium services, and growth-ready businesses.
+                                Subha Shree Bhawan in Baluwatar offers a refined, professional environment for
+                                offices, premium services, and growth-ready businesses.
                             </p>
 
-                            <div data-reveal className="mt-10 flex flex-wrap gap-3">
-                                <a
-                                    href="#available-spaces"
-                                    className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 text-white px-6 py-3 text-sm font-semibold shadow-[0_18px_50px_rgba(2,6,23,0.18)] hover:opacity-95 transition"
-                                >
+                            <div data-reveal className="mt-9 md:mt-10 flex flex-wrap gap-3">
+                                <a href="#available-spaces" className="btn-primary">
                                     View Available Spaces <ArrowRight className="h-4 w-4" />
                                 </a>
 
-                                <a
-                                    href="#building-a-ground"
-                                    className="inline-flex items-center gap-2 rounded-2xl bg-white ring-1 ring-black/10 px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-black/[0.02] transition"
-                                >
+                                <a href="#building-a-ground" className="btn-secondary">
                                     Explore Floors <ChevronDown className="h-4 w-4" />
                                 </a>
                             </div>
 
-                            <div data-reveal className="mt-12 grid sm:grid-cols-3 gap-3 max-w-2xl">
+                            <div data-reveal className="mt-11 md:mt-12 grid sm:grid-cols-3 gap-3 max-w-2xl">
                                 <InfoTile title="Buildings" value="2 connected" icon={<Building2 className="h-4 w-4" />} />
                                 <InfoTile title="Location" value="Baluwatar" icon={<MapPin className="h-4 w-4" />} />
                                 <InfoTile title="Positioning" value="Premium" icon={<Star className="h-4 w-4" />} />
@@ -225,18 +221,18 @@ export default function Home() {
 
                         {/* Hero visual */}
                         <div className="lg:col-span-5" data-reveal>
-                            <div className="rounded-[28px] bg-white ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.12)] overflow-hidden">
-                                <div className="relative h-[420px]">
+                            <MediaCard>
+                                <div className="relative h-[410px] md:h-[440px]">
                                     <img
                                         src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=2400"
                                         alt="Subha Shree Bhawan"
                                         className="absolute inset-0 h-full w-full object-cover"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7DE] via-[#FFF7DE]/20 to-transparent" />
 
                                     <div className="absolute left-5 right-5 bottom-5">
-                                        <div className="rounded-2xl bg-white/80 backdrop-blur-xl ring-1 ring-black/10 p-4">
-                                            <p className="text-xs tracking-[0.18em] text-slate-500">CONTACT</p>
+                                        <div className="rounded-2xl bg-white/70 backdrop-blur-xl ring-1 ring-black/10 p-4">
+                                            <p className="text-[11px] tracking-[0.18em] text-slate-500 font-semibold">CONTACT</p>
                                             <div className="mt-2 grid gap-1 text-sm text-slate-700">
                                                 <div className="flex items-center gap-2">
                                                     <Phone className="h-4 w-4 text-slate-400" /> +977 980-8100067
@@ -257,271 +253,248 @@ export default function Home() {
                                         <MiniStat title="Floors" value="Office-ready" icon={<Laptop className="h-4 w-4" />} />
                                     </div>
                                 </div>
-                            </div>
+                            </MediaCard>
                         </div>
                     </div>
 
-                    <div className="mt-14 flex justify-center" data-reveal>
-                        <div className="h-10 w-[2px] bg-gradient-to-b from-black/20 to-transparent" />
+                    <div className="mt-14 md:mt-16 flex justify-center" data-reveal>
+                        <div className="h-12 w-[2px] bg-gradient-to-b from-black/20 to-transparent" />
                     </div>
-                </div>
+                </Container>
             </section>
 
             {/* BUILDING A */}
             <SectionHeader title="Building A" subtitle="Seven floors of excellence" />
 
-            <section id="building-a-ground" className="py-16">
-                <div className="max-w-7xl mx-auto px-6">
-                    <TwoCol
-                        left={
-                            <>
-                                <Kicker text="GROUND FLOOR • BUILDING A" />
-                                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
-                                    Tesla Clinic & Himalayan Java
-                                </h3>
+            <Section id="building-a-ground">
+                <TwoCol
+                    left={
+                        <>
+                            <Kicker text="GROUND FLOOR • BUILDING A" />
+                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                                Tesla Clinic & Himalayan Java
+                            </h3>
 
-                                <div data-reveal className="mt-8 space-y-4">
-                                    <FeatureRow
-                                        icon={<Stethoscope className="h-5 w-5" />}
-                                        title="Tesla Clinic"
-                                        desc="Professional healthcare services with modern facilities and experienced practitioners."
-                                    />
-                                    <FeatureRow
-                                        icon={<Coffee className="h-5 w-5" />}
-                                        title="Himalayan Java"
-                                        desc="Premium coffee experience with warm Nepali hospitality."
-                                    />
-                                </div>
-                            </>
-                        }
-                        right={
-                            <ImageCard
-                                src="/javatesla.png"
-                                alt="Tesla Clinic & Himalayan Java"
-                                footerLeft="FACILITIES"
-                                footerRight="Clinic + Café"
-                            />
-                        }
-                    />
-                </div>
-            </section>
+                            <div data-reveal className="space-y-4">
+                                <FeatureRow
+                                    icon={<Stethoscope className="h-5 w-5" />}
+                                    title="Tesla Clinic"
+                                    desc="Professional healthcare services with modern facilities and experienced practitioners."
+                                />
+                                <FeatureRow
+                                    icon={<Coffee className="h-5 w-5" />}
+                                    title="Himalayan Java"
+                                    desc="Premium coffee experience with warm Nepali hospitality."
+                                />
+                            </div>
+                        </>
+                    }
+                    right={
+                        <ImageCard
+                            src="/javatesla.png"
+                            alt="Tesla Clinic & Himalayan Java"
+                            footerLeft="FACILITIES"
+                            footerRight="Clinic + Café"
+                        />
+                    }
+                />
+            </Section>
 
-            <section id="building-a-1st" className="py-16 border-y border-black/5 bg-white">
-                <div className="max-w-7xl mx-auto px-6">
-                    <TwoCol
-                        left={<ImageCard src="/vairav.png" alt="Vairav Tech" footerLeft="FLOOR AREA" footerRight="3,500 sq. ft." />}
-                        right={
-                            <>
-                                <Kicker text="1ST FLOOR • BUILDING A" />
-                                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
-                                    Vairav Tech
-                                </h3>
-                                <div data-reveal className="mt-8">
-                                    <FeatureRow
-                                        icon={<ShieldCheck className="h-5 w-5" />}
-                                        title="Security Operations Center"
-                                        desc="Modern monitoring and security services for organizations and enterprises."
-                                    />
-                                </div>
-                            </>
-                        }
-                    />
-                </div>
-            </section>
+            <Section id="building-a-1st" tone="soft">
+                <TwoCol
+                    reverse
+                    left={
+                        <>
+                            <Kicker text="1ST FLOOR • BUILDING A" />
+                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                                Vairav Tech
+                            </h3>
+                            <div data-reveal>
+                                <FeatureRow
+                                    icon={<ShieldCheck className="h-5 w-5" />}
+                                    title="Security Operations Center"
+                                    desc="Modern monitoring and security services for organizations and enterprises."
+                                />
+                            </div>
+                        </>
+                    }
+                    right={
+                        <ImageCard
+                            src="/vairav.png"
+                            alt="Vairav Tech"
+                            footerLeft="FLOOR AREA"
+                            footerRight="3,500 sq. ft."
+                        />
+                    }
+                />
+            </Section>
 
-            <section id="building-a-2nd" className="py-16">
-                <div className="max-w-7xl mx-auto px-6">
-                    <VacantFloorCard
-                        badge="AVAILABLE"
-                        floor="2ND FLOOR • BUILDING A"
-                        title="Prime Office Space"
-                        image="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800"
-                        area="3,500 sq. ft."
-                        phone="+977 980-8100067"
-                    />
-                </div>
-            </section>
+            <Section id="building-a-2nd">
+                <VacantFloorCard
+                    badge="AVAILABLE"
+                    floor="2ND FLOOR • BUILDING A"
+                    title="Prime Office Space"
+                    image="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1800"
+                    area="3,500 sq. ft."
+                    phone="+977 980-8100067"
+                />
+            </Section>
 
-            <section id="building-a-3rd" className="py-16 border-y border-black/5 bg-white">
-                <div className="max-w-7xl mx-auto px-6">
-                    <VacantFloorCard
-                        badge="AVAILABLE"
-                        floor="3RD FLOOR • BUILDING A"
-                        title="Prime Office Space"
-                        image="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1800"
-                        area="3,500 sq. ft."
-                        phone="+977 980-8100067"
-                    />
-                </div>
-            </section>
+            <Section id="building-a-3rd" tone="soft">
+                <VacantFloorCard
+                    badge="AVAILABLE"
+                    floor="3RD FLOOR • BUILDING A"
+                    title="Prime Office Space"
+                    image="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1800"
+                    area="3,500 sq. ft."
+                    phone="+977 980-8100067"
+                />
+            </Section>
 
-            <section id="building-a-gym" className="py-16">
-                <div className="max-w-7xl mx-auto px-6 text-center">
+            <Section id="building-a-gym">
+                <div className="text-center">
                     <Kicker text="4TH, 5TH AND 6TH FLOORS • BUILDING A" />
                     <h3 data-reveal className="mt-6 text-4xl md:text-5xl font-extrabold tracking-tight">
                         Premium Fitness Center
-                        <span className="block text-slate-500">Coming soon</span>
+                        <span className="block text-slate-600">Coming soon</span>
                     </h3>
-                    <p data-reveal className="mt-4 text-slate-600">
-                        Three floors of wellness.
-                    </p>
+                    <p data-reveal className="mt-3 text-slate-700">Three floors of wellness.</p>
                 </div>
-            </section>
+            </Section>
 
             {/* AVAILABLE SPACES */}
-            <section id="available-spaces" className="py-16 bg-white border-y border-black/5">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-12">
-                        <div className="inline-flex items-center gap-2 rounded-full bg-black/[0.04] ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
-                            Leasing
+            <Section id="available-spaces" tone="soft">
+                <div className="text-center mb-10 md:mb-12">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white/60 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
+                        Leasing
+                    </div>
+                    <h2 data-reveal className="mt-5 text-4xl md:text-5xl font-extrabold tracking-tight">
+                        Available Spaces
+                    </h2>
+                    <p data-reveal className="mt-3 text-lg text-slate-700">
+                        Premium commercial floors ready for immediate occupancy.
+                    </p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-5 max-w-6xl mx-auto" data-reveal>
+                    <SpaceCard
+                        building="BUILDING A"
+                        floor="2nd Floor"
+                        title="Prime Office Space"
+                        area="3,500 sq. ft."
+                        phone="+977 9808100067"
+                        email="buddhalife.np@gmail.com"
+                        tag="AVAILABLE NOW"
+                    />
+                    <SpaceCard
+                        building="BUILDING A"
+                        floor="3rd Floor"
+                        title="Prime Office Space"
+                        area="3,500 sq. ft."
+                        phone="+977 9808100067"
+                        email="buddhalife.np@gmail.com"
+                    />
+                </div>
+
+                <div className="mt-9 md:mt-10 max-w-6xl mx-auto" data-reveal>
+                    <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div>
+                            <h4 className="text-xl md:text-2xl font-extrabold tracking-tight">Request a viewing</h4>
+                            <p className="mt-2 text-slate-700">Get floor plans and leasing terms. We’ll respond quickly.</p>
                         </div>
-                        <h2 data-reveal className="mt-5 text-4xl md:text-5xl font-extrabold tracking-tight">
-                            Available Spaces
-                        </h2>
-                        <p data-reveal className="mt-3 text-lg text-slate-600">
-                            Premium commercial floors ready for immediate occupancy.
-                        </p>
-                    </div>
 
-                    <div className="grid md:grid-cols-2 gap-5 max-w-6xl mx-auto" data-reveal>
-                        <SpaceCard
-                            building="BUILDING A"
-                            floor="2nd Floor"
-                            title="Prime Office Space"
-                            area="3,500 sq. ft."
-                            phone="+977 9808100067"
-                            email="buddhalife.np@gmail.com"
-                            tag="AVAILABLE NOW"
-                        />
-                        <SpaceCard
-                            building="BUILDING A"
-                            floor="3rd Floor"
-                            title="Prime Office Space"
-                            area="3,500 sq. ft."
-                            phone="+977 9808100067"
-                            email="buddhalife.np@gmail.com"
-                        />
-                    </div>
-
-                    {/* Apple-like CTA strip */}
-                    <div className="mt-10 max-w-6xl mx-auto" data-reveal>
-                        <div className="rounded-[28px] bg-[#f7f7f8] ring-1 ring-black/10 p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                            <div>
-                                <h4 className="text-xl md:text-2xl font-extrabold tracking-tight">Request a viewing</h4>
-                                <p className="mt-2 text-slate-600">
-                                    Get floor plans and leasing terms. We’ll respond quickly.
-                                </p>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <a
-                                    href="#available-spaces"
-                                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/10 px-5 py-3 text-sm font-semibold hover:bg-black/[0.02] transition"
-                                >
-                                    Call <Phone className="h-4 w-4" />
-                                </a>
-                                <a
-                                    href="#available-spaces"
-                                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 text-white px-5 py-3 text-sm font-semibold shadow-[0_18px_50px_rgba(2,6,23,0.18)] hover:opacity-95 transition"
-                                >
-                                    Email <Mail className="h-4 w-4" />
-                                </a>
-                            </div>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <a href="tel:+9779808100067" className="btn-secondary justify-center">
+                                Call <Phone className="h-4 w-4" />
+                            </a>
+                            <a href="mailto:buddhalife.np@gmail.com" className="btn-primary justify-center">
+                                Email <Mail className="h-4 w-4" />
+                            </a>
                         </div>
                     </div>
                 </div>
-            </section>
+            </Section>
 
             {/* BUILDING B */}
             <SectionHeader title="Building B" subtitle="Connected excellence" />
 
-            <section id="building-b-ground" className="py-16">
-                <div className="max-w-7xl mx-auto px-6">
-                    <TwoCol
-                        left={
-                            <>
-                                <Kicker text="GROUND FLOOR • BUILDING B" />
-                                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
-                                    Elements Restaurant
-                                </h3>
-                                <div data-reveal className="mt-8">
-                                    <FeatureRow
-                                        icon={<Utensils className="h-5 w-5" />}
-                                        title="Fine Dining"
-                                        desc="Contemporary Nepali and international cuisine crafted with premium service."
-                                    />
-                                </div>
-                            </>
-                        }
-                        right={
-                            <ImageCard
-                                src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800"
-                                alt="Elements Restaurant"
-                            />
-                        }
-                    />
-                </div>
-            </section>
+            <Section id="building-b-ground">
+                <TwoCol
+                    left={
+                        <>
+                            <Kicker text="GROUND FLOOR • BUILDING B" />
+                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                                Elements Restaurant
+                            </h3>
+                            <div data-reveal>
+                                <FeatureRow
+                                    icon={<Utensils className="h-5 w-5" />}
+                                    title="Fine Dining"
+                                    desc="Contemporary Nepali and international cuisine crafted with premium service."
+                                />
+                            </div>
+                        </>
+                    }
+                    right={
+                        <ImageCard
+                            src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800"
+                            alt="Elements Restaurant"
+                        />
+                    }
+                />
+            </Section>
 
-            <section id="building-b-1st" className="py-16 bg-white border-y border-black/5">
-                <div className="max-w-7xl mx-auto px-6">
-                    <TwoCol
-                        left={<ImageCard src="/alogo.png" alt="Swopna Chitra" />}
-                        right={
-                            <>
-                                <Kicker text="1ST FLOOR • BUILDING B" />
-                                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
-                                    Swopna Chitra
-                                </h3>
-                                <div data-reveal className="mt-8">
-                                    <FeatureRow
-                                        icon={<Film className="h-5 w-5" />}
-                                        title="Production House"
-                                        desc="Creative media production supporting high-quality storytelling."
-                                    />
-                                </div>
-                            </>
-                        }
-                    />
-                </div>
-            </section>
+            <Section id="building-b-1st" tone="soft">
+                <TwoCol
+                    reverse
+                    left={
+                        <>
+                            <Kicker text="1ST FLOOR • BUILDING B" />
+                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                                Swopna Chitra
+                            </h3>
+                            <div data-reveal>
+                                <FeatureRow
+                                    icon={<Film className="h-5 w-5" />}
+                                    title="Production House"
+                                    desc="Creative media production supporting high-quality storytelling."
+                                />
+                            </div>
+                        </>
+                    }
+                    right={<ImageCard src="/alogo.png" alt="Swopna Chitra" />}
+                />
+            </Section>
 
-            <section id="building-b-2nd" className="py-16">
-                <div className="max-w-7xl mx-auto px-6">
-                    <TwoCol
-                        left={
-                            <>
-                                <Kicker text="2ND FLOOR • BUILDING B" />
-                                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
-                                    Moon Technology
-                                </h3>
-                                <div data-reveal className="mt-8">
-                                    <FeatureRow
-                                        icon={<Laptop className="h-5 w-5" />}
-                                        title="IT Solutions"
-                                        desc="Software, cloud and technology services for modern organizations."
-                                    />
-                                </div>
-                            </>
-                        }
-                        right={
-                            <ImageCard
-                                src="/moon.jpeg"
-                                alt="Moon Technology"
-                            />
-                        }
-                    />
-                </div>
-            </section>
+            <Section id="building-b-2nd">
+                <TwoCol
+                    left={
+                        <>
+                            <Kicker text="2ND FLOOR • BUILDING B" />
+                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                                Moon Technology
+                            </h3>
+                            <div data-reveal>
+                                <FeatureRow
+                                    icon={<Laptop className="h-5 w-5" />}
+                                    title="IT Solutions"
+                                    desc="Software, cloud and technology services for modern organizations."
+                                />
+                            </div>
+                        </>
+                    }
+                    right={<ImageCard src="/moon.jpeg" alt="Moon Technology" />}
+                />
+            </Section>
 
             {/* FOOTER */}
-            <footer className="py-14">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="rounded-[28px] bg-white ring-1 ring-black/10 p-8">
+            <footer className="py-12 md:py-14">
+                <Container>
+                    <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 p-7 md:p-8">
                         <div className="grid md:grid-cols-3 gap-10">
                             <div>
                                 <h3 className="text-xl font-extrabold tracking-tight">Subha Shree Bhawan</h3>
-                                <p className="mt-3 text-slate-600 leading-relaxed">
+                                <p className="mt-3 text-slate-700 leading-relaxed">
                                     A premium commercial destination offering world-class business spaces and amenities.
                                 </p>
                             </div>
@@ -560,14 +533,115 @@ export default function Home() {
                             &copy; 2026 Subha Shree Bhawan. All rights reserved.
                         </div>
                     </div>
-                </div>
+                </Container>
             </footer>
 
+            {/* Animations + buttons + soft section fade */}
             <style>{`
         html { scroll-behavior: smooth; }
-        .reveal { opacity: 0; transform: translateY(14px); transition: opacity 650ms ease, transform 650ms ease; }
-        .reveal-in { opacity: 1; transform: translateY(0); }
+
+        /* reveal: Stripe-ish */
+        .reveal { 
+          opacity: 0; 
+          transform: translateY(16px); 
+          filter: blur(6px);
+          transition: opacity 900ms cubic-bezier(.2,.9,.2,1), transform 900ms cubic-bezier(.2,.9,.2,1), filter 900ms cubic-bezier(.2,.9,.2,1);
+        }
+        .reveal-in { opacity: 1; transform: translateY(0); filter: blur(0); }
+
+        /* float bg */
+        @keyframes floatSlow {
+          0%, 100% { transform: translate3d(-50%,0,0) scale(1); }
+          50% { transform: translate3d(-50%,16px,0) scale(1.02); }
+        }
+        @keyframes floatSlow2 {
+          0%, 100% { transform: translate3d(0,0,0) scale(1); }
+          50% { transform: translate3d(0,18px,0) scale(1.03); }
+        }
+        .animate-floatSlow { animation: floatSlow 10s ease-in-out infinite; }
+        .animate-floatSlow2 { animation: floatSlow2 11s ease-in-out infinite; }
+
+        /* mobile menu pop */
+        @keyframes pop {
+          0% { opacity: 0; transform: translateY(-8px) scale(.98); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-pop { animation: pop 220ms ease-out; }
+
+        /* buttons: minimal, crisp */
+        .btn-primary{
+          display:inline-flex; align-items:center; gap:10px;
+          border-radius: 18px;
+          padding: 12px 20px;
+          background: #0f172a;
+          color: white;
+          font-weight: 800;
+          font-size: 14px;
+          box-shadow: 0 18px 50px rgba(2,6,23,.18);
+          transition: transform 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
+        }
+        .btn-primary:hover{ transform: translateY(-1px); opacity: .96; box-shadow: 0 22px 70px rgba(2,6,23,.22); }
+
+        .btn-secondary{
+          display:inline-flex; align-items:center; gap:10px;
+          border-radius: 18px;
+          padding: 12px 20px;
+          background: rgba(255,255,255,.55);
+          border: 1px solid rgba(15,23,42,.12);
+          color: #0f172a;
+          font-weight: 800;
+          font-size: 14px;
+          transition: transform 180ms ease, background 180ms ease;
+          backdrop-filter: blur(10px);
+        }
+        .btn-secondary:hover{ transform: translateY(-1px); background: rgba(255,255,255,.70); }
       `}</style>
+        </div>
+    );
+}
+
+/* ================= Layout Helpers ================= */
+
+function Container({
+    children,
+    className = "",
+}: {
+    children: React.ReactNode;
+    className?: string;
+}) {
+    return <div className={`max-w-7xl mx-auto px-5 sm:px-6 ${className}`}>{children}</div>;
+}
+
+/**
+ * SOFT FADE SECTION:
+ * - No "dirty pillow" blocks
+ * - Just a gentle glow that blends into the page
+ */
+function Section({
+    id,
+    tone = "base",
+    children,
+}: {
+    id?: string;
+    tone?: "base" | "soft";
+    children: React.ReactNode;
+}) {
+    return (
+        <section id={id} className="relative py-14 md:py-20">
+            {tone === "soft" && (
+                <div className="absolute inset-0 -z-10">
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FFF2C7]/28 to-transparent" />
+                </div>
+            )}
+            <Container>{children}</Container>
+        </section>
+    );
+}
+
+function MediaCard({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden">
+            {children}
         </div>
     );
 }
@@ -577,16 +651,16 @@ export default function Home() {
 function NavDropdown({ label, items }: { label: string; items: LinkItem[] }) {
     return (
         <div className="relative group">
-            <button className="px-3 py-2 text-[12px] tracking-[0.18em] font-medium text-slate-600 hover:text-slate-900 rounded-2xl hover:bg-black/[0.04] transition inline-flex items-center gap-2">
+            <button className="px-3 py-2 text-[12px] tracking-[0.18em] font-semibold text-slate-700 hover:text-slate-900 rounded-2xl hover:bg-black/[0.04] transition inline-flex items-center gap-2">
                 {label} <ChevronDown className="h-4 w-4 opacity-70" />
             </button>
 
-            <div className="absolute top-full left-0 mt-2 w-64 rounded-3xl bg-white ring-1 ring-black/10 shadow-[0_26px_80px_rgba(15,23,42,0.12)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
+            <div className="absolute top-full left-0 mt-2 w-64 rounded-3xl bg-white/85 backdrop-blur-xl ring-1 ring-black/10 shadow-[0_26px_80px_rgba(15,23,42,0.14)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
                 {items.map((it, i) => (
                     <a
                         key={it.href}
                         href={it.href}
-                        className={`block px-5 py-3 text-sm text-slate-700 hover:bg-black/[0.03] transition ${i !== items.length - 1 ? "border-b border-black/5" : ""
+                        className={`block px-5 py-3 text-sm text-slate-800 hover:bg-black/[0.03] transition ${i !== items.length - 1 ? "border-b border-black/5" : ""
                             }`}
                     >
                         {it.label}
@@ -599,7 +673,7 @@ function NavDropdown({ label, items }: { label: string; items: LinkItem[] }) {
 
 function MobileGroup({ title, items }: { title: string; items: LinkItem[] }) {
     return (
-        <div className="rounded-2xl ring-1 ring-black/10 overflow-hidden bg-white">
+        <div className="rounded-2xl ring-1 ring-black/10 overflow-hidden bg-white/70 backdrop-blur-xl">
             <div className="px-4 py-3 bg-black/[0.03] text-[12px] tracking-[0.18em] text-slate-600 font-semibold">
                 {title}
             </div>
@@ -608,7 +682,7 @@ function MobileGroup({ title, items }: { title: string; items: LinkItem[] }) {
                     <a
                         key={it.href}
                         href={it.href}
-                        className={`block px-4 py-3 text-sm text-slate-700 hover:bg-black/[0.03] transition ${idx !== items.length - 1 ? "border-b border-black/5" : ""
+                        className={`block px-4 py-3 text-sm text-slate-800 hover:bg-black/[0.03] transition ${idx !== items.length - 1 ? "border-b border-black/5" : ""
                             }`}
                     >
                         {it.label}
@@ -621,14 +695,17 @@ function MobileGroup({ title, items }: { title: string; items: LinkItem[] }) {
 
 function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
     return (
-        <div className="py-14">
-            <div className="max-w-7xl mx-auto px-6 text-center">
-                <h2 data-reveal className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                    {title}
-                </h2>
-                <p data-reveal className="mt-2 text-sm tracking-[0.18em] text-slate-500">
-                    {subtitle.toUpperCase()}
-                </p>
+        <div className="py-16 md:py-20">
+            <div className="max-w-7xl mx-auto px-5 sm:px-6">
+                <div className="text-center">
+                    <h2 data-reveal className="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900">
+                        {title}
+                    </h2>
+                    <p data-reveal className="mt-3 text-xs md:text-sm tracking-[0.22em] text-slate-500">
+                        {subtitle.toUpperCase()}
+                    </p>
+                    <div className="mx-auto mt-7 h-[2px] w-16 rounded-full bg-black/10" />
+                </div>
             </div>
         </div>
     );
@@ -636,21 +713,38 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle: string })
 
 function Kicker({ text }: { text: string }) {
     return (
-        <div className="inline-flex items-center rounded-full bg-black/[0.04] ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
+        <div className="inline-flex items-center rounded-full bg-white/55 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
             {text}
         </div>
     );
 }
 
-function TwoCol({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
-    return <div className="grid md:grid-cols-2 gap-10 items-center">{left}{right}</div>;
+function TwoCol({
+    left,
+    right,
+    reverse = false,
+}: {
+    left: React.ReactNode;
+    right: React.ReactNode;
+    reverse?: boolean;
+}) {
+    return (
+        <div className="grid items-center gap-10 md:gap-12 lg:grid-cols-12">
+            <div className={["lg:col-span-6", reverse ? "lg:order-2" : "lg:order-1"].join(" ")}>
+                <div className="space-y-6">{left}</div>
+            </div>
+            <div className={["lg:col-span-6", reverse ? "lg:order-1" : "lg:order-2"].join(" ")}>
+                {right}
+            </div>
+        </div>
+    );
 }
 
 function InfoTile({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
     return (
-        <div className="rounded-3xl bg-white ring-1 ring-black/10 px-4 py-4 shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
+        <div className="rounded-3xl bg-white/55 ring-1 ring-black/10 px-4 py-4 shadow-[0_14px_40px_rgba(15,23,42,0.06)] hover:-translate-y-[2px] hover:shadow-[0_22px_70px_rgba(15,23,42,0.10)] transition">
             <div className="flex items-center gap-2 text-xs tracking-[0.18em] text-slate-500 font-semibold">
-                <span className="text-slate-400">{icon}</span> {title.toUpperCase()}
+                <span className="text-slate-500">{icon}</span> {title.toUpperCase()}
             </div>
             <div className="mt-2 text-base font-semibold text-slate-900">{value}</div>
         </div>
@@ -659,7 +753,7 @@ function InfoTile({ title, value, icon }: { title: string; value: string; icon: 
 
 function MiniStat({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
     return (
-        <div className="rounded-2xl bg-black/[0.03] ring-1 ring-black/10 p-3">
+        <div className="rounded-2xl bg-black/[0.03] ring-1 ring-black/10 p-3 hover:-translate-y-[1px] transition">
             <div className="flex items-center justify-between">
                 <p className="text-xs tracking-[0.18em] text-slate-500 font-semibold">{title.toUpperCase()}</p>
                 <span className="text-slate-500">{icon}</span>
@@ -681,23 +775,21 @@ function ImageCard({
     footerRight?: string;
 }) {
     return (
-        <div className="rounded-[28px] bg-white ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden">
+        <MediaCard>
             <div className="relative">
                 <img src={src} alt={alt} className="w-full h-80 object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7DE]/35 via-transparent to-transparent" />
             </div>
 
             {(footerLeft || footerRight) && (
                 <div className="p-5 border-t border-black/5">
                     <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
-                            {footerLeft}
-                        </span>
+                        <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">{footerLeft}</span>
                         <span className="font-semibold text-slate-900">{footerRight}</span>
                     </div>
                 </div>
             )}
-        </div>
+        </MediaCard>
     );
 }
 
@@ -711,13 +803,13 @@ function FeatureRow({
     desc: string;
 }) {
     return (
-        <div className="flex gap-4 rounded-3xl bg-white ring-1 ring-black/10 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)] hover:shadow-[0_22px_70px_rgba(15,23,42,0.08)] transition">
+        <div className="flex gap-4 rounded-3xl bg-white/55 ring-1 ring-black/10 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)] hover:-translate-y-[2px] hover:shadow-[0_26px_85px_rgba(15,23,42,0.10)] transition">
             <div className="shrink-0 rounded-2xl bg-black/[0.03] ring-1 ring-black/10 p-3 text-slate-700">
                 {icon}
             </div>
-            <div>
+            <div className="min-w-0">
                 <h4 className="font-semibold text-slate-900">{title}</h4>
-                <p className="mt-1 text-sm text-slate-600 leading-relaxed">{desc}</p>
+                <p className="mt-1 text-sm text-slate-700 leading-relaxed">{desc}</p>
             </div>
         </div>
     );
@@ -743,15 +835,15 @@ function VacantFloorCard({
             <div>
                 <Kicker text={floor} />
 
-                <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em]">
+                <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em] shadow-[0_18px_50px_rgba(2,6,23,0.16)]">
                     {badge}
                 </div>
 
-                <h3 data-reveal className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight">
+                <h3 data-reveal className="mt-6 text-3xl md:text-4xl font-extrabold tracking-tight">
                     {title}
                 </h3>
 
-                <div className="mt-6 rounded-3xl bg-white ring-1 ring-black/10 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)]">
+                <div className="mt-7 rounded-3xl bg-white/55 ring-1 ring-black/10 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)]">
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">FLOOR AREA</span>
                         <span className="font-semibold">{area}</span>
@@ -787,16 +879,16 @@ function SpaceCard({
     tag?: string;
 }) {
     return (
-        <div className="relative rounded-[28px] bg-white ring-1 ring-black/10 p-7 shadow-[0_20px_70px_rgba(15,23,42,0.08)] hover:shadow-[0_28px_90px_rgba(15,23,42,0.10)] transition">
+        <div className="relative rounded-[28px] bg-white/55 ring-1 ring-black/10 p-7 shadow-[0_20px_70px_rgba(15,23,42,0.08)] hover:-translate-y-[2px] hover:shadow-[0_30px_95px_rgba(15,23,42,0.12)] transition">
             {tag && (
-                <div className="absolute top-4 right-4 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em]">
+                <div className="absolute top-4 right-4 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em] shadow-[0_18px_50px_rgba(2,6,23,0.16)]">
                     {tag}
                 </div>
             )}
 
             <p className="text-xs tracking-[0.18em] text-slate-500 font-semibold">{building}</p>
             <h3 className="mt-3 text-2xl font-extrabold tracking-tight">{floor}</h3>
-            <p className="mt-2 text-slate-600">{title}</p>
+            <p className="mt-2 text-slate-700">{title}</p>
 
             <div className="mt-6 space-y-3 text-sm">
                 <div className="flex items-center justify-between border-t border-black/5 pt-4">
@@ -805,11 +897,11 @@ function SpaceCard({
                 </div>
 
                 <div className="flex flex-col gap-2 pt-3">
-                    <div className="inline-flex items-center gap-2 text-slate-700">
-                        <Phone className="h-4 w-4 text-slate-400" /> {phone}
+                    <div className="inline-flex items-center gap-2 text-slate-800">
+                        <Phone className="h-4 w-4 text-slate-500" /> {phone}
                     </div>
-                    <div className="inline-flex items-center gap-2 text-slate-700">
-                        <Mail className="h-4 w-4 text-slate-400" /> {email}
+                    <div className="inline-flex items-center gap-2 text-slate-800">
+                        <Mail className="h-4 w-4 text-slate-500" /> {email}
                     </div>
                 </div>
             </div>
