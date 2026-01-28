@@ -1,10 +1,3 @@
-// main (UPDATED)
-// ✅ Changes:
-// 1) "Available Spaces" section moved to the very bottom (just before footer)
-// 2) Added CTA links on 2nd & 3rd floor sections to jump to #available-spaces
-// 3) Carousel images now show the FULL photo (no zoom/crop) while still feeling “full screen”
-//    using a blurred cover background + a sharp contain foreground (no empty ugly spaces)
-
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Building2,
@@ -168,12 +161,12 @@ export default function Home() {
                     navShadow ? "shadow-[0_14px_60px_rgba(15,23,42,0.10)]" : "",
                 ].join(" ")}
             >
-                <Container className="py-4">
+                <Container className="">
                     <div className="flex items-center justify-between">
                         <a href="#hero" className="inline-flex items-center gap-3 group">
-                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/55 ring-1 ring-black/10 group-hover:ring-black/20 transition">
-                                <Building2 className="h-4 w-4 text-slate-900" />
-                            </span>
+                            {/* <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/55 ring-1 ring-black/10 group-hover:ring-black/20 transition"> */}
+                            <img src="/subhashree.png" alt="Subha Shree Bhawan Logo" className="h-20 w-20 overflow-hidden pb-2" />
+                            {/* </span> */}
                             <span className="text-[15px] md:text-base font-semibold tracking-tight">
                                 Subha Shree Bhawan
                             </span>
@@ -625,6 +618,7 @@ export default function Home() {
                                 <p className="mt-3 text-slate-700 leading-relaxed">
                                     A premium commercial destination offering world-class business spaces and amenities.
                                 </p>
+                                <img src="/subhashree.png" alt="Subha Shree Bhawan Logo" className="h-24 w-24 overflow-hidden" />
                             </div>
 
                             <div>
