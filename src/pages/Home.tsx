@@ -28,7 +28,7 @@ export default function Home() {
         const v = heroVideoRef.current;
         if (!v) return;
         try {
-            v.currentTime = 1; // start from 1s
+            v.currentTime = 1;
             await v.play();
         } catch { }
     };
@@ -37,7 +37,7 @@ export default function Home() {
         const v = heroVideoRef.current;
         if (!v) return;
         v.pause();
-        v.currentTime = 2; // stay at 2s mark when paused
+        v.currentTime = 2;
     };
 
     const buildingALinks: LinkItem[] = useMemo(
@@ -60,7 +60,6 @@ export default function Home() {
         []
     );
 
-    // subtle nav elevation on scroll
     useEffect(() => {
         const onScroll = () => setNavShadow(window.scrollY > 10);
         onScroll();
@@ -68,7 +67,6 @@ export default function Home() {
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
 
-    // close mobile menu on anchor click
     useEffect(() => {
         const handler = (e: Event) => {
             const target = e.target as HTMLElement | null;
@@ -79,7 +77,6 @@ export default function Home() {
         return () => document.removeEventListener("click", handler);
     }, []);
 
-    // scroll reveal (no library)
     useEffect(() => {
         const els = Array.from(
             document.querySelectorAll<HTMLElement>("[data-reveal]")
@@ -104,23 +101,6 @@ export default function Home() {
         return () => io.disconnect();
     }, []);
 
-    // ✅ Floor galleries (put your images in /public/available/...)
-    const floor2Images = useMemo(
-        () => [
-            {
-                src: "/available/2nd-1.png",
-                alt: "2nd floor office view",
-                label: "Building A • 2nd Floor",
-            },
-            {
-                src: "/available/2nd-2.png",
-                alt: "2nd floor workspace angle",
-                label: "Building A • 2nd Floor",
-            },
-        ],
-        []
-    );
-
     const floor3Images = useMemo(
         () => [
             {
@@ -137,14 +117,10 @@ export default function Home() {
         []
     );
 
-    const allAvailableImages = useMemo(
-        () => [...floor2Images, ...floor3Images],
-        [floor2Images, floor3Images]
-    );
+    const allAvailableImages = useMemo(() => [...floor3Images], [floor3Images]);
 
     return (
         <div className="min-h-screen bg-[#FAF6EA] text-slate-900 antialiased">
-            {/* Apple/Stripe-ish ambient: clean + subtle */}
             <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-[#FFF7DE] via-[#FAF6EA] to-[#FAF6EA]" />
                 <div className="absolute -top-56 left-1/2 h-[760px] w-[760px] -translate-x-1/2 rounded-full bg-[#FFD27A]/25 blur-[90px] animate-floatSlow" />
@@ -152,7 +128,6 @@ export default function Home() {
                 <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(#0f172a_1px,transparent_1px)] [background-size:54px_54px]" />
             </div>
 
-            {/* NAV */}
             <nav
                 className={[
                     "fixed top-0 left-0 right-0 z-40",
@@ -164,15 +139,12 @@ export default function Home() {
                 <Container className="">
                     <div className="flex items-center justify-between">
                         <a href="#hero" className="inline-flex items-center gap-3 group">
-                            {/* <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/55 ring-1 ring-black/10 group-hover:ring-black/20 transition"> */}
                             <img src="/subhashree.png" alt="Subha Shree Bhawan Logo" className="h-20 w-20 overflow-hidden pb-2" />
-                            {/* </span> */}
                             <span className="text-[15px] md:text-base font-semibold tracking-tight">
                                 Subha Shree Bhawan
                             </span>
                         </a>
 
-                        {/* Desktop */}
                         <div className="hidden md:flex items-center gap-1">
                             <NavDropdown label="Building A" items={buildingALinks} />
                             <NavDropdown label="Building B" items={buildingBLinks} />
@@ -189,7 +161,6 @@ export default function Home() {
                             </a>
                         </div>
 
-                        {/* Mobile */}
                         <button
                             onClick={() => setMenuOpen((p) => !p)}
                             className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/55 ring-1 ring-black/10 hover:bg-white/70 transition"
@@ -199,7 +170,6 @@ export default function Home() {
                         </button>
                     </div>
 
-                    {/* Mobile panel */}
                     {menuOpen && (
                         <div className="md:hidden mt-4 rounded-3xl bg-[#FFF7DE]/95 backdrop-blur-xl ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.14)] overflow-hidden animate-pop">
                             <div className="p-4 space-y-3">
@@ -222,11 +192,9 @@ export default function Home() {
                 </Container>
             </nav>
 
-            {/* HERO */}
             <section id="hero" className="relative pt-28 md:pt-32 pb-14 md:pb-20">
                 <Container>
                     <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-                        {/* Copy */}
                         <div className="lg:col-span-7">
                             <div
                                 data-reveal
@@ -271,7 +239,6 @@ export default function Home() {
                             </div>
                         </div>
 
-                        {/* Hero visual */}
                         <div className="lg:col-span-5" data-reveal>
                             <MediaCard>
                                 <div
@@ -314,14 +281,13 @@ export default function Home() {
                                                     <Phone className="h-4 w-4 text-slate-400" /> +977 980-8100067
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <Mail className="h-4 w-4 text-slate-400" /> buddhalife.np@gmail.com
+                                                    <Mail className="h-4 w-4 text-slate-400" /> buddhalifestyle.np@gmail.com
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* micro highlights */}
                                 <div className="p-5 border-t border-black/5">
                                     <div className="grid grid-cols-3 gap-3 text-sm">
                                         <MiniStat title="Café" value="Himalayan Java" icon={<Coffee className="h-4 w-4" />} />
@@ -339,7 +305,6 @@ export default function Home() {
                 </Container>
             </section>
 
-            {/* BUILDING A */}
             <SectionHeader title="Building A" subtitle="Seven floors of excellence" />
 
             <Section id="building-a-ground">
@@ -362,7 +327,6 @@ export default function Home() {
                                     title="Tesla Clinic"
                                     desc="Professional healthcare services with modern facilities and experienced practitioners."
                                 />
-
                             </div>
                         </>
                     }
@@ -413,32 +377,28 @@ export default function Home() {
                 />
             </Section>
 
-            {/* ✅ 2ND FLOOR */}
             <Section id="building-a-2nd">
                 <TwoCol
                     left={
-                        <VacantFloorInfo
-                            badge="AVAILABLE"
-                            floor="2ND FLOOR • BUILDING A"
-                            title="Prime Office Space"
-                            area="3,500 sq. ft."
-                            phone="+977 980-8100067"
-                            ctaHref="#available-spaces"
-                            ctaText="Go to Available Floors"
-                        />
+                        <>
+                            <Kicker text="2ND FLOOR • BUILDING A" />
+                            <h3 data-reveal className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                                Family Health International 360
+                            </h3>
+
+                            <div data-reveal className="space-y-4">
+                                <FeatureRow
+                                    icon={<Building2 className="h-5 w-5" />}
+                                    title="Occupied Space"
+                                    desc="The 2nd floor is now occupied by Family Health International 360."
+                                />
+                            </div>
+                        </>
                     }
-                    right={
-                        <FloorCarousel
-                            title="2nd Floor Gallery"
-                            images={floor2Images}
-                            intervalMs={5000}
-                            fit="contain"
-                        />
-                    }
+                    right={<ComingSoonCard title="2nd Floor Photos" subtitle="Coming soon" />}
                 />
             </Section>
 
-            {/* ✅ 3RD FLOOR */}
             <Section id="building-a-3rd" tone="soft">
                 <TwoCol
                     reverse
@@ -475,7 +435,6 @@ export default function Home() {
                 </div>
             </Section>
 
-            {/* BUILDING B */}
             <SectionHeader title="Building B" subtitle="Connected excellence" />
 
             <Section id="building-b-ground">
@@ -542,7 +501,6 @@ export default function Home() {
                 />
             </Section>
 
-            {/* ✅✅ MOVED HERE: AVAILABLE SPACES AT VERY BOTTOM */}
             <Section id="available-spaces" tone="soft">
                 <div className="text-center mb-10 md:mb-12">
                     <div className="inline-flex items-center gap-2 rounded-full bg-white/60 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
@@ -557,28 +515,18 @@ export default function Home() {
                 </div>
 
                 <div className="grid lg:grid-cols-12 gap-6 max-w-6xl mx-auto" data-reveal>
-                    {/* Left: cards */}
                     <div className="lg:col-span-5 grid gap-5">
-                        <SpaceCard
-                            building="BUILDING A"
-                            floor="2nd Floor"
-                            title="Prime Office Space"
-                            area="3,500 sq. ft."
-                            phone="+977 9808100067"
-                            email="buddhalife.np@gmail.com"
-                            tag="AVAILABLE NOW"
-                        />
                         <SpaceCard
                             building="BUILDING A"
                             floor="3rd Floor"
                             title="Prime Office Space"
                             area="3,500 sq. ft."
                             phone="+977 9808100067"
-                            email="buddhalife.np@gmail.com"
+                            email="buddhalifestyle.np@gmail.com"
+                            tag="AVAILABLE NOW"
                         />
                     </div>
 
-                    {/* Right: carousel (all available) */}
                     <div className="lg:col-span-7">
                         <FloorCarousel
                             title="Available Floors Preview"
@@ -600,7 +548,7 @@ export default function Home() {
                             <a href="tel:+9779808100067" className="btn-secondary justify-center">
                                 Call <Phone className="h-4 w-4" />
                             </a>
-                            <a href="mailto:buddhalife.np@gmail.com" className="btn-primary justify-center">
+                            <a href="mailto:buddhalifestyle.np@gmail.com" className="btn-primary justify-center">
                                 Email <Mail className="h-4 w-4" />
                             </a>
                         </div>
@@ -608,7 +556,6 @@ export default function Home() {
                 </div>
             </Section>
 
-            {/* FOOTER */}
             <footer className="py-12 md:py-14">
                 <Container>
                     <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 p-7 md:p-8">
@@ -634,7 +581,7 @@ export default function Home() {
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <Mail className="h-5 w-5 text-slate-400" />
-                                        <span>buddhalife.np@gmail.com</span>
+                                        <span>buddhalifestyle.np@gmail.com</span>
                                     </div>
                                 </div>
                             </div>
@@ -658,7 +605,6 @@ export default function Home() {
                 </Container>
             </footer>
 
-            {/* Animations + buttons + soft section fade */}
             <style>{`
         html { scroll-behavior: smooth; }
 
@@ -718,8 +664,6 @@ export default function Home() {
     );
 }
 
-/* ================= Layout Helpers ================= */
-
 function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
     return <div className={`max-w-7xl mx-auto px-5 sm:px-6 ${className}`}>{children}</div>;
 }
@@ -752,8 +696,6 @@ function MediaCard({ children }: { children: React.ReactNode }) {
         </div>
     );
 }
-
-/* ================= Components ================= */
 
 function NavDropdown({ label, items }: { label: string; items: LinkItem[] }) {
     return (
@@ -924,7 +866,6 @@ function FeatureRow({ icon, title, desc }: { icon: React.ReactNode; title: strin
     );
 }
 
-/* ✅ Left info + CTA link to available floors */
 function VacantFloorInfo({
     badge,
     floor,
@@ -1025,10 +966,36 @@ function SpaceCard({
     );
 }
 
-/* ✅ Carousel: FULL photo visible (contain) + "full screen" feel (blurred cover background)
-   - No zoom/crop on the main image.
-   - No ugly empty space: background fills, foreground stays true to image.
-*/
+function ComingSoonCard({
+    title,
+    subtitle = "Coming soon",
+}: {
+    title: string;
+    subtitle?: string;
+}) {
+    return (
+        <MediaCard>
+            <div className="relative h-[320px] md:h-[520px] flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#FFF7DE] via-[#FFF2C7] to-white" />
+                <div className="absolute -top-16 -left-10 h-40 w-40 rounded-full bg-[#FFD27A]/30 blur-3xl" />
+                <div className="absolute -bottom-16 -right-10 h-40 w-40 rounded-full bg-[#FFB35A]/20 blur-3xl" />
+
+                <div className="relative z-10 text-center px-6">
+                    <div className="inline-flex items-center rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em] shadow-[0_18px_50px_rgba(2,6,23,0.16)]">
+                        COMING SOON
+                    </div>
+                    <h4 className="mt-5 text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
+                        {title}
+                    </h4>
+                    <p className="mt-3 text-slate-600 text-base md:text-lg">
+                        {subtitle}
+                    </p>
+                </div>
+            </div>
+        </MediaCard>
+    );
+}
+
 function FloorCarousel({
     images,
     title = "Available Floors",
@@ -1082,14 +1049,12 @@ function FloorCarousel({
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
         >
-            {/* Header */}
             <div className="flex items-center justify-between px-5 md:px-6 py-4 border-b border-black/5">
                 <div className="min-w-0">
                     <p className="text-[11px] tracking-[0.18em] text-slate-500 font-semibold">GALLERY</p>
                     <h4 className="mt-1 text-lg md:text-xl font-extrabold tracking-tight text-slate-900">{title}</h4>
                 </div>
 
-                {/* Controls */}
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
@@ -1110,7 +1075,6 @@ function FloorCarousel({
                 </div>
             </div>
 
-            {/* Slides */}
             <div className="relative h-[320px] md:h-[520px]">
                 {images.map((img, idx) => {
                     const active = idx === i;
@@ -1124,17 +1088,14 @@ function FloorCarousel({
                             ].join(" ")}
                             aria-hidden={!active}
                         >
-                            {/* Background fill (cover + blur) */}
                             <img
                                 src={img.src}
                                 alt=""
                                 aria-hidden="true"
                                 className="absolute inset-0 h-full w-full object-cover blur-2xl scale-110 opacity-70"
                             />
-                            {/* tint so it looks premium */}
                             <div className="absolute inset-0 bg-gradient-to-b from-white/15 via-[#FFF2C7]/18 to-white/20" />
 
-                            {/* Foreground (FULL image visible, no zoom, no crop) */}
                             <img
                                 src={img.src}
                                 alt={img.alt}
@@ -1144,11 +1105,9 @@ function FloorCarousel({
                                 ].join(" ")}
                             />
 
-                            {/* soft fade overlays */}
                             <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7DE]/35 via-transparent to-transparent" />
                             <div className="absolute inset-0 bg-gradient-to-r from-black/[0.06] via-transparent to-black/[0.06]" />
 
-                            {/* Label */}
                             {img.label && (
                                 <div className="absolute left-5 bottom-5">
                                     <div className="rounded-2xl bg-white/70 backdrop-blur-xl ring-1 ring-black/10 px-4 py-2">
@@ -1160,7 +1119,6 @@ function FloorCarousel({
                     );
                 })}
 
-                {/* Dots */}
                 <div className="absolute bottom-4 right-5 flex items-center gap-2">
                     {images.map((_, idx) => (
                         <button
@@ -1177,7 +1135,6 @@ function FloorCarousel({
                 </div>
             </div>
 
-            {/* Footer strip */}
             <div className="px-5 md:px-6 py-4 border-t border-black/5">
                 <div className="flex items-center justify-between text-sm">
                     <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">SLIDE</span>
