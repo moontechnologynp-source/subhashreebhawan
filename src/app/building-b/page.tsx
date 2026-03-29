@@ -16,6 +16,11 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import {
+  clearPendingSectionScroll,
+  queuePendingSectionScroll,
+  resolvePendingSectionScroll,
+} from "@/lib/section-scroll";
 
 export default function BuildingBPage() {
   const router = useRouter();
@@ -29,6 +34,7 @@ export default function BuildingBPage() {
     { label: "2nd Floor", id: "building-a-2nd" },
     { label: "3rd Floor", id: "building-a-3rd" },
     { label: "Gym (4th–6th)", id: "building-a-gym" },
+    { label: "Available Spaces", id: "available-spaces" },
   ];
 
   const buildingBFloors = [
@@ -77,27 +83,41 @@ export default function BuildingBPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const hash = decodeURIComponent(window.location.hash.replace("#", ""));
-    if (!hash) return;
+    const scrollToHash = () => {
+      const id = resolvePendingSectionScroll(window.location.pathname);
+      if (!id) return;
 
-    const attemptScroll = () => {
-      const target = document.getElementById(hash);
-      if (!target) return false;
+      const attemptScroll = (attemptsLeft = 8) => {
+        const target = document.getElementById(id);
+        if (target) {
+          const navHeight =
+            document.querySelector("nav")?.getBoundingClientRect().height ?? 72;
+          const top =
+            target.getBoundingClientRect().top + window.scrollY - navHeight - 8;
 
-      const navHeight =
-        document.querySelector("nav")?.getBoundingClientRect().height ?? 72;
-      const top =
-        target.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+          if (window.location.hash !== `#${id}`) {
+            window.history.replaceState(
+              null,
+              "",
+              `${window.location.pathname}#${id}`,
+            );
+          }
+          window.scrollTo({ top, behavior: "smooth" });
+          clearPendingSectionScroll(window.location.pathname, id);
+          return;
+        }
 
-      window.scrollTo({ top, behavior: "smooth" });
-      return true;
+        if (attemptsLeft > 0) {
+          window.setTimeout(() => attemptScroll(attemptsLeft - 1), 100);
+        }
+      };
+
+      window.setTimeout(() => attemptScroll(), 120);
     };
 
-    const timer = window.setTimeout(() => {
-      attemptScroll();
-    }, 120);
-
-    return () => window.clearTimeout(timer);
+    scrollToHash();
+    window.addEventListener("hashchange", scrollToHash);
+    return () => window.removeEventListener("hashchange", scrollToHash);
   }, []);
 
   const scrollToSection = (id: string) => {
@@ -114,6 +134,16 @@ export default function BuildingBPage() {
     }
   };
 
+  const navigateToPageSection = (
+    pathname: "/building-a" | "/building-b",
+    id: string,
+  ) => {
+    queuePendingSectionScroll(pathname, id);
+    setOpenMenu(null);
+    setMobileOpen(false);
+    router.push(pathname);
+  };
+
   return (
     <div className="min-h-screen bg-[#FAF6EA] text-slate-900 antialiased">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -125,7 +155,7 @@ export default function BuildingBPage() {
       <nav className="sticky top-0 z-40 border-b border-black/5 bg-[#F2EBD7]/80 backdrop-blur-xl">
         <Container>
           <div className="flex items-center justify-between py-3">
-            <a href="/" className="inline-flex items-center gap-3">
+            <Link href="/" className="inline-flex items-center gap-3">
               <img
                 src="/subhashree.png"
                 alt="Subha Shree Bhawan Logo"
@@ -135,7 +165,7 @@ export default function BuildingBPage() {
                 <p className="text-sm font-semibold">Subha Shree Bhawan</p>
                 <p className="text-xs text-slate-500">Building B</p>
               </div>
-            </a>
+            </Link>
 
             <div
               ref={dropdownRef}
@@ -155,10 +185,7 @@ export default function BuildingBPage() {
                 {openMenu === "a" && (
                   <DropdownMenu
                     items={buildingAFloors}
-                    onSelect={(id) => {
-                      window.location.href = `/building-a#${id}`;
-                      setOpenMenu(null);
-                    }}
+                    onSelect={(id) => navigateToPageSection("/building-a", id)}
                   />
                 )}
                 {openMenu === "b" && (
@@ -203,15 +230,16 @@ export default function BuildingBPage() {
                     </p>
                     <div className="border-t border-black/5">
                       {buildingAFloors.map((floor) => (
-                        <Link
+                        <button
                           key={floor.id}
-                          href={`/building-a#${floor.id}`}
-                          scroll
-                          onClick={() => setMobileOpen(false)}
+                          type="button"
+                          onClick={() =>
+                            navigateToPageSection("/building-a", floor.id)
+                          }
                           className="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-black/[0.03] transition border-b border-black/5 last:border-0"
                         >
                           {floor.label}
-                        </Link>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -317,7 +345,6 @@ export default function BuildingBPage() {
             floor="2nd Floor"
             title="Moon Technology"
             status="Active"
-            highlight
           />
         </div>
       </Section>
@@ -440,7 +467,7 @@ export default function BuildingBPage() {
               Call or Email Instantly
             </h2>
             <p data-reveal className="mt-3 text-slate-700 max-w-2xl mx-auto">
-              These buttons work directly. Tap call to dial, or email to open
+              Tap call to dial, or email to open
               your mail app.
             </p>
           </div>

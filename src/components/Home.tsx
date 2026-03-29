@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Building2,
   Stethoscope,
@@ -19,6 +19,7 @@ import {
   X,
   ChevronDown,
 } from "lucide-react";
+import { queuePendingSectionScroll } from "@/lib/section-scroll";
 
 const buildingAFloors = [
   { label: "Ground Floor", id: "building-a-ground" },
@@ -26,6 +27,7 @@ const buildingAFloors = [
   { label: "2nd Floor", id: "building-a-2nd" },
   { label: "3rd Floor", id: "building-a-3rd" },
   { label: "Gym (4th–6th)", id: "building-a-gym" },
+  { label: "Available Spaces", id: "available-spaces" },
 ];
 
 const buildingBFloors = [
@@ -35,6 +37,7 @@ const buildingBFloors = [
 ];
 
 export default function Home() {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [navShadow, setNavShadow] = useState(false);
   const [openMenu, setOpenMenu] = useState<"a" | "b" | null>(null);
@@ -140,6 +143,13 @@ export default function Home() {
 
   const allAvailableImages = useMemo(() => [...floor3Images], [floor3Images]);
 
+  const navigateToFloor = (pathname: "/building-a" | "/building-b", id: string) => {
+    queuePendingSectionScroll(pathname, id);
+    setMenuOpen(false);
+    setOpenMenu(null);
+    router.push(pathname);
+  };
+
   return (
     <div className="min-h-screen bg-[#FAF6EA] text-slate-900 antialiased">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -182,9 +192,8 @@ export default function Home() {
                 />
                 {openMenu === "a" && (
                   <DropdownMenu
-                    basePath="/building-a"
                     items={buildingAFloors}
-                    onSelect={() => setOpenMenu(null)}
+                    onSelect={(id) => navigateToFloor("/building-a", id)}
                   />
                 )}
               </div>
@@ -197,9 +206,8 @@ export default function Home() {
                 />
                 {openMenu === "b" && (
                   <DropdownMenu
-                    basePath="/building-b"
                     items={buildingBFloors}
-                    onSelect={() => setOpenMenu(null)}
+                    onSelect={(id) => navigateToFloor("/building-b", id)}
                   />
                 )}
               </div>
@@ -238,18 +246,14 @@ export default function Home() {
                   </p>
                   <div className="border-t border-black/5">
                     {buildingAFloors.map((floor) => (
-                      <Link
+                      <button
                         key={floor.id}
-                        href={`/building-a#${floor.id}`}
-                        scroll
-                        onClick={() => {
-                          setMenuOpen(false);
-                          setOpenMenu(null);
-                        }}
+                        type="button"
+                        onClick={() => navigateToFloor("/building-a", floor.id)}
                         className="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-black/[0.03] transition border-b border-black/5 last:border-0"
                       >
                         {floor.label}
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -260,18 +264,14 @@ export default function Home() {
                   </p>
                   <div className="border-t border-black/5">
                     {buildingBFloors.map((floor) => (
-                      <Link
+                      <button
                         key={floor.id}
-                        href={`/building-b#${floor.id}`}
-                        scroll
-                        onClick={() => {
-                          setMenuOpen(false);
-                          setOpenMenu(null);
-                        }}
+                        type="button"
+                        onClick={() => navigateToFloor("/building-b", floor.id)}
                         className="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-black/[0.03] transition border-b border-black/5 last:border-0"
                       >
                         {floor.label}
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -741,7 +741,7 @@ export default function Home() {
                 Request a viewing
               </h4>
               <p className="mt-2 text-slate-700">
-                Get floor plans and leasing terms. We'll respond quickly.
+                Get floor plans and leasing terms. We&apos;ll respond quickly.
               </p>
             </div>
 
@@ -1381,29 +1381,26 @@ function DropdownPill({
 
 function DropdownMenu({
   items,
-  basePath,
   onSelect,
 }: {
   items: { label: string; id: string }[];
-  basePath: string;
-  onSelect?: () => void;
+  onSelect: (id: string) => void;
 }) {
   return (
     <div className="absolute left-0 top-[42px] z-50 w-[200px] overflow-hidden rounded-2xl border border-black/10 bg-[#F7F7F7]/95 shadow-[0_12px_40px_rgba(15,23,42,0.14)] backdrop-blur-xl">
       <div className="py-1">
         {items.map((item, index) => (
-          <Link
+          <button
             key={item.id}
-            href={`${basePath}#${item.id}`}
-            scroll
-            onClick={onSelect}
+            type="button"
+            onClick={() => onSelect(item.id)}
             className={[
               "flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-slate-700 transition hover:bg-black/[0.04] hover:text-slate-900",
               index !== items.length - 1 ? "border-b border-black/5" : "",
             ].join(" ")}
           >
             {item.label}
-          </Link>
+          </button>
         ))}
       </div>
     </div>

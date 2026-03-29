@@ -16,6 +16,11 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import {
+  clearPendingSectionScroll,
+  queuePendingSectionScroll,
+  resolvePendingSectionScroll,
+} from "@/lib/section-scroll";
 
 export default function BuildingAPage() {
   const router = useRouter();
@@ -29,6 +34,7 @@ export default function BuildingAPage() {
     { label: "2nd Floor", id: "building-a-2nd" },
     { label: "3rd Floor", id: "building-a-3rd" },
     { label: "Gym (4th–6th)", id: "building-a-gym" },
+    { label: "Available Spaces", id: "available-spaces" },
   ];
 
   const buildingBFloors = [
@@ -71,30 +77,47 @@ export default function BuildingAPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ── FIXED: hash-scroll that works both on initial load and on hashchange ──
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const hash = decodeURIComponent(window.location.hash.replace("#", ""));
-    if (!hash) return;
+    const scrollToHash = () => {
+      const id = resolvePendingSectionScroll(window.location.pathname);
+      if (!id) return;
 
-    const attemptScroll = () => {
-      const target = document.getElementById(hash);
-      if (!target) return false;
+      const attemptScroll = (attemptsLeft = 8) => {
+        const target = document.getElementById(id);
+        if (target) {
+          const navHeight =
+            document.querySelector("nav")?.getBoundingClientRect().height ?? 72;
+          const top =
+            target.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+          if (window.location.hash !== `#${id}`) {
+            window.history.replaceState(
+              null,
+              "",
+              `${window.location.pathname}#${id}`,
+            );
+          }
+          window.scrollTo({ top, behavior: "smooth" });
+          clearPendingSectionScroll(window.location.pathname, id);
+          return;
+        }
+        // Element not yet in DOM — retry
+        if (attemptsLeft > 0) {
+          window.setTimeout(() => attemptScroll(attemptsLeft - 1), 100);
+        }
+      };
 
-      const navHeight =
-        document.querySelector("nav")?.getBoundingClientRect().height ?? 72;
-      const top =
-        target.getBoundingClientRect().top + window.scrollY - navHeight - 8;
-
-      window.scrollTo({ top, behavior: "smooth" });
-      return true;
+      window.setTimeout(() => attemptScroll(), 120);
     };
 
-    const timer = window.setTimeout(() => {
-      attemptScroll();
-    }, 120);
+    // Fire on initial load
+    scrollToHash();
 
-    return () => window.clearTimeout(timer);
+    // Fire whenever the hash changes (navigating from home page dropdown)
+    window.addEventListener("hashchange", scrollToHash);
+    return () => window.removeEventListener("hashchange", scrollToHash);
   }, []);
 
   const scrollToSection = (id: string) => {
@@ -110,6 +133,16 @@ export default function BuildingAPage() {
       setOpenMenu(null);
       setMobileOpen(false);
     }
+  };
+
+  const navigateToPageSection = (
+    pathname: "/building-a" | "/building-b",
+    id: string,
+  ) => {
+    queuePendingSectionScroll(pathname, id);
+    setOpenMenu(null);
+    setMobileOpen(false);
+    router.push(pathname);
   };
 
   const floor3Images = [
@@ -136,7 +169,7 @@ export default function BuildingAPage() {
       <nav className="sticky top-0 z-40 border-b border-black/5 bg-[#F2EBD7]/80 backdrop-blur-xl">
         <Container>
           <div className="flex items-center justify-between py-3">
-            <a href="/" className="inline-flex items-center gap-3">
+            <Link href="/" className="inline-flex items-center gap-3">
               <img
                 src="/subhashree.png"
                 alt="Subha Shree Bhawan Logo"
@@ -146,7 +179,7 @@ export default function BuildingAPage() {
                 <p className="text-sm font-semibold">Subha Shree Bhawan</p>
                 <p className="text-xs text-slate-500">Building A</p>
               </div>
-            </a>
+            </Link>
 
             <div
               ref={dropdownRef}
@@ -172,10 +205,7 @@ export default function BuildingAPage() {
                 {openMenu === "b" && (
                   <DropdownMenu
                     items={buildingBFloors}
-                    onSelect={(id) => {
-                      window.location.href = `/building-b#${id}`;
-                      setOpenMenu(null);
-                    }}
+                    onSelect={(id) => navigateToPageSection("/building-b", id)}
                   />
                 )}
               </div>
@@ -232,15 +262,16 @@ export default function BuildingAPage() {
                     </p>
                     <div className="border-t border-black/5">
                       {buildingBFloors.map((floor) => (
-                        <Link
+                        <button
                           key={floor.id}
-                          href={`/building-b#${floor.id}`}
-                          scroll
-                          onClick={() => setMobileOpen(false)}
+                          type="button"
+                          onClick={() =>
+                            navigateToPageSection("/building-b", floor.id)
+                          }
                           className="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-black/[0.03] transition border-b border-black/5 last:border-0"
                         >
                           {floor.label}
-                        </Link>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -484,6 +515,51 @@ export default function BuildingAPage() {
             Three floors of wellness and future-ready fitness amenities.
           </p>
         </div>
+      </Section>
+
+      <Section id="available-spaces" tone="soft">
+        <div className="text-center mb-10 md:mb-12">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/60 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
+            Leasing
+          </div>
+          <h2
+            data-reveal
+            className="mt-5 text-4xl md:text-5xl font-extrabold tracking-tight"
+          >
+            Available Spaces
+          </h2>
+          <p data-reveal className="mt-3 text-lg text-slate-700">
+            Building A currently has a premium office floor ready for immediate
+            occupancy.
+          </p>
+        </div>
+
+        <div
+          className="grid lg:grid-cols-12 gap-6 max-w-6xl mx-auto"
+          data-reveal
+        >
+          <div className="lg:col-span-5 grid gap-5">
+            <SpaceCard
+              building="BUILDING A"
+              floor="3rd Floor"
+              title="Prime Office Space"
+              area="3,500 sq. ft."
+              phone="+977 9808100067"
+              email="buddhalifestyle.np@gmail.com"
+              tag="AVAILABLE NOW"
+            />
+          </div>
+
+          <div className="lg:col-span-7">
+            <FloorCarousel
+              title="Available Floors Preview"
+              images={floor3Images}
+              intervalMs={5000}
+              fit="contain"
+            />
+          </div>
+        </div>
+
       </Section>
 
       <Section id="contact-actions" tone="soft">
@@ -822,6 +898,55 @@ function ComingSoonCard({
         </div>
       </div>
     </MediaCard>
+  );
+}
+
+function SpaceCard({
+  building,
+  floor,
+  title,
+  area,
+  phone,
+  email,
+  tag,
+}: {
+  building: string;
+  floor: string;
+  title: string;
+  area: string;
+  phone: string;
+  email: string;
+  tag?: string;
+}) {
+  return (
+    <div className="relative rounded-[28px] bg-white/55 ring-1 ring-black/10 p-7 shadow-[0_20px_70px_rgba(15,23,42,0.08)] hover:-translate-y-[2px] hover:shadow-[0_30px_95px_rgba(15,23,42,0.12)] transition">
+      {tag && (
+        <div className="absolute top-4 right-4 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em] shadow-[0_18px_50px_rgba(2,6,23,0.16)]">
+          {tag}
+        </div>
+      )}
+      <p className="text-xs tracking-[0.18em] text-slate-500 font-semibold">
+        {building}
+      </p>
+      <h3 className="mt-3 text-2xl font-extrabold tracking-tight">{floor}</h3>
+      <p className="mt-2 text-slate-700">{title}</p>
+      <div className="mt-6 space-y-3 text-sm">
+        <div className="flex items-center justify-between border-t border-black/5 pt-4">
+          <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
+            FLOOR AREA
+          </span>
+          <span className="font-semibold">{area}</span>
+        </div>
+        <div className="flex flex-col gap-2 pt-3">
+          <div className="inline-flex items-center gap-2 text-slate-800">
+            <Phone className="h-4 w-4 text-slate-500" /> {phone}
+          </div>
+          <div className="inline-flex items-center gap-2 text-slate-800">
+            <Mail className="h-4 w-4 text-slate-500" /> {email}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
