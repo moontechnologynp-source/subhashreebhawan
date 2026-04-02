@@ -169,7 +169,7 @@ export default function Home() {
       >
         <Container>
           <div className="flex items-center justify-between">
-            <a href="#hero" className="inline-flex items-center gap-3 group">
+            <a href="" className="inline-flex items-center gap-3 group">
               <img
                 src="/subhashree.png"
                 alt="Subha Shree Bhawan Logo"
