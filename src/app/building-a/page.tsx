@@ -471,7 +471,16 @@ export default function BuildingAPage() {
             </>
           }
           right={
-            <ComingSoonCard title="2nd Floor Photos" subtitle="Coming soon" />
+             <ImageCard
+              src="/fhi.png"
+              alt="Family Health International 360"
+              footerLeft="FLOOR AREA"
+              footerRight="3,500 sq. ft."
+              heightClass="h-[31.25rem]"
+              crop="object-contain"
+              zoom="scale-[0.55]"
+              fit="contain"
+            />
           }
         />
       </Section>
