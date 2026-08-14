@@ -406,9 +406,10 @@ export default function BuildingAPage() {
               alt="Tesla Clinic and Himalayan Java"
               footerLeft="FACILITIES"
               footerRight="Clinic + Café"
-              heightClass="h-96"
-              crop="object-[50%_30%]"
-              fit="cover"
+              heightClass="h-[28rem] md:h-[34rem]"
+              crop="object-center"
+              zoom="scale-100"
+              fit="contain"
             />
           }
         />
@@ -706,19 +707,17 @@ function Section({
 function TwoCol({
   left,
   right,
-  reverse = false,
 }: {
   left: React.ReactNode;
   right: React.ReactNode;
   reverse?: boolean;
 }) {
   return (
-    <div className="grid items-center gap-10 md:gap-12 lg:grid-cols-12">
-      <div className={`lg:col-span-6 ${reverse ? "lg:order-2" : "lg:order-1"}`}>
-        <div className="space-y-6">{left}</div>
-      </div>
-      <div className={`lg:col-span-6 ${reverse ? "lg:order-1" : "lg:order-2"}`}>
-        {right}
+    <div className="group relative mx-auto max-w-5xl rounded-[36px] bg-white/65 p-2 shadow-[0_32px_100px_rgba(15,23,42,0.14)] ring-1 ring-black/[0.08] backdrop-blur-sm transition duration-500 hover:-translate-y-1 hover:shadow-[0_38px_120px_rgba(15,23,42,0.19)]">
+      <div className="building-visual">{right}</div>
+      <div className="pointer-events-none absolute inset-2 rounded-[28px] bg-gradient-to-b from-slate-950/35 via-transparent to-transparent" />
+      <div className="building-copy absolute left-2 top-2 z-10 p-5 md:p-8">
+        <div>{left}</div>
       </div>
     </div>
   );
@@ -734,8 +733,8 @@ function MediaCard({ children }: { children: React.ReactNode }) {
 
 function Kicker({ text }: { text: string }) {
   return (
-    <div className="inline-flex items-center rounded-full bg-white/55 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
-      {text}
+    <div className="inline-flex items-center gap-2.5 rounded-2xl border border-white/40 bg-white/90 px-4 py-2.5 text-[11px] font-bold tracking-[0.16em] text-slate-950 shadow-[0_12px_35px_rgba(15,23,42,0.16)] backdrop-blur-xl">
+      <span className="h-2 w-2 rounded-full bg-amber-500" /> {text}
     </div>
   );
 }
@@ -791,10 +790,18 @@ function ImageCard({
   zoom?: string;
   fit?: "cover" | "contain";
 }) {
+  const backdropClass = src.includes("fhi")
+    ? "bg-[#293b4b]"
+    : src.includes("vairav")
+      ? "bg-[#edf4f6]"
+      : src.includes("sigma")
+        ? "bg-[#edf8f7]"
+        : "bg-[#fffdfa]";
+
   return (
     <MediaCard>
-      <div className={`relative ${heightClass} overflow-hidden`}>
-        <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-[#FFF2C7]/30 to-white/30" />
+      <div className={`relative ${heightClass} overflow-hidden ${backdropClass}`}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(255,255,255,0.16),transparent_58%)]" />
         <img
           src={src}
           alt={alt}
@@ -805,7 +812,7 @@ function ImageCard({
             zoom,
           ].join(" ")}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7DE]/35 via-transparent to-transparent" />
+        <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
       </div>
       {(footerLeft || footerRight) && (
         <div className="p-5 border-t border-black/5">
@@ -831,13 +838,13 @@ function FeatureRow({
   desc: string;
 }) {
   return (
-    <div className="flex gap-4 rounded-3xl bg-white/55 ring-1 ring-black/10 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)]">
-      <div className="shrink-0 rounded-2xl bg-black/[0.03] ring-1 ring-black/10 p-3 text-slate-700">
+    <div className="flex gap-4 border-t border-white/10 py-5 first:border-t-0">
+      <div className="shrink-0 self-start rounded-xl bg-amber-300 p-2.5 text-slate-950 shadow-[0_10px_30px_rgba(252,211,77,0.18)]">
         {icon}
       </div>
       <div>
-        <h4 className="font-semibold text-slate-900">{title}</h4>
-        <p className="mt-1 text-sm text-slate-700 leading-relaxed">{desc}</p>
+        <h4 className="font-bold tracking-tight text-white">{title}</h4>
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-300">{desc}</p>
       </div>
     </div>
   );

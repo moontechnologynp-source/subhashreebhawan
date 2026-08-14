@@ -50,6 +50,50 @@ body {
   color: #0f172a;
 }
 
+.building-copy > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.building-copy > div > :nth-child(n + 3) {
+  display: none;
+}
+
+.building-copy h2,
+.building-copy h3 {
+  margin: 0;
+  max-width: min(520px, 75vw);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.84);
+  padding: 10px 16px;
+  color: #fff;
+  font-size: clamp(0.78rem, 1.5vw, 0.95rem);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.2);
+  backdrop-filter: blur(16px);
+}
+
+.building-visual > div {
+  border-radius: 28px;
+  box-shadow: none;
+  outline: none;
+}
+
+.building-visual {
+  overflow: hidden;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.building-visual > div > div:last-child:not(:first-child) {
+  display: none;
+}
+
 /* Reveal animation for scroll-triggered elements */
 .reveal {
   opacity: 0;
