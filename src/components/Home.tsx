@@ -27,7 +27,7 @@ const buildingAFloors = [
   { label: "2nd Floor", id: "building-a-2nd" },
   { label: "3rd Floor", id: "building-a-3rd" },
   { label: "Gym (4th–6th)", id: "building-a-gym" },
-  { label: "Available Spaces", id: "available-spaces" },
+  // { label: "Available Spaces", id: "available-spaces" },
 ];
 
 const buildingBFloors = [
@@ -212,12 +212,12 @@ export default function Home() {
                 )}
               </div>
 
-              <a
+              {/* <a
                 href="#available-spaces"
                 className="px-3 py-2 text-[12px] tracking-[0.18em] font-semibold text-slate-700 hover:text-slate-900 rounded-2xl hover:bg-black/[0.04] transition"
               >
                 AVAILABLE SPACES
-              </a>
+              </a> */}
 
               <a href="#available-spaces" className="ml-2 btn-primary">
                 Book a Viewing <ArrowRight className="h-4 w-4" />
@@ -329,9 +329,9 @@ export default function Home() {
               </p>
 
               <div data-reveal className="mt-9 md:mt-10 flex flex-wrap gap-3">
-                <a href="#available-spaces" className="btn-primary">
+                {/* <a href="#available-spaces" className="btn-primary">
                   View Available Spaces <ArrowRight className="h-4 w-4" />
-                </a>
+                </a> */}
 
                 <a href="#building-a-ground" className="btn-secondary">
                   Explore Floors <ChevronDown className="h-4 w-4" />
@@ -560,30 +560,40 @@ export default function Home() {
         />
       </Section>
 
-      <Section id="building-a-3rd" tone="soft">
-        <TwoCol
-          reverse
-          left={
-            <VacantFloorInfo
-              badge="AVAILABLE"
-              floor="3RD FLOOR • BUILDING A"
-              title="Prime Office Space"
-              area="3,500 sq. ft."
-              phone="+977 980-8100067"
-              ctaHref="#available-spaces"
-              ctaText="Go to Available Floors"
-            />
-          }
-          right={
-            <FloorCarousel
-              title="3rd Floor Gallery"
-              images={floor3Images}
-              intervalMs={5000}
-              fit="contain"
-            />
-          }
-        />
-      </Section>
+      <Section id="building-a-3rd">
+              <TwoCol
+                left={
+                  <>
+                    <Kicker text="3RD FLOOR • BUILDING A" />
+                    <h2
+                      data-reveal
+                      className="text-3xl md:text-4xl font-extrabold tracking-tight"
+                    >
+                      Sigma Capital
+                    </h2>
+                    <div data-reveal>
+                      <FeatureRow
+                        icon={<Building2 className="h-5 w-5" />}
+                        title="Occupied Floor"
+                        desc="This floor is currently occupied by Sigma Capital."
+                      />
+                    </div>
+                  </>
+                }
+                right={
+                   <ImageCard
+                    src="/sigma.png"
+                    alt="Sigma Capital"
+                    footerLeft="FLOOR AREA"
+                    footerRight="3,500 sq. ft."
+                    heightClass="h-[31.25rem]"
+                    crop="object-contain"
+                    zoom="scale-[0.55]"
+                    fit="contain"
+                  />
+                }
+              />
+            </Section>
 
       <Section id="building-a-gym">
         <div className="text-center">
@@ -616,7 +626,7 @@ export default function Home() {
                 data-reveal
                 className="text-3xl md:text-4xl font-extrabold tracking-tight"
               >
-                Elements Restaurant
+                The Bengal Restaurant
               </h3>
               <div data-reveal>
                 <FeatureRow
@@ -629,8 +639,8 @@ export default function Home() {
           }
           right={
             <ImageCard
-              src="/elements.jpg"
-              alt="Elements Restaurant"
+              src="/bengal.jpg"
+              alt="The Bengal Restaurant"
               fit="contain"
               zoom="scale-100"
             />
@@ -661,7 +671,7 @@ export default function Home() {
           }
           right={
             <ImageCard
-              src="/alogo.png"
+              src="/swopna.png"
               alt="Swopna Chitra"
               fit="contain"
               zoom="scale-100"
@@ -701,7 +711,7 @@ export default function Home() {
         />
       </Section>
 
-      <Section id="available-spaces" tone="soft">
+      {/* <Section id="available-spaces" tone="soft">
         <div className="text-center mb-10 md:mb-12">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/60 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
             Leasing
@@ -770,7 +780,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </Section>
+      </Section> */}
 
       <footer className="py-12 md:py-14">
         <Container>

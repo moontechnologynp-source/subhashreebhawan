@@ -34,7 +34,7 @@ export default function BuildingAPage() {
     { label: "2nd Floor", id: "building-a-2nd" },
     { label: "3rd Floor", id: "building-a-3rd" },
     { label: "Gym (4th–6th)", id: "building-a-gym" },
-    { label: "Available Spaces", id: "available-spaces" },
+    // { label: "Available Spaces", id: "available-spaces" },
   ];
 
   const buildingBFloors = [
@@ -484,31 +484,41 @@ export default function BuildingAPage() {
           }
         />
       </Section>
-
-      <Section id="building-a-3rd" tone="soft">
+<Section id="building-a-3rd">
         <TwoCol
-          reverse
           left={
-            <VacantFloorInfo
-              badge="AVAILABLE"
-              floor="3RD FLOOR • BUILDING A"
-              title="Prime Office Space"
-              area="3,500 sq. ft."
-              phone="+977 980-8100067"
-              ctaHref="#contact-actions"
-              ctaText="Contact for This Floor"
-            />
+            <>
+              <Kicker text="3rd FLOOR • BUILDING A" />
+              <h2
+                data-reveal
+                className="text-3xl md:text-4xl font-extrabold tracking-tight"
+              >
+                Sigma Capital
+              </h2>
+              <div data-reveal>
+                <FeatureRow
+                  icon={<Building2 className="h-5 w-5" />}
+                  title="Occupied Floor"
+                  desc="This floor is currently occupied by Sigma Capital."
+                />
+              </div>
+            </>
           }
           right={
-            <FloorCarousel
-              title="3rd Floor Gallery"
-              images={floor3Images}
-              intervalMs={5000}
+             <ImageCard
+              src="/sigma.png"
+              alt="Sigma Capital"
+              footerLeft="FLOOR AREA"
+              footerRight="3,500 sq. ft."
+              heightClass="h-[31.25rem]"
+              crop="object-contain"
+              zoom="scale-[0.55]"
               fit="contain"
             />
           }
         />
       </Section>
+    
 
       <Section id="building-a-gym">
         <div className="text-center">
@@ -526,7 +536,7 @@ export default function BuildingAPage() {
         </div>
       </Section>
 
-      <Section id="available-spaces" tone="soft">
+      {/* <Section id="available-spaces" tone="soft">
         <div className="text-center mb-10 md:mb-12">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/60 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
             Leasing
@@ -569,7 +579,7 @@ export default function BuildingAPage() {
           </div>
         </div>
 
-      </Section>
+      </Section> */}
 
       <Section id="contact-actions" tone="soft">
         <div className="max-w-5xl mx-auto rounded-[32px] bg-white/60 ring-1 ring-black/10 p-8 md:p-10 shadow-[0_30px_90px_rgba(15,23,42,0.08)]">

@@ -34,7 +34,7 @@ export default function BuildingBPage() {
     { label: "2nd Floor", id: "building-a-2nd" },
     { label: "3rd Floor", id: "building-a-3rd" },
     { label: "Gym (4th–6th)", id: "building-a-gym" },
-    { label: "Available Spaces", id: "available-spaces" },
+    // { label: "Available Spaces", id: "available-spaces" },
   ];
 
   const buildingBFloors = [
@@ -333,7 +333,7 @@ export default function BuildingBPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <FloorLabelCard
             floor="Ground Floor"
-            title="Elements Restaurant"
+            title="The Bengal Restaurant"
             status="Active"
           />
           <FloorLabelCard
@@ -358,7 +358,7 @@ export default function BuildingBPage() {
                 data-reveal
                 className="text-3xl md:text-4xl font-extrabold tracking-tight"
               >
-                Elements Restaurant
+                The Bengal Restaurant
               </h2>
               <div data-reveal>
                 <FeatureRow
@@ -367,12 +367,22 @@ export default function BuildingBPage() {
                   desc="Contemporary Nepali and international cuisine crafted with premium service."
                 />
               </div>
+          <div data-reveal className="pt-2">
+                <a
+                  href="https://thebengalrestaurantandbar.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(15,23,42,0.18)] transition hover:translate-y-[-1px]"
+                >
+                  Visit Website <ArrowRight className="h-4 w-4" />
+                </a>
+              </div>
             </>
           }
           right={
             <ImageCard
-              src="/elements.jpg"
-              alt="Elements Restaurant"
+              src="/bengal.jpg"
+              alt="The Bengal Restaurant"
               fit="contain"
               zoom="scale-100"
             />
@@ -399,11 +409,21 @@ export default function BuildingBPage() {
                   desc="Dreams into Frames."
                 />
               </div>
+               <div data-reveal className="pt-2">
+                <a
+                  href="https://swopnachitra.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(15,23,42,0.18)] transition hover:translate-y-[-1px]"
+                >
+                  Visit Website <ArrowRight className="h-4 w-4" />
+                </a>
+              </div>
             </>
           }
           right={
             <ImageCard
-              src="/alogo.png"
+              src="/Swopna.png"
               alt="Swopna Chitra"
               fit="contain"
               zoom="scale-100"
@@ -427,7 +447,7 @@ export default function BuildingBPage() {
                 <FeatureRow
                   icon={<Laptop className="h-5 w-5" />}
                   title="IT Solutions"
-                  desc="Software, cloud and technology services for modern organizations."
+                  desc="Software and technology services for modern organizations."
                 />
               </div>
 
