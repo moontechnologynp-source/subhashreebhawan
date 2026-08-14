@@ -524,6 +524,9 @@ export default function BuildingBPage() {
                   A connected destination for dining, production, and
                   technology-focused businesses.
                 </p>
+                <a href="/blog" className="mt-4 inline-flex font-semibold text-slate-700 hover:text-slate-950 transition">
+                  Visit our blog →
+                </a>
               </div>
 
               <div>

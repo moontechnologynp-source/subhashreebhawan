@@ -785,7 +785,7 @@ export default function Home() {
       <footer className="py-12 md:py-14">
         <Container>
           <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 p-7 md:p-8">
-            <div className="grid md:grid-cols-3 gap-10">
+            <div className="grid md:grid-cols-4 gap-10">
               <div>
                 <h3 className="text-xl font-extrabold tracking-tight">
                   Subha Shree Bhawan
@@ -837,6 +837,18 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-semibold tracking-[0.18em] text-slate-500">
+                  EXPLORE
+                </h4>
+                <a
+                  href="/blog"
+                  className="mt-4 inline-flex items-center gap-2 font-semibold text-slate-700 transition hover:text-slate-950"
+                >
+                  Our Blog <ArrowRight className="h-4 w-4" />
+                </a>
               </div>
             </div>
 

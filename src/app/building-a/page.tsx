@@ -626,6 +626,9 @@ export default function BuildingAPage() {
                   Premium office, café, clinic, and future wellness spaces in
                   Subha Shree Bhawan.
                 </p>
+                <a href="/blog" className="mt-4 inline-flex font-semibold text-slate-700 hover:text-slate-950 transition">
+                  Visit our blog →
+                </a>
               </div>
               <div>
                 <h4 className="text-xs font-semibold tracking-[0.18em] text-slate-500">
