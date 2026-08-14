@@ -733,8 +733,8 @@ function MediaCard({ children }: { children: React.ReactNode }) {
 
 function Kicker({ text }: { text: string }) {
   return (
-    <div className="inline-flex items-center gap-2.5 rounded-2xl border border-white/40 bg-white/90 px-4 py-2.5 text-[11px] font-bold tracking-[0.16em] text-slate-950 shadow-[0_12px_35px_rgba(15,23,42,0.16)] backdrop-blur-xl">
-      <span className="h-2 w-2 rounded-full bg-amber-500" /> {text}
+    <div className="inline-flex items-center rounded-2xl border border-white/40 bg-white/90 px-4 py-2.5 text-[11px] font-bold tracking-[0.16em] text-slate-950 shadow-[0_12px_35px_rgba(15,23,42,0.16)] backdrop-blur-xl">
+      {text}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Clock3 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Blog | Subha Shree Bhawan",
@@ -11,6 +11,16 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    category: "Commercial Property",
+    date: "August 14, 2026",
+    title: "What to Look for Before Choosing a Commercial Building for Rent in Kathmandu",
+    excerpt:
+      "Learn the key factors to consider, including location, accessibility, parking, building quality, facilities, and long-term value.",
+    image: "/commercial-building-rent-kathmandu-clean.png",
+    href: "/blog/commercial-building-for-rent-in-kathmandu",
+    readTime: "9 min read",
+  },
+  {
     category: "Workspace",
     date: "August 12, 2026",
     title: "Why Location and Building Quality Matter When Choosing a Rental Building in Kathmandu",
@@ -18,6 +28,7 @@ const posts = [
       "Discover why location, building quality, accessibility, facilities, and maintenance matter when choosing a rental building in Kathmandu.",
     image: "/blo.png",
     href: "/blog/why-location-and-building-quality-matter-in-kathmandu",
+    readTime: "8 min read",
   },
 ];
 
@@ -42,28 +53,50 @@ export default function BlogPage() {
         </div>
       </header>
 
-      <section className="relative z-10 mx-auto max-w-7xl px-5 pb-16 pt-20 sm:px-6 md:pb-24 md:pt-28">
-        <div className="max-w-3xl">
-          <p className="text-xs font-bold tracking-[0.22em] text-amber-700">OUR JOURNAL</p>
-          <h1 className="mt-5 text-5xl font-extrabold tracking-tight md:text-7xl">Ideas, updates, and stories from the Bhawan.</h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl">
-            Explore practical workplace insights, neighbourhood stories, and the latest news from Subha Shree Bhawan.
-          </p>
+      <section className="relative z-10 mx-auto max-w-7xl px-5 pb-16 pt-16 sm:px-6 md:pb-24 md:pt-24">
+        <div className="grid items-end gap-10 border-b border-black/10 pb-14 lg:grid-cols-[1fr_320px]">
+          <div className="max-w-4xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/65 px-4 py-2 text-xs font-bold tracking-[0.2em] text-amber-800 ring-1 ring-black/10">
+              <BookOpen className="h-4 w-4" /> OUR JOURNAL
+            </div>
+            <h1 className="mt-6 text-5xl font-extrabold leading-[1.02] tracking-tight md:text-7xl">
+              Property insight,
+              <span className="block text-slate-500">made useful.</span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl">
+              Practical guidance for choosing better workspaces and commercial property in Kathmandu.
+            </p>
+          </div>
+          <div className="hidden rounded-[28px] bg-slate-950 p-7 text-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] lg:block">
+            <p className="text-xs font-bold tracking-[0.18em] text-amber-300">SUBHA SHREE BHAWAN</p>
+            <p className="mt-4 text-2xl font-extrabold tracking-tight">Local knowledge for better property decisions.</p>
+            <p className="mt-4 text-sm leading-relaxed text-slate-300">Thoughtful articles from Baluwatar, Kathmandu.</p>
+          </div>
         </div>
 
-        <div className="mt-14 max-w-4xl">
-          {posts.map((post) => {
+        <div className="mt-12 flex items-center justify-between">
+          <h2 className="text-2xl font-extrabold tracking-tight">Latest stories</h2>
+          <span className="text-sm font-semibold text-slate-500">{posts.length} articles</span>
+        </div>
+
+        <div className="mt-6 grid gap-8">
+          {posts.map((post, index) => {
             return (
-              <article key={post.title} className="group overflow-hidden rounded-[28px] bg-white/60 ring-1 ring-black/10 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-sm transition hover:-translate-y-1 hover:bg-white/75 md:grid md:grid-cols-2">
-                <Link href={post.href} className="relative block aspect-[16/10] overflow-hidden md:aspect-auto">
-                  <Image src={post.image} alt="Why Location and Building Quality Matter" fill className="object-cover transition duration-500 group-hover:scale-[1.02]" sizes="(max-width: 768px) 100vw, 448px" />
+              <article key={post.title} className="group overflow-hidden rounded-[32px] bg-white/70 ring-1 ring-black/[0.08] shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-sm transition duration-500 hover:-translate-y-1 hover:shadow-[0_32px_100px_rgba(15,23,42,0.14)] md:grid md:grid-cols-[1.08fr_0.92fr]">
+                <Link href={post.href} className={`relative block min-h-[340px] overflow-hidden md:min-h-[470px] ${index % 2 === 1 ? "md:order-2" : ""}`}>
+                  <Image src={post.image} alt={post.title} fill className="object-cover transition duration-700 group-hover:scale-[1.035]" sizes="(max-width: 768px) 100vw, 55vw" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
+                  {index === 0 && <span className="absolute left-5 top-5 rounded-full bg-slate-950/85 px-4 py-2 text-[11px] font-bold tracking-[0.15em] text-white backdrop-blur-md">FEATURED</span>}
                 </Link>
-                <div className="flex min-h-[360px] flex-col p-7 md:p-9">
+                <div className={`flex min-h-[390px] flex-col justify-center p-7 md:p-12 ${index % 2 === 1 ? "md:order-1" : ""}`}>
                   <span className="w-fit rounded-full bg-[#FFF2C7] px-3 py-1.5 text-xs font-bold text-amber-800">{post.category}</span>
-                  <p className="mt-7 text-sm text-slate-500">{post.date}</p>
-                  <h2 className="mt-3 text-2xl font-extrabold tracking-tight">{post.title}</h2>
-                  <p className="mt-4 flex-1 leading-relaxed text-slate-600">{post.excerpt}</p>
-                  <Link href={post.href} className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-slate-900">
+                  <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-500">
+                    <span>{post.date}</span>
+                    <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4" /> {post.readTime}</span>
+                  </div>
+                  <h2 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight md:text-4xl">{post.title}</h2>
+                  <p className="mt-5 leading-relaxed text-slate-600">{post.excerpt}</p>
+                  <Link href={post.href} className="mt-8 inline-flex w-fit items-center gap-3 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-[0_14px_40px_rgba(15,23,42,0.16)] transition hover:bg-slate-800">
                     Read article <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
                   </Link>
                 </div>

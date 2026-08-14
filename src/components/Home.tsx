@@ -219,9 +219,9 @@ export default function Home() {
                 AVAILABLE SPACES
               </a> */}
 
-              <a href="#available-spaces" className="ml-2 btn-primary">
+              {/* <a href="#available-spaces" className="ml-2 btn-primary">
                 Book a Viewing <ArrowRight className="h-4 w-4" />
-              </a>
+              </a> */}
             </div>
 
             <button
@@ -284,13 +284,13 @@ export default function Home() {
                   Available Spaces
                 </a>
 
-                <a
+                {/* <a
                   href="#available-spaces"
                   onClick={() => setMenuOpen(false)}
                   className="btn-primary w-full justify-center"
                 >
                   Book a Viewing <ArrowRight className="h-4 w-4" />
-                </a>
+                </a> */}
               </div>
             </div>
           )}
@@ -783,6 +783,73 @@ export default function Home() {
         </div>
       </Section> */}
 
+      <Section id="faq" tone="soft">
+        <div className="mx-auto max-w-4xl">
+          <div className="text-center">
+            <Kicker text="FREQUENTLY ASKED QUESTIONS" />
+            <h2
+              data-reveal
+              className="mt-6 text-4xl font-extrabold tracking-tight md:text-5xl"
+            >
+              Commercial rental questions,
+              <span className="block text-slate-600">answered clearly.</span>
+            </h2>
+            <p data-reveal className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-slate-600">
+              Helpful guidance for choosing a commercial building in Kathmandu.
+            </p>
+          </div>
+
+          <div data-reveal className="mt-10 space-y-3">
+            {[
+              {
+                question:
+                  "What should I consider when renting a commercial building in Kathmandu?",
+                answer:
+                  "Important factors include location, accessibility, parking, building quality, facilities, maintenance, rental cost, lease terms, and whether the property suits your business requirements.",
+              },
+              {
+                question:
+                  "Is location important when choosing commercial property?",
+                answer:
+                  "Yes. Location can affect customer accessibility, employee commuting, business visibility, transportation, and overall convenience.",
+              },
+              {
+                question:
+                  "Should I consider parking when renting a commercial building?",
+                answer:
+                  "Yes. Parking can be especially important for businesses that receive regular customers, employees, suppliers, and visitors.",
+              },
+              {
+                question: "What facilities should a commercial building have?",
+                answer:
+                  "Depending on your business, useful facilities can include electricity, water, internet connectivity, parking, lift access, security, ventilation, natural lighting, and proper maintenance.",
+              },
+              {
+                question:
+                  "Should I choose a commercial building based only on rent?",
+                answer:
+                  "No. Monthly rent is only one part of the total value. Accessibility, facilities, parking, building quality, maintenance, and location should also be considered.",
+              },
+            ].map((item) => (
+              <details
+                key={item.question}
+                className="group rounded-[22px] bg-white/70 ring-1 ring-black/[0.08] shadow-[0_12px_40px_rgba(15,23,42,0.05)] open:bg-white"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-5 px-5 py-5 font-bold text-slate-900 md:px-6 [&::-webkit-details-marker]:hidden">
+                  <span>{item.question}</span>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FFF0BF] text-amber-900 transition group-open:rotate-180">
+                    <ChevronDown className="h-4 w-4" />
+                  </span>
+                </summary>
+                <div className="border-t border-black/5 px-5 pb-6 pt-4 leading-relaxed text-slate-600 md:px-6">
+                  {item.answer}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </Section>
+
       <footer className="py-12 md:py-14">
         <Container>
           <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 p-7 md:p-8">
@@ -949,8 +1016,8 @@ function SectionHeader({
 
 function Kicker({ text }: { text: string }) {
   return (
-    <div className="inline-flex items-center gap-2.5 rounded-2xl border border-white/40 bg-white/90 px-4 py-2.5 text-[11px] font-bold tracking-[0.16em] text-slate-950 shadow-[0_12px_35px_rgba(15,23,42,0.16)] backdrop-blur-xl">
-      <span className="h-2 w-2 rounded-full bg-amber-500" /> {text}
+    <div className="inline-flex items-center rounded-2xl border border-white/40 bg-white/90 px-4 py-2.5 text-[11px] font-bold tracking-[0.16em] text-slate-950 shadow-[0_12px_35px_rgba(15,23,42,0.16)] backdrop-blur-xl">
+      {text}
     </div>
   );
 }
