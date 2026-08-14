@@ -145,18 +145,18 @@ export default function BuildingAPage() {
     router.push(pathname);
   };
 
-  const floor3Images = [
-    {
-      src: "/available/3rd-1.png",
-      alt: "3rd floor office view",
-      label: "Building A • 3rd Floor",
-    },
-    {
-      src: "/available/3.png",
-      alt: "3rd floor office hallway",
-      label: "Building A • 3rd Floor",
-    },
-  ];
+  // const floor3Images = [
+  //   {
+  //     src: "/available/3rd-1.png",
+  //     alt: "3rd floor office view",
+  //     label: "Building A • 3rd Floor",
+  //   },
+  //   {
+  //     src: "/available/3.png",
+  //     alt: "3rd floor office hallway",
+  //     label: "Building A • 3rd Floor",
+  //   },
+  // ];
 
   return (
     <div className="min-h-screen bg-[#FAF6EA] text-slate-900 antialiased">
@@ -840,220 +840,220 @@ function FeatureRow({
   );
 }
 
-function VacantFloorInfo({
-  badge,
-  floor,
-  title,
-  area,
-  phone,
-  ctaHref,
-  ctaText,
-}: {
-  badge: string;
-  floor: string;
-  title: string;
-  area: string;
-  phone: string;
-  ctaHref?: string;
-  ctaText?: string;
-}) {
-  return (
-    <div>
-      <Kicker text={floor} />
-      <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em]">
-        {badge}
-      </div>
-      <h3
-        data-reveal
-        className="mt-6 text-3xl md:text-4xl font-extrabold tracking-tight"
-      >
-        {title}
-      </h3>
-      <div className="mt-7 rounded-3xl bg-white/55 ring-1 ring-black/10 p-5">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
-            FLOOR AREA
-          </span>
-          <span className="font-semibold">{area}</span>
-        </div>
-        <div className="mt-4 flex items-center justify-between text-sm border-t border-black/5 pt-4">
-          <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
-            CONTACT
-          </span>
-          <span className="font-semibold">{phone}</span>
-        </div>
-      </div>
-      {ctaHref && (
-        <div className="mt-6">
-          <a href={ctaHref} className="btn-primary">
-            {ctaText || "View Leasing Details"}{" "}
-            <ArrowRight className="h-4 w-4" />
-          </a>
-        </div>
-      )}
-    </div>
-  );
-}
+// function VacantFloorInfo({
+//   badge,
+//   floor,
+//   title,
+//   area,
+//   phone,
+//   ctaHref,
+//   ctaText,
+// }: {
+//   badge: string;
+//   floor: string;
+//   title: string;
+//   area: string;
+//   phone: string;
+//   ctaHref?: string;
+//   ctaText?: string;
+// }) {
+//   return (
+//     <div>
+//       <Kicker text={floor} />
+//       <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em]">
+//         {badge}
+//       </div>
+//       <h3
+//         data-reveal
+//         className="mt-6 text-3xl md:text-4xl font-extrabold tracking-tight"
+//       >
+//         {title}
+//       </h3>
+//       <div className="mt-7 rounded-3xl bg-white/55 ring-1 ring-black/10 p-5">
+//         <div className="flex items-center justify-between text-sm">
+//           <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
+//             FLOOR AREA
+//           </span>
+//           <span className="font-semibold">{area}</span>
+//         </div>
+//         <div className="mt-4 flex items-center justify-between text-sm border-t border-black/5 pt-4">
+//           <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
+//             CONTACT
+//           </span>
+//           <span className="font-semibold">{phone}</span>
+//         </div>
+//       </div>
+//       {ctaHref && (
+//         <div className="mt-6">
+//           <a href={ctaHref} className="btn-primary">
+//             {ctaText || "View Leasing Details"}{" "}
+//             <ArrowRight className="h-4 w-4" />
+//           </a>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
 
-function ComingSoonCard({
-  title,
-  subtitle = "Coming soon",
-}: {
-  title: string;
-  subtitle?: string;
-}) {
-  return (
-    <MediaCard>
-      <div className="relative h-[320px] md:h-[520px] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#FFF7DE] via-[#FFF2C7] to-white" />
-        <div className="relative z-10 text-center px-6">
-          <div className="inline-flex items-center rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em]">
-            COMING SOON
-          </div>
-          <h4 className="mt-5 text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
-            {title}
-          </h4>
-          <p className="mt-3 text-slate-600 text-base md:text-lg">{subtitle}</p>
-        </div>
-      </div>
-    </MediaCard>
-  );
-}
+// function ComingSoonCard({
+//   title,
+//   subtitle = "Coming soon",
+// }: {
+//   title: string;
+//   subtitle?: string;
+// }) {
+//   return (
+//     <MediaCard>
+//       <div className="relative h-[320px] md:h-[520px] flex items-center justify-center overflow-hidden">
+//         <div className="absolute inset-0 bg-gradient-to-br from-[#FFF7DE] via-[#FFF2C7] to-white" />
+//         <div className="relative z-10 text-center px-6">
+//           <div className="inline-flex items-center rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em]">
+//             COMING SOON
+//           </div>
+//           <h4 className="mt-5 text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
+//             {title}
+//           </h4>
+//           <p className="mt-3 text-slate-600 text-base md:text-lg">{subtitle}</p>
+//         </div>
+//       </div>
+//     </MediaCard>
+//   );
+// }
 
-function SpaceCard({
-  building,
-  floor,
-  title,
-  area,
-  phone,
-  email,
-  tag,
-}: {
-  building: string;
-  floor: string;
-  title: string;
-  area: string;
-  phone: string;
-  email: string;
-  tag?: string;
-}) {
-  return (
-    <div className="relative rounded-[28px] bg-white/55 ring-1 ring-black/10 p-7 shadow-[0_20px_70px_rgba(15,23,42,0.08)] hover:-translate-y-[2px] hover:shadow-[0_30px_95px_rgba(15,23,42,0.12)] transition">
-      {tag && (
-        <div className="absolute top-4 right-4 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em] shadow-[0_18px_50px_rgba(2,6,23,0.16)]">
-          {tag}
-        </div>
-      )}
-      <p className="text-xs tracking-[0.18em] text-slate-500 font-semibold">
-        {building}
-      </p>
-      <h3 className="mt-3 text-2xl font-extrabold tracking-tight">{floor}</h3>
-      <p className="mt-2 text-slate-700">{title}</p>
-      <div className="mt-6 space-y-3 text-sm">
-        <div className="flex items-center justify-between border-t border-black/5 pt-4">
-          <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
-            FLOOR AREA
-          </span>
-          <span className="font-semibold">{area}</span>
-        </div>
-        <div className="flex flex-col gap-2 pt-3">
-          <div className="inline-flex items-center gap-2 text-slate-800">
-            <Phone className="h-4 w-4 text-slate-500" /> {phone}
-          </div>
-          <div className="inline-flex items-center gap-2 text-slate-800">
-            <Mail className="h-4 w-4 text-slate-500" /> {email}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+// function SpaceCard({
+//   building,
+//   floor,
+//   title,
+//   area,
+//   phone,
+//   email,
+//   tag,
+// }: {
+//   building: string;
+//   floor: string;
+//   title: string;
+//   area: string;
+//   phone: string;
+//   email: string;
+//   tag?: string;
+// }) {
+//   return (
+//     <div className="relative rounded-[28px] bg-white/55 ring-1 ring-black/10 p-7 shadow-[0_20px_70px_rgba(15,23,42,0.08)] hover:-translate-y-[2px] hover:shadow-[0_30px_95px_rgba(15,23,42,0.12)] transition">
+//       {tag && (
+//         <div className="absolute top-4 right-4 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em] shadow-[0_18px_50px_rgba(2,6,23,0.16)]">
+//           {tag}
+//         </div>
+//       )}
+//       <p className="text-xs tracking-[0.18em] text-slate-500 font-semibold">
+//         {building}
+//       </p>
+//       <h3 className="mt-3 text-2xl font-extrabold tracking-tight">{floor}</h3>
+//       <p className="mt-2 text-slate-700">{title}</p>
+//       <div className="mt-6 space-y-3 text-sm">
+//         <div className="flex items-center justify-between border-t border-black/5 pt-4">
+//           <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
+//             FLOOR AREA
+//           </span>
+//           <span className="font-semibold">{area}</span>
+//         </div>
+//         <div className="flex flex-col gap-2 pt-3">
+//           <div className="inline-flex items-center gap-2 text-slate-800">
+//             <Phone className="h-4 w-4 text-slate-500" /> {phone}
+//           </div>
+//           <div className="inline-flex items-center gap-2 text-slate-800">
+//             <Mail className="h-4 w-4 text-slate-500" /> {email}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
-function FloorCarousel({
-  images,
-  title = "Available Floors",
-  intervalMs = 5000,
-  fit = "contain",
-}: {
-  images: { src: string; alt: string; label?: string }[];
-  title?: string;
-  intervalMs?: number;
-  fit?: "contain" | "cover";
-}) {
-  const [i, setI] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const count = images.length;
+// function FloorCarousel({
+//   images,
+//   title = "Available Floors",
+//   intervalMs = 5000,
+//   fit = "contain",
+// }: {
+//   images: { src: string; alt: string; label?: string }[];
+//   title?: string;
+//   intervalMs?: number;
+//   fit?: "contain" | "cover";
+// }) {
+//   const [i, setI] = useState(0);
+//   const [paused, setPaused] = useState(false);
+//   const count = images.length;
 
-  useEffect(() => {
-    if (paused || count <= 1) return;
-    const t = window.setInterval(
-      () => setI((p) => (p + 1) % count),
-      intervalMs,
-    );
-    return () => window.clearInterval(t);
-  }, [paused, count, intervalMs]);
+//   useEffect(() => {
+//     if (paused || count <= 1) return;
+//     const t = window.setInterval(
+//       () => setI((p) => (p + 1) % count),
+//       intervalMs,
+//     );
+//     return () => window.clearInterval(t);
+//   }, [paused, count, intervalMs]);
 
-  const go = (next: number) => setI((next + count) % count);
-  if (!images.length) return null;
+//   const go = (next: number) => setI((next + count) % count);
+//   if (!images.length) return null;
 
-  return (
-    <div
-      className="rounded-[28px] bg-white/55 ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
-      <div className="flex items-center justify-between px-5 md:px-6 py-4 border-b border-black/5">
-        <div>
-          <p className="text-[11px] tracking-[0.18em] text-slate-500 font-semibold">
-            GALLERY
-          </p>
-          <h4 className="mt-1 text-lg md:text-xl font-extrabold tracking-tight text-slate-900">
-            {title}
-          </h4>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => go(i - 1)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/60 ring-1 ring-black/10"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            onClick={() => go(i + 1)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/60 ring-1 ring-black/10"
-          >
-            ›
-          </button>
-        </div>
-      </div>
-      <div className="relative h-[320px] md:h-[520px]">
-        {images.map((img, idx) => (
-          <div
-            key={img.src + idx}
-            className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
-          >
-            <img
-              src={img.src}
-              alt={img.alt}
-              className={`absolute inset-0 h-full w-full ${fit === "contain" ? "object-contain" : "object-cover"}`}
-            />
-            {img.label && (
-              <div className="absolute left-5 bottom-5">
-                <div className="rounded-2xl bg-white/70 backdrop-blur-xl ring-1 ring-black/10 px-4 py-2">
-                  <p className="text-xs font-semibold text-slate-800">
-                    {img.label}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div
+//       className="rounded-[28px] bg-white/55 ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden"
+//       onMouseEnter={() => setPaused(true)}
+//       onMouseLeave={() => setPaused(false)}
+//     >
+//       <div className="flex items-center justify-between px-5 md:px-6 py-4 border-b border-black/5">
+//         <div>
+//           <p className="text-[11px] tracking-[0.18em] text-slate-500 font-semibold">
+//             GALLERY
+//           </p>
+//           <h4 className="mt-1 text-lg md:text-xl font-extrabold tracking-tight text-slate-900">
+//             {title}
+//           </h4>
+//         </div>
+//         <div className="flex items-center gap-2">
+//           <button
+//             type="button"
+//             onClick={() => go(i - 1)}
+//             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/60 ring-1 ring-black/10"
+//           >
+//             ‹
+//           </button>
+//           <button
+//             type="button"
+//             onClick={() => go(i + 1)}
+//             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/60 ring-1 ring-black/10"
+//           >
+//             ›
+//           </button>
+//         </div>
+//       </div>
+//       <div className="relative h-[320px] md:h-[520px]">
+//         {images.map((img, idx) => (
+//           <div
+//             key={img.src + idx}
+//             className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
+//           >
+//             <img
+//               src={img.src}
+//               alt={img.alt}
+//               className={`absolute inset-0 h-full w-full ${fit === "contain" ? "object-contain" : "object-cover"}`}
+//             />
+//             {img.label && (
+//               <div className="absolute left-5 bottom-5">
+//                 <div className="rounded-2xl bg-white/70 backdrop-blur-xl ring-1 ring-black/10 px-4 py-2">
+//                   <p className="text-xs font-semibold text-slate-800">
+//                     {img.label}
+//                   </p>
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
 
 function DropdownPill({
   label,
