@@ -672,7 +672,7 @@ export default function Home() {
           }
           right={
             <ImageCard
-              src="/swopna.png"
+              src="/Swopna.png"
               alt="Swopna Chitra"
               fit="contain"
               zoom="scale-100"
