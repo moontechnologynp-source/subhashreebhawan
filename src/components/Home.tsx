@@ -3337,7 +3337,22 @@ function getFloorVisual(
     | "b"
 ) {
   // ======================================
-  // 1. FLOOR GALLERY IMAGE
+  // CURRENT TENANT IDS
+  // ======================================
+
+  const tenantIds =
+    floorTenants.map(
+      (tenant) =>
+        Number(
+          tenant.id
+        )
+    );
+
+  // ======================================
+  // FLOOR IMAGE ONLY
+  //
+  // A proper floor image must not belong
+  // to a tenant.
   // ======================================
 
   const floorImage =
@@ -3346,46 +3361,72 @@ function getFloorVisual(
         Number(
           item.floor_id
         ) ===
-        Number(
-          floor.id
+          Number(
+            floor.id
+          ) &&
+        (
+          item.tenant_id ===
+            null ||
+          item.tenant_id ===
+            undefined
         ) &&
         Boolean(
           item.is_active
         )
     );
 
-  if (floorImage) {
+  // ======================================
+  // AVAILABLE / EMPTY FLOOR
+  // ======================================
+
+  if (
+    floor.status ===
+      "available" ||
+    floorTenants.length ===
+      0
+  ) {
+    // If an actual floor image exists,
+    // use that image.
+    if (floorImage) {
+      return {
+        src:
+          resolveMediaUrl(
+            floorImage.image_url
+          ),
+
+        alt:
+          floorImage.alt_text ||
+          floorImage.title ||
+          `${floor.name} available for rent`,
+
+        isBackendImage:
+          true,
+      };
+    }
+
+    // Never show an old tenant image
+    // when the floor is empty.
     return {
       src:
-        resolveMediaUrl(
-          floorImage.image_url
-        ),
+        "/subhashree.png",
 
       alt:
-        floorImage.alt_text ||
-        floorImage.title ||
-        floor.name,
+        `${floor.name} available for rent`,
 
       isBackendImage:
-        true,
+        false,
     };
   }
 
   // ======================================
-  // 2. TENANT GALLERY IMAGE
+  // CURRENT TENANT GALLERY IMAGE
   // ======================================
-
-  const tenantIds =
-    floorTenants.map(
-      (tenant) =>
-        tenant.id
-    );
 
   const tenantImage =
     gallery.find(
       (item) =>
         item.tenant_id !==
-        null &&
+          null &&
         tenantIds.includes(
           Number(
             item.tenant_id
@@ -3414,7 +3455,7 @@ function getFloorVisual(
   }
 
   // ======================================
-  // 3. TENANT LOGO
+  // CURRENT TENANT LOGO
   // ======================================
 
   const tenantWithLogo =
@@ -3443,16 +3484,40 @@ function getFloorVisual(
   }
 
   // ======================================
-  // 4. ORIGINAL WEBSITE FALLBACK
+  // FLOOR IMAGE
+  // ======================================
+
+  if (floorImage) {
+    return {
+      src:
+        resolveMediaUrl(
+          floorImage.image_url
+        ),
+
+      alt:
+        floorImage.alt_text ||
+        floorImage.title ||
+        floor.name,
+
+      isBackendImage:
+        true,
+    };
+  }
+
+  // ======================================
+  // OLD STATIC FALLBACK
+  //
+  // This is only reached while the floor
+  // is occupied.
   // ======================================
 
   return building === "a"
     ? getStaticBuildingAImage(
-      floor.floor_number
-    )
+        floor.floor_number
+      )
     : getStaticBuildingBImage(
-      floor.floor_number
-    );
+        floor.floor_number
+      );
 }
 
 function getStaticBuildingAImage(
