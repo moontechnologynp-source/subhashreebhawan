@@ -8,6 +8,7 @@ import React, {
 } from "react";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import {
   ArrowRight,
@@ -1156,66 +1157,6 @@ export default function Home() {
       cancelled = true;
     };
   }, []);
-
-  // ========================================
-  // BUILDING TENANTS
-  // ========================================
-
-  const tenantsA =
-    useMemo(
-      () =>
-        tenants
-          .filter(
-            (tenant) =>
-              tenant.building_slug ===
-              "building-a" ||
-              Number(
-                tenant.building_id
-              ) ===
-              Number(
-                buildingA.id
-              )
-          )
-          .sort(
-            (a, b) =>
-              a.sort_order -
-              b.sort_order ||
-              a.id - b.id
-          ),
-
-      [
-        tenants,
-        buildingA.id,
-      ]
-    );
-
-  const tenantsB =
-    useMemo(
-      () =>
-        tenants
-          .filter(
-            (tenant) =>
-              tenant.building_slug ===
-              "building-b" ||
-              Number(
-                tenant.building_id
-              ) ===
-              Number(
-                buildingB.id
-              )
-          )
-          .sort(
-            (a, b) =>
-              a.sort_order -
-              b.sort_order ||
-              a.id - b.id
-          ),
-
-      [
-        tenants,
-        buildingB.id,
-      ]
-    );
 
   // ========================================
   // TENANTS BY FLOOR
@@ -3008,14 +2949,14 @@ export default function Home() {
                   EXPLORE
                 </h4>
 
-                <a
+                <Link
                   href="/blog"
                   className="mt-4 inline-flex items-center gap-2 font-semibold text-slate-700 transition hover:text-slate-950"
                 >
                   Our Blog
 
                   <ArrowRight className="h-4 w-4" />
-                </a>
+                </Link>
 
 
 
