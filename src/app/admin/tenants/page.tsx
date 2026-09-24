@@ -54,9 +54,9 @@ interface Tenant {
   email: string | null;
 
   status:
-  | "active"
-  | "inactive"
-  | "coming_soon";
+    | "active"
+    | "inactive"
+    | "coming_soon";
 
   sort_order: number;
 
@@ -90,9 +90,9 @@ interface TenantForm {
   email: string;
 
   status:
-  | "active"
-  | "inactive"
-  | "coming_soon";
+    | "active"
+    | "inactive"
+    | "coming_soon";
 
   sort_order: string;
 }
@@ -154,17 +154,33 @@ export default function AdminTenantsPage() {
   const [saving, setSaving] =
     useState(false);
 
+  const [
+    moveOutTarget,
+    setMoveOutTarget,
+  ] = useState<Tenant | null>(
+    null
+  );
+
+  const [
+    movingOut,
+    setMovingOut,
+  ] = useState(false);
+
   const [error, setError] =
     useState("");
 
   const [message, setMessage] =
     useState("");
 
-  const [buildingFilter, setBuildingFilter] =
-    useState("all");
+  const [
+    buildingFilter,
+    setBuildingFilter,
+  ] = useState("all");
 
-  const [floorFilter, setFloorFilter] =
-    useState("all");
+  const [
+    floorFilter,
+    setFloorFilter,
+  ] = useState("all");
 
   // ========================================
   // TOKEN
@@ -180,126 +196,142 @@ export default function AdminTenantsPage() {
   // LOAD DATA
   // ========================================
 
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
+  const loadData =
+    useCallback(async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-      const token = getToken();
+        const token =
+          getToken();
 
-      if (!token) {
-        router.replace("/admin/login");
-        return;
-      }
+        if (!token) {
+          router.replace(
+            "/admin/login"
+          );
 
-      // VERIFY ADMIN
-
-      const authResponse = await fetch(
-        `${API_URL}/auth/me`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          return;
         }
-      );
 
-      if (!authResponse.ok) {
-        localStorage.removeItem(
-          "subhashree_admin_token"
+        // ==================================
+        // VERIFY ADMIN
+        // ==================================
+
+        const authResponse =
+          await fetch(
+            `${API_URL}/auth/me`,
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+        if (!authResponse.ok) {
+          localStorage.removeItem(
+            "subhashree_admin_token"
+          );
+
+          localStorage.removeItem(
+            "subhashree_admin"
+          );
+
+          router.replace(
+            "/admin/login"
+          );
+
+          return;
+        }
+
+        // ==================================
+        // LOAD DATA
+        // ==================================
+
+        const [
+          buildingsResponse,
+          floorsResponse,
+          tenantsResponse,
+        ] = await Promise.all([
+          fetch(
+            `${API_URL}/buildings`
+          ),
+
+          fetch(
+            `${API_URL}/floors`
+          ),
+
+          fetch(
+            `${API_URL}/tenants`
+          ),
+        ]);
+
+        const buildingsData =
+          await buildingsResponse.json();
+
+        const floorsData =
+          await floorsResponse.json();
+
+        const tenantsData =
+          await tenantsResponse.json();
+
+        if (
+          !buildingsResponse.ok ||
+          !buildingsData.success
+        ) {
+          throw new Error(
+            buildingsData.message ||
+              "Unable to load buildings"
+          );
+        }
+
+        if (
+          !floorsResponse.ok ||
+          !floorsData.success
+        ) {
+          throw new Error(
+            floorsData.message ||
+              "Unable to load floors"
+          );
+        }
+
+        if (
+          !tenantsResponse.ok ||
+          !tenantsData.success
+        ) {
+          throw new Error(
+            tenantsData.message ||
+              "Unable to load tenants"
+          );
+        }
+
+        setBuildings(
+          buildingsData.buildings ||
+            []
         );
 
-        localStorage.removeItem(
-          "subhashree_admin"
+        setFloors(
+          floorsData.floors ||
+            []
         );
 
-        router.replace("/admin/login");
+        setTenants(
+          tenantsData.tenants ||
+            []
+        );
+      } catch (error) {
+        console.error(
+          "Load tenants error:",
+          error
+        );
 
-        return;
+        setError(
+          "Unable to load tenant information."
+        );
+      } finally {
+        setLoading(false);
       }
-
-      // LOAD DATA
-
-      const [
-        buildingsResponse,
-        floorsResponse,
-        tenantsResponse,
-      ] = await Promise.all([
-        fetch(
-          `${API_URL}/buildings`
-        ),
-
-        fetch(
-          `${API_URL}/floors`
-        ),
-
-        fetch(
-          `${API_URL}/tenants`
-        ),
-      ]);
-
-      const buildingsData =
-        await buildingsResponse.json();
-
-      const floorsData =
-        await floorsResponse.json();
-
-      const tenantsData =
-        await tenantsResponse.json();
-
-      if (
-        !buildingsResponse.ok ||
-        !buildingsData.success
-      ) {
-        throw new Error(
-          buildingsData.message ||
-          "Unable to load buildings"
-        );
-      }
-
-      if (
-        !floorsResponse.ok ||
-        !floorsData.success
-      ) {
-        throw new Error(
-          floorsData.message ||
-          "Unable to load floors"
-        );
-      }
-
-      if (
-        !tenantsResponse.ok ||
-        !tenantsData.success
-      ) {
-        throw new Error(
-          tenantsData.message ||
-          "Unable to load tenants"
-        );
-      }
-
-      setBuildings(
-        buildingsData.buildings || []
-      );
-
-      setFloors(
-        floorsData.floors || []
-      );
-
-      setTenants(
-        tenantsData.tenants || []
-      );
-    } catch (error) {
-      console.error(
-        "Load tenants error:",
-        error
-      );
-
-      setError(
-        "Unable to load tenant information."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [API_URL, router]);
+    }, [API_URL, router]);
 
   useEffect(() => {
     loadData();
@@ -321,7 +353,8 @@ export default function AdminTenantsPage() {
   const floorsForFilter =
     useMemo(() => {
       if (
-        buildingFilter === "all"
+        buildingFilter ===
+        "all"
       ) {
         return floors;
       }
@@ -346,22 +379,23 @@ export default function AdminTenantsPage() {
         (tenant) => {
           const buildingMatches =
             buildingFilter ===
-            "all" ||
+              "all" ||
             Number(
               tenant.building_id
             ) ===
-            Number(
-              buildingFilter
-            );
+              Number(
+                buildingFilter
+              );
 
           const floorMatches =
-            floorFilter === "all" ||
+            floorFilter ===
+              "all" ||
             Number(
               tenant.floor_id
             ) ===
-            Number(
-              floorFilter
-            );
+              Number(
+                floorFilter
+              );
 
           return (
             buildingMatches &&
@@ -385,6 +419,7 @@ export default function AdminTenantsPage() {
   ) => {
     setForm((current) => ({
       ...current,
+
       [field]: value,
     }));
   };
@@ -402,8 +437,8 @@ export default function AdminTenantsPage() {
       floor_id:
         floors.length > 0
           ? String(
-            floors[0].id
-          )
+              floors[0].id
+            )
           : "",
     });
 
@@ -443,25 +478,31 @@ export default function AdminTenantsPage() {
         "",
 
       description:
-        tenant.description || "",
+        tenant.description ||
+        "",
 
       logo:
-        tenant.logo || "",
+        tenant.logo ||
+        "",
 
       website_url:
-        tenant.website_url || "",
+        tenant.website_url ||
+        "",
 
       phone:
-        tenant.phone || "",
+        tenant.phone ||
+        "",
 
       email:
-        tenant.email || "",
+        tenant.email ||
+        "",
 
       status:
         tenant.status,
 
       sort_order: String(
-        tenant.sort_order ?? 0
+        tenant.sort_order ??
+          0
       ),
     });
 
@@ -477,7 +518,7 @@ export default function AdminTenantsPage() {
   };
 
   // ========================================
-  // CANCEL
+  // CANCEL FORM
   // ========================================
 
   const cancelForm = () => {
@@ -513,7 +554,9 @@ export default function AdminTenantsPage() {
       return;
     }
 
-    if (!form.name.trim()) {
+    if (
+      !form.name.trim()
+    ) {
       setError(
         "Tenant name is required."
       );
@@ -605,12 +648,31 @@ export default function AdminTenantsPage() {
         await response.json();
 
       if (
+        response.status ===
+        401
+      ) {
+        localStorage.removeItem(
+          "subhashree_admin_token"
+        );
+
+        localStorage.removeItem(
+          "subhashree_admin"
+        );
+
+        router.replace(
+          "/admin/login"
+        );
+
+        return;
+      }
+
+      if (
         !response.ok ||
         !data.success
       ) {
         setError(
           data.message ||
-          "Unable to save tenant."
+            "Unable to save tenant."
         );
 
         return;
@@ -646,6 +708,140 @@ export default function AdminTenantsPage() {
   };
 
   // ========================================
+  // OPEN MOVE OUT
+  // ========================================
+
+  const openMoveOutModal = (
+    tenant: Tenant
+  ) => {
+    setError("");
+    setMessage("");
+
+    setMoveOutTarget(
+      tenant
+    );
+  };
+
+  // ========================================
+  // CLOSE MOVE OUT
+  // ========================================
+
+  const closeMoveOutModal =
+    () => {
+      if (movingOut) {
+        return;
+      }
+
+      setMoveOutTarget(
+        null
+      );
+    };
+
+  // ========================================
+  // MOVE TENANT OUT
+  // ========================================
+
+  const handleMoveOut =
+    async () => {
+      if (!moveOutTarget) {
+        return;
+      }
+
+      const tenantName =
+        moveOutTarget.name;
+
+      try {
+        setMovingOut(true);
+
+        setError("");
+        setMessage("");
+
+        const token =
+          getToken();
+
+        if (!token) {
+          router.replace(
+            "/admin/login"
+          );
+
+          return;
+        }
+
+        const response =
+          await fetch(
+            `${API_URL}/tenants/${moveOutTarget.id}/move-out`,
+            {
+              method:
+                "PATCH",
+
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (
+          response.status ===
+          401
+        ) {
+          localStorage.removeItem(
+            "subhashree_admin_token"
+          );
+
+          localStorage.removeItem(
+            "subhashree_admin"
+          );
+
+          router.replace(
+            "/admin/login"
+          );
+
+          return;
+        }
+
+        if (
+          !response.ok ||
+          !data.success
+        ) {
+          setError(
+            data.message ||
+              "Unable to move tenant out."
+          );
+
+          return;
+        }
+
+        setMoveOutTarget(
+          null
+        );
+
+        setMessage(
+          data.message ||
+            `${tenantName} moved out successfully.`
+        );
+
+        await loadData();
+      } catch (error) {
+        console.error(
+          "Move out tenant error:",
+          error
+        );
+
+        setError(
+          "Unable to connect to the backend."
+        );
+      } finally {
+        setMovingOut(
+          false
+        );
+      }
+    };
+
+  // ========================================
   // STATUS STYLES
   // ========================================
 
@@ -673,7 +869,9 @@ export default function AdminTenantsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      {/* HEADER */}
+      {/* ===================================
+          HEADER
+      =================================== */}
 
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -708,7 +906,9 @@ export default function AdminTenantsPage() {
       </header>
 
       <div className="mx-auto max-w-7xl px-6 py-8">
-        {/* MESSAGES */}
+        {/* ===================================
+            MESSAGES
+        =================================== */}
 
         {error && (
           <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -722,7 +922,9 @@ export default function AdminTenantsPage() {
           </div>
         )}
 
-        {/* FORM */}
+        {/* ===================================
+            FORM
+        =================================== */}
 
         {showForm && (
           <form
@@ -734,7 +936,8 @@ export default function AdminTenantsPage() {
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">
-                  {editingId !== null
+                  {editingId !==
+                  null
                     ? "Edit Tenant"
                     : "Add Tenant"}
                 </h2>
@@ -858,8 +1061,9 @@ export default function AdminTenantsPage() {
 
                 <p className="mt-1 text-xs text-slate-400">
                   Leave blank when
-                  creating to generate it
-                  from the tenant name.
+                  creating to generate
+                  it from the tenant
+                  name.
                 </p>
               </div>
 
@@ -1048,8 +1252,8 @@ export default function AdminTenantsPage() {
 
                 <p className="mt-1 text-xs text-slate-400">
                   Later we will select
-                  this directly from the
-                  Gallery uploader.
+                  this directly from
+                  the Gallery uploader.
                 </p>
               </div>
 
@@ -1092,7 +1296,9 @@ export default function AdminTenantsPage() {
 
               <button
                 type="submit"
-                disabled={saving}
+                disabled={
+                  saving
+                }
                 className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
               >
                 {saving
@@ -1106,7 +1312,9 @@ export default function AdminTenantsPage() {
           </form>
         )}
 
-        {/* HEADER / FILTERS */}
+        {/* ===================================
+            HEADER / FILTERS
+        =================================== */}
 
         <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -1115,9 +1323,9 @@ export default function AdminTenantsPage() {
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              {tenants.length} tenants
-              currently in the
-              database.
+              {tenants.length}{" "}
+              tenants currently in
+              the database.
             </p>
           </div>
 
@@ -1216,7 +1424,9 @@ export default function AdminTenantsPage() {
           </div>
         </div>
 
-        {/* TENANT LIST */}
+        {/* ===================================
+            TENANT LIST
+        =================================== */}
 
         {loading ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
@@ -1283,17 +1493,33 @@ export default function AdminTenantsPage() {
                       </p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openEditForm(
-                          tenant
-                        )
-                      }
-                      className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                    >
-                      Edit
-                    </button>
+                    {/* ACTIONS */}
+
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openEditForm(
+                            tenant
+                          )
+                        }
+                        className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openMoveOutModal(
+                            tenant
+                          )
+                        }
+                        className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+                      >
+                        Move Out
+                      </button>
+                    </div>
                   </div>
 
                   <p className="mt-5 text-sm leading-6 text-slate-600">
@@ -1307,6 +1533,7 @@ export default function AdminTenantsPage() {
                         <span className="font-medium text-slate-800">
                           Phone:
                         </span>{" "}
+
                         {
                           tenant.phone
                         }
@@ -1318,6 +1545,7 @@ export default function AdminTenantsPage() {
                         <span className="font-medium text-slate-800">
                           Email:
                         </span>{" "}
+
                         {
                           tenant.email
                         }
@@ -1329,6 +1557,7 @@ export default function AdminTenantsPage() {
                         <span className="font-medium text-slate-800">
                           Website:
                         </span>{" "}
+
                         {
                           tenant.website_url
                         }
@@ -1341,6 +1570,133 @@ export default function AdminTenantsPage() {
           </div>
         )}
       </div>
+
+      {/* ===================================
+          MOVE OUT CONFIRMATION
+      =================================== */}
+
+      {moveOutTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-sm"
+          onMouseDown={(
+            event
+          ) => {
+            if (
+              event.target ===
+              event.currentTarget
+            ) {
+              closeMoveOutModal();
+            }
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="move-out-title"
+            className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-600">
+                  Tenant Move Out
+                </p>
+
+                <h2
+                  id="move-out-title"
+                  className="mt-2 text-xl font-semibold text-slate-900"
+                >
+                  Move out{" "}
+                  {
+                    moveOutTarget.name
+                  }
+                  ?
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={
+                  closeMoveOutModal
+                }
+                disabled={
+                  movingOut
+                }
+                className="rounded-lg px-2 py-1 text-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Close move out confirmation"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-sm font-semibold text-slate-900">
+                {
+                  moveOutTarget.building_name
+                }{" "}
+                ·{" "}
+                {
+                  moveOutTarget.floor_name
+                }
+              </p>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                This will remove{" "}
+                {
+                  moveOutTarget.name
+                }{" "}
+                from the tenant list
+                and the public
+                website.
+              </p>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                If this is the last
+                tenant on{" "}
+                {
+                  moveOutTarget.floor_name
+                }
+                , that floor will
+                automatically become
+                available for rent.
+                If another tenant
+                remains on the floor,
+                it will stay
+                occupied.
+              </p>
+            </div>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={
+                  closeMoveOutModal
+                }
+                disabled={
+                  movingOut
+                }
+                className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={
+                  handleMoveOut
+                }
+                disabled={
+                  movingOut
+                }
+                className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {movingOut
+                  ? "Moving Out..."
+                  : "Confirm Move Out"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
