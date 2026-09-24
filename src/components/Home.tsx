@@ -3017,49 +3017,7 @@ export default function Home() {
                   <ArrowRight className="h-4 w-4" />
                 </a>
 
-                <div className="mt-5 text-sm text-slate-600">
-                  <p>
-                    {
-                      tenantsA.length
-                    }{" "}
-                    tenant
-                    {tenantsA.length ===
-                    1
-                      ? ""
-                      : "s"}{" "}
-                    in{" "}
-                    {
-                      buildingA.name
-                    }
-                  </p>
-
-                  <p className="mt-2">
-                    {
-                      tenantsB.length
-                    }{" "}
-                    tenant
-                    {tenantsB.length ===
-                    1
-                      ? ""
-                      : "s"}{" "}
-                    in{" "}
-                    {
-                      buildingB.name
-                    }
-                  </p>
-
-                  <p className="mt-2">
-                    {availableFloors.length >
-                    0
-                      ? `${availableFloors.length} available ${
-                          availableFloors.length ===
-                          1
-                            ? "floor"
-                            : "floors"
-                        }`
-                      : "Live floor availability"}
-                  </p>
-                </div>
+                
 
                 <div className="mt-5 space-y-2 text-sm">
                   <a
