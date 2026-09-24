@@ -345,6 +345,10 @@ export default function AdminDashboardPage() {
             </p>
           </button>
 
+          {/* BLOGS */}
+
+          <button type="button" onClick={() => router.push("/admin/blogs")} className="rounded-2xl bg-white p-6 text-left shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"><h2 className="text-xl font-bold text-slate-900">Manage blogs</h2><p className="mt-2 text-sm text-slate-500">Create, edit and publish articles.</p></button>
+
           {/* GALLERY */}
 
           <button

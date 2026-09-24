@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { getBlogs, blogDate } from "@/lib/blogs";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BookOpen, Clock3 } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Blog | Subha Shree Bhawan",
@@ -9,30 +10,8 @@ export const metadata: Metadata = {
     "News, insights, and updates from Subha Shree Bhawan in Baluwatar, Kathmandu.",
 };
 
-const posts = [
-  {
-    category: "Commercial Property",
-    date: "August 14, 2026",
-    title: "What to Look for Before Choosing a Commercial Building for Rent in Kathmandu",
-    excerpt:
-      "Learn the key factors to consider, including location, accessibility, parking, building quality, facilities, and long-term value.",
-    image: "/commercial-building-rent-kathmandu-clean.png",
-    href: "/blog/commercial-building-for-rent-in-kathmandu",
-    readTime: "9 min read",
-  },
-  {
-    category: "Workspace",
-    date: "August 12, 2026",
-    title: "Why Location and Building Quality Matter When Choosing a Rental Building in Kathmandu",
-    excerpt:
-      "Discover why location, building quality, accessibility, facilities, and maintenance matter when choosing a rental building in Kathmandu.",
-    image: "/blo.png",
-    href: "/blog/why-location-and-building-quality-matter-in-kathmandu",
-    readTime: "8 min read",
-  },
-];
-
-export default function BlogPage() {
+export default async function BlogPage() {
+  const posts = (await getBlogs()).map(post => ({ ...post, href: `/blog/${post.slug}`, date: blogDate(post.publishedAt) }));
   return (
     <main className="min-h-screen overflow-hidden bg-[#FAF6EA] text-slate-900 antialiased">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -79,12 +58,13 @@ export default function BlogPage() {
           <span className="text-sm font-semibold text-slate-500">{posts.length} articles</span>
         </div>
 
+        {posts.length === 0 && <p className="mt-8 text-slate-600">New stories are coming soon.</p>}
         <div className="mt-6 grid gap-8">
           {posts.map((post, index) => {
             return (
               <article key={post.title} className="group overflow-hidden rounded-[32px] bg-white/70 ring-1 ring-black/[0.08] shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-sm transition duration-500 hover:-translate-y-1 hover:shadow-[0_32px_100px_rgba(15,23,42,0.14)] md:grid md:grid-cols-[1.08fr_0.92fr]">
                 <Link href={post.href} className={`relative block min-h-[340px] overflow-hidden md:min-h-[470px] ${index % 2 === 1 ? "md:order-2" : ""}`}>
-                  <Image src={post.image} alt={post.title} fill className="object-cover transition duration-700 group-hover:scale-[1.035]" sizes="(max-width: 768px) 100vw, 55vw" />
+                  <img src={post.image || "/buildingA.png"} alt={post.title} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.035]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
                   {index === 0 && <span className="absolute left-5 top-5 rounded-full bg-slate-950/85 px-4 py-2 text-[11px] font-bold tracking-[0.15em] text-white backdrop-blur-md">FEATURED</span>}
                 </Link>
@@ -92,7 +72,7 @@ export default function BlogPage() {
                   <span className="w-fit rounded-full bg-[#FFF2C7] px-3 py-1.5 text-xs font-bold text-amber-800">{post.category}</span>
                   <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-500">
                     <span>{post.date}</span>
-                    <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4" /> {post.readTime}</span>
+                    
                   </div>
                   <h2 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight md:text-4xl">{post.title}</h2>
                   <p className="mt-5 leading-relaxed text-slate-600">{post.excerpt}</p>
