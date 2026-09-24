@@ -7,6 +7,7 @@
 }
 
 @keyframes float-slow {
+
   0%,
   100% {
     transform: translate3d(-50%, 0, 0) scale(1);
@@ -18,6 +19,7 @@
 }
 
 @keyframes float-slow-2 {
+
   0%,
   100% {
     transform: translate3d(0, 0, 0) scale(1);
@@ -50,14 +52,14 @@ body {
   color: #0f172a;
 }
 
-.building-copy > div {
+.building-copy>div {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }
 
-.building-copy > div > :nth-child(n + 3) {
+.building-copy>div> :nth-child(n + 3) {
   display: none;
 }
 
@@ -78,7 +80,7 @@ body {
   backdrop-filter: blur(16px);
 }
 
-.building-visual > div {
+.building-visual>div {
   border-radius: 28px;
   box-shadow: none;
   outline: none;
@@ -90,7 +92,7 @@ body {
   background: rgba(255, 255, 255, 0.82);
 }
 
-.building-visual > div > div:last-child:not(:first-child) {
+.building-visual>div>div:last-child:not(:first-child) {
   display: none;
 }
 
@@ -150,4 +152,33 @@ body {
 .btn-secondary:hover {
   transform: translateY(-1px);
   background: rgba(255, 255, 255, 0.7);
+}
+
+.form-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(226 232 240);
+  background: white;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  color: rgb(15 23 42);
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.form-input::placeholder {
+  color: rgb(148 163 184);
+}
+
+.form-input:focus {
+  border-color: rgb(100 116 139);
+  box-shadow: 0 0 0 3px rgb(148 163 184 / 0.12);
+}
+
+.form-input:disabled {
+  cursor: not-allowed;
+  background: rgb(248 250 252);
+  color: rgb(148 163 184);
 }

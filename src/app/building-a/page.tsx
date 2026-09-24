@@ -1,7 +1,16 @@
 "use client";
-//building A
-import React, { useEffect, useRef, useState } from "react";
+
+// Building A
+
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import Link from "next/link";
+
 import {
   ArrowRight,
   Building2,
@@ -15,214 +24,1003 @@ import {
   Stethoscope,
   X,
 } from "lucide-react";
+
 import { useRouter } from "next/navigation";
+
 import {
   clearPendingSectionScroll,
   queuePendingSectionScroll,
   resolvePendingSectionScroll,
 } from "@/lib/section-scroll";
 
+import {
+  getBuildingBySlug,
+  getFloorsByBuilding,
+  getTenants,
+  getGalleryByBuilding,
+  getBackendImageUrl,
+} from "@/lib/api";
+
+// ========================================
+// TYPES
+// ========================================
+
+type FloorStatus =
+  | "available"
+  | "occupied"
+  | "coming_soon"
+  | "inactive";
+
+interface BuildingData {
+  id: number;
+  name: string;
+  slug: string;
+  short_description: string | null;
+  description: string | null;
+  address: string | null;
+  total_floors: number;
+  status: string;
+  featured_image: string | null;
+  is_featured: number;
+  sort_order: number;
+}
+
+interface FloorData {
+  id: number;
+
+  building_id: number;
+
+  building_name: string;
+  building_slug: string;
+
+  name: string;
+  floor_number: number;
+  slug: string;
+
+  description: string | null;
+
+  area_sqft:
+    | string
+    | number
+    | null;
+
+  status: FloorStatus;
+
+  tenant_name: string | null;
+
+  featured_image: string | null;
+
+  sort_order: number;
+}
+
+interface TenantData {
+  id: number;
+
+  floor_id: number;
+
+  name: string;
+  slug: string;
+
+  short_description: string | null;
+  description: string | null;
+
+  logo: string | null;
+
+  website_url: string | null;
+
+  phone: string | null;
+  email: string | null;
+
+  status:
+    | "active"
+    | "inactive"
+    | "coming_soon";
+
+  sort_order: number;
+
+  floor_name: string;
+  floor_number: number;
+  floor_slug: string;
+
+  building_id: number;
+  building_name: string;
+  building_slug: string;
+}
+
+interface GalleryItem {
+  id: number;
+
+  building_id: number | null;
+  floor_id: number | null;
+  tenant_id: number | null;
+
+  title: string | null;
+  description: string | null;
+
+  image_url: string;
+  alt_text: string | null;
+
+  category:
+    | "general"
+    | "building"
+    | "floor"
+    | "tenant";
+
+  is_featured: number;
+  is_active: number;
+  sort_order: number;
+
+  building_name: string | null;
+  floor_name: string | null;
+  tenant_name: string | null;
+}
+
+// ========================================
+// PAGE
+// ========================================
+
 export default function BuildingAPage() {
   const router = useRouter();
-  const [openMenu, setOpenMenu] = useState<"a" | "b" | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const buildingAFloors = [
-    { label: "Ground Floor", id: "building-a-ground" },
-    { label: "1st Floor", id: "building-a-1st" },
-    { label: "2nd Floor", id: "building-a-2nd" },
-    { label: "3rd Floor", id: "building-a-3rd" },
-    { label: "Gym (4th–6th)", id: "building-a-gym" },
-    // { label: "Available Spaces", id: "available-spaces" },
-  ];
+  const [openMenu, setOpenMenu] =
+    useState<"a" | "b" | null>(
+      null,
+    );
 
-  const buildingBFloors = [
-    { label: "Ground Floor", id: "building-b-ground" },
-    { label: "1st Floor", id: "building-b-1st" },
-    { label: "2nd Floor", id: "building-b-2nd" },
-  ];
+  const [mobileOpen, setMobileOpen] =
+    useState(false);
+
+  const dropdownRef =
+    useRef<HTMLDivElement | null>(
+      null,
+    );
+
+  // ========================================
+  // BACKEND DATA
+  // ========================================
+
+  const [
+    building,
+    setBuilding,
+  ] =
+    useState<BuildingData | null>(
+      null,
+    );
+
+  const [floors, setFloors] =
+    useState<FloorData[]>([]);
+
+  const [tenants, setTenants] =
+    useState<TenantData[]>([]);
+
+  const [gallery, setGallery] =
+    useState<GalleryItem[]>([]);
+
+  const [
+    buildingBFloors,
+    setBuildingBFloors,
+  ] =
+    useState<FloorData[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  // ========================================
+  // LOAD BUILDING A
+  // ========================================
 
   useEffect(() => {
-    const els = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-reveal]"),
-    );
-    if (!els.length) return;
-    els.forEach((el) => el.classList.add("reveal"));
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            (entry.target as HTMLElement).classList.add("reveal-in");
-            io.unobserve(entry.target);
+    let cancelled = false;
+
+    const loadBuildingData =
+      async () => {
+        try {
+          setLoading(true);
+          setError("");
+
+          // --------------------------------
+          // BUILDING A
+          // --------------------------------
+
+          const buildingA =
+            (await getBuildingBySlug(
+              "building-a",
+            )) as BuildingData;
+
+          const [
+            floorData,
+            allTenantData,
+            galleryData,
+          ] = await Promise.all([
+            getFloorsByBuilding(
+              buildingA.id,
+            ),
+
+            getTenants(),
+
+            getGalleryByBuilding(
+              buildingA.id,
+            ),
+          ]);
+
+          if (cancelled) {
+            return;
           }
-        });
-      },
-      { threshold: 0.12 },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+
+          const sortedFloors = (
+            floorData as FloorData[]
+          ).sort(
+            (a, b) =>
+              a.sort_order -
+                b.sort_order ||
+              a.floor_number -
+                b.floor_number,
+          );
+
+          const buildingATenants = (
+            allTenantData as TenantData[]
+          )
+            .filter(
+              (tenant) =>
+                Number(
+                  tenant.building_id,
+                ) ===
+                Number(
+                  buildingA.id,
+                ),
+            )
+            .sort(
+              (a, b) =>
+                a.sort_order -
+                  b.sort_order ||
+                a.id - b.id,
+            );
+
+          setBuilding(buildingA);
+
+          setFloors(sortedFloors);
+
+          setTenants(
+            buildingATenants,
+          );
+
+          setGallery(
+            (
+              galleryData as GalleryItem[]
+            ).filter(
+              (item) =>
+                Boolean(
+                  item.is_active,
+                ),
+            ),
+          );
+
+          // --------------------------------
+          // BUILDING B MENU DATA
+          // --------------------------------
+
+          try {
+            const buildingB =
+              (await getBuildingBySlug(
+                "building-b",
+              )) as BuildingData;
+
+            const bFloors =
+              (await getFloorsByBuilding(
+                buildingB.id,
+              )) as FloorData[];
+
+            if (!cancelled) {
+              setBuildingBFloors(
+                bFloors.sort(
+                  (a, b) =>
+                    a.sort_order -
+                      b.sort_order ||
+                    a.floor_number -
+                      b.floor_number,
+                ),
+              );
+            }
+          } catch (menuError) {
+            console.warn(
+              "Unable to load Building B navigation:",
+              menuError,
+            );
+          }
+        } catch (loadError) {
+          console.error(
+            "Building A load error:",
+            loadError,
+          );
+
+          if (!cancelled) {
+            setError(
+              "Unable to load Building A information. Please make sure the backend is running.",
+            );
+          }
+        } finally {
+          if (!cancelled) {
+            setLoading(false);
+          }
+        }
+      };
+
+    loadBuildingData();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  // ========================================
+  // TENANTS GROUPED BY FLOOR
+  // ========================================
+
+  const tenantsByFloor =
+    useMemo(() => {
+      const map =
+        new Map<
+          number,
+          TenantData[]
+        >();
+
+      tenants.forEach(
+        (tenant) => {
+          const current =
+            map.get(
+              tenant.floor_id,
+            ) || [];
+
+          current.push(tenant);
+
+          map.set(
+            tenant.floor_id,
+            current,
+          );
+        },
+      );
+
+      return map;
+    }, [tenants]);
+
+  // ========================================
+  // MAIN FLOORS
+  // ========================================
+
+  const primaryFloors =
+    useMemo(
+      () =>
+        floors.filter(
+          (floor) =>
+            floor.floor_number <=
+            3,
+        ),
+      [floors],
+    );
+
+  const futureFloors =
+    useMemo(
+      () =>
+        floors.filter(
+          (floor) =>
+            floor.floor_number >=
+            4,
+        ),
+      [floors],
+    );
+
+  // ========================================
+  // BUILDING A MENU
+  // ========================================
+
+  const buildingAFloors =
+    useMemo(() => {
+      const items =
+        primaryFloors.map(
+          (floor) => ({
+            label: floor.name,
+
+            id: getBuildingASectionId(
+              floor,
+            ),
+          }),
+        );
+
+      if (
+        futureFloors.length >
+        0
+      ) {
+        items.push({
+          label:
+            getFutureFloorMenuLabel(
+              futureFloors,
+            ),
+
+          id: "building-a-gym",
+        });
+      }
+
+      return items;
+    }, [
+      primaryFloors,
+      futureFloors,
+    ]);
+
+  // ========================================
+  // BUILDING B MENU
+  // ========================================
+
+  const buildingBMenuFloors =
+    useMemo(() => {
+      if (
+        buildingBFloors.length >
+        0
+      ) {
+        return buildingBFloors.map(
+          (floor) => ({
+            label: floor.name,
+
+            id: getBuildingBSectionId(
+              floor,
+            ),
+          }),
+        );
+      }
+
+      return [
+        {
+          label: "Ground Floor",
+          id: "building-b-ground",
+        },
+
+        {
+          label: "1st Floor",
+          id: "building-b-1st",
+        },
+
+        {
+          label: "2nd Floor",
+          id: "building-b-2nd",
+        },
+      ];
+    }, [buildingBFloors]);
+
+  // ========================================
+  // AVAILABLE FLOORS
+  // ========================================
+
+  const availableFloors =
+    useMemo(
+      () =>
+        floors.filter(
+          (floor) =>
+            floor.status ===
+            "available",
+        ),
+      [floors],
+    );
+
+  const availableFutureFloors =
+    useMemo(
+      () =>
+        futureFloors.filter(
+          (floor) =>
+            floor.status ===
+            "available",
+        ),
+      [futureFloors],
+    );
+
+  // ========================================
+  // INQUIRY URLS
+  // ========================================
+
+  // Building is null while the page is
+  // initially loading, so we use the
+  // known Building A slug as a safe
+  // fallback.
+
+  const inquiryBuildingSlug =
+    building?.slug || "building-a";
+
+  const buildingInquiryUrl =
+    `/inquiry?building=${encodeURIComponent(
+      inquiryBuildingSlug,
+    )}`;
+
+  const getFloorInquiryUrl = (
+    floorId: number,
+  ) =>
+    `/inquiry?building=${encodeURIComponent(
+      inquiryBuildingSlug,
+    )}&floor=${floorId}`;
+
+  // ========================================
+  // REVEAL ANIMATION
+  // ========================================
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    if (loading) {
+      return;
+    }
+
+    const els =
+      Array.from(
+        document.querySelectorAll<HTMLElement>(
+          "[data-reveal]",
+        ),
+      );
+
+    if (!els.length) {
+      return;
+    }
+
+    els.forEach((el) =>
+      el.classList.add(
+        "reveal",
+      ),
+    );
+
+    const io =
+      new IntersectionObserver(
+        (entries) => {
+          entries.forEach(
+            (entry) => {
+              if (
+                entry.isIntersecting
+              ) {
+                (
+                  entry.target as HTMLElement
+                ).classList.add(
+                  "reveal-in",
+                );
+
+                io.unobserve(
+                  entry.target,
+                );
+              }
+            },
+          );
+        },
+
+        {
+          threshold: 0.12,
+        },
+      );
+
+    els.forEach((el) =>
+      io.observe(el),
+    );
+
+    return () =>
+      io.disconnect();
+  }, [
+    loading,
+    floors.length,
+    tenants.length,
+    gallery.length,
+  ]);
+
+  // ========================================
+  // OUTSIDE MENU CLICK
+  // ========================================
+
+  useEffect(() => {
+    const handleClickOutside = (
+      event: MouseEvent,
+    ) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(
+          event.target as Node,
+        )
       ) {
         setOpenMenu(null);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside,
+    );
+
+    return () =>
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside,
+      );
   }, []);
 
-  // ── FIXED: hash-scroll that works both on initial load and on hashchange ──
+  // ========================================
+  // HASH SCROLL
+  // ========================================
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (
+      typeof window ===
+      "undefined"
+    ) {
+      return;
+    }
 
     const scrollToHash = () => {
-      const id = resolvePendingSectionScroll(window.location.pathname);
-      if (!id) return;
+      const id =
+        resolvePendingSectionScroll(
+          window.location.pathname,
+        );
 
-      const attemptScroll = (attemptsLeft = 8) => {
-        const target = document.getElementById(id);
+      if (!id) {
+        return;
+      }
+
+      const attemptScroll = (
+        attemptsLeft = 12,
+      ) => {
+        const target =
+          document.getElementById(
+            id,
+          );
+
         if (target) {
           const navHeight =
-            document.querySelector("nav")?.getBoundingClientRect().height ?? 72;
+            document
+              .querySelector("nav")
+              ?.getBoundingClientRect()
+              .height ?? 72;
+
           const top =
-            target.getBoundingClientRect().top + window.scrollY - navHeight - 8;
-          if (window.location.hash !== `#${id}`) {
+            target.getBoundingClientRect()
+              .top +
+            window.scrollY -
+            navHeight -
+            8;
+
+          if (
+            window.location.hash !==
+            `#${id}`
+          ) {
             window.history.replaceState(
               null,
               "",
               `${window.location.pathname}#${id}`,
             );
           }
-          window.scrollTo({ top, behavior: "smooth" });
-          clearPendingSectionScroll(window.location.pathname, id);
+
+          window.scrollTo({
+            top,
+            behavior: "smooth",
+          });
+
+          clearPendingSectionScroll(
+            window.location.pathname,
+            id,
+          );
+
           return;
         }
-        // Element not yet in DOM — retry
-        if (attemptsLeft > 0) {
-          window.setTimeout(() => attemptScroll(attemptsLeft - 1), 100);
+
+        if (
+          attemptsLeft > 0
+        ) {
+          window.setTimeout(
+            () =>
+              attemptScroll(
+                attemptsLeft - 1,
+              ),
+            100,
+          );
         }
       };
 
-      window.setTimeout(() => attemptScroll(), 120);
+      window.setTimeout(
+        () =>
+          attemptScroll(),
+        120,
+      );
     };
 
-    // Fire on initial load
     scrollToHash();
 
-    // Fire whenever the hash changes (navigating from home page dropdown)
-    window.addEventListener("hashchange", scrollToHash);
-    return () => window.removeEventListener("hashchange", scrollToHash);
-  }, []);
+    window.addEventListener(
+      "hashchange",
+      scrollToHash,
+    );
 
-  const scrollToSection = (id: string) => {
-    const target = document.getElementById(id);
+    return () =>
+      window.removeEventListener(
+        "hashchange",
+        scrollToHash,
+      );
+  }, [floors.length]);
+
+  // ========================================
+  // SCROLL
+  // ========================================
+
+  const scrollToSection = (
+    id: string,
+  ) => {
+    const target =
+      document.getElementById(id);
+
     if (target) {
       const navHeight =
-        document.querySelector("nav")?.getBoundingClientRect().height ?? 72;
-      const top =
-        target.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+        document
+          .querySelector("nav")
+          ?.getBoundingClientRect()
+          .height ?? 72;
 
-      window.history.replaceState(null, "", `#${id}`);
-      window.scrollTo({ top, behavior: "smooth" });
+      const top =
+        target.getBoundingClientRect()
+          .top +
+        window.scrollY -
+        navHeight -
+        8;
+
+      window.history.replaceState(
+        null,
+        "",
+        `#${id}`,
+      );
+
+      window.scrollTo({
+        top,
+        behavior: "smooth",
+      });
+
       setOpenMenu(null);
+
       setMobileOpen(false);
     }
   };
 
+  // ========================================
+  // OTHER BUILDING NAVIGATION
+  // ========================================
+
   const navigateToPageSection = (
-    pathname: "/building-a" | "/building-b",
+    pathname:
+      | "/building-a"
+      | "/building-b",
+
     id: string,
   ) => {
-    queuePendingSectionScroll(pathname, id);
+    queuePendingSectionScroll(
+      pathname,
+      id,
+    );
+
     setOpenMenu(null);
+
     setMobileOpen(false);
+
     router.push(pathname);
   };
 
-  // const floor3Images = [
-  //   {
-  //     src: "/available/3rd-1.png",
-  //     alt: "3rd floor office view",
-  //     label: "Building A • 3rd Floor",
-  //   },
-  //   {
-  //     src: "/available/3.png",
-  //     alt: "3rd floor office hallway",
-  //     label: "Building A • 3rd Floor",
-  //   },
-  // ];
+  // ========================================
+  // LOADING
+  // ========================================
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FAF6EA] flex items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-[#E8DFC8] border-t-slate-900" />
+
+          <p className="mt-4 text-sm font-medium text-slate-600">
+            Loading Building A...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ========================================
+  // ERROR
+  // ========================================
+
+  if (
+    error ||
+    !building
+  ) {
+    return (
+      <div className="min-h-screen bg-[#FAF6EA] flex items-center justify-center px-5">
+        <div className="max-w-lg rounded-[30px] bg-white/70 p-8 text-center ring-1 ring-black/10 shadow-xl">
+          <Building2 className="mx-auto h-10 w-10 text-slate-500" />
+
+          <h1 className="mt-5 text-2xl font-extrabold">
+            Building A could not be loaded
+          </h1>
+
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            {error ||
+              "Building information is currently unavailable."}
+          </p>
+
+          <button
+            type="button"
+            onClick={() =>
+              window.location.reload()
+            }
+            className="mt-6 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ========================================
+  // HERO TEXT
+  // ========================================
+
+  const heroDescription =
+    building.description ||
+    building.short_description ||
+    "Explore the complete Building A experience including premium ground-floor amenities, office spaces, occupied floors, and currently available units.";
+
+  const totalFloors =
+    Number(
+      building.total_floors,
+    ) || floors.length;
+
+  // ========================================
+  // UI
+  // ========================================
 
   return (
     <div className="min-h-screen bg-[#FAF6EA] text-slate-900 antialiased">
+      {/* =====================================
+          BACKGROUND
+      ===================================== */}
+
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#FFF7DE] via-[#FAF6EA] to-[#FAF6EA]" />
+
         <div className="absolute -top-56 left-1/2 h-[760px] w-[760px] -translate-x-1/2 rounded-full bg-[#FFD27A]/25 blur-[90px]" />
+
         <div className="absolute -bottom-64 right-[-220px] h-[720px] w-[720px] rounded-full bg-[#FFB35A]/18 blur-[110px]" />
       </div>
+
+      {/* =====================================
+          NAVIGATION
+      ===================================== */}
 
       <nav className="sticky top-0 z-40 border-b border-black/5 bg-[#F2EBD7]/80 backdrop-blur-xl">
         <Container>
           <div className="flex items-center justify-between py-3">
-            <Link href="/" className="inline-flex items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-3"
+            >
               <img
                 src="/subhashree.png"
                 alt="Subha Shree Bhawan Logo"
                 className="h-12 w-12"
               />
+
               <div>
-                <p className="text-sm font-semibold">Subha Shree Bhawan</p>
-                <p className="text-xs text-slate-500">Building A</p>
+                <p className="text-sm font-semibold">
+                  Subha Shree Bhawan
+                </p>
+
+                <p className="text-xs text-slate-500">
+                  {building.name}
+                </p>
               </div>
             </Link>
 
+            {/* DESKTOP */}
+
             <div
-              ref={dropdownRef}
+              ref={
+                dropdownRef
+              }
               className="hidden xl:flex items-center gap-2"
             >
               <div className="relative flex items-center gap-2">
                 <DropdownPill
                   label="Building A"
-                  active={openMenu === "a"}
-                  onClick={() => setOpenMenu(openMenu === "a" ? null : "a")}
+                  active={
+                    openMenu ===
+                    "a"
+                  }
+                  onClick={() =>
+                    setOpenMenu(
+                      openMenu ===
+                        "a"
+                        ? null
+                        : "a",
+                    )
+                  }
                 />
+
                 <DropdownPill
                   label="Building B"
-                  active={openMenu === "b"}
-                  onClick={() => setOpenMenu(openMenu === "b" ? null : "b")}
+                  active={
+                    openMenu ===
+                    "b"
+                  }
+                  onClick={() =>
+                    setOpenMenu(
+                      openMenu ===
+                        "b"
+                        ? null
+                        : "b",
+                    )
+                  }
                 />
-                {openMenu === "a" && (
+
+                {openMenu ===
+                  "a" && (
                   <DropdownMenu
-                    items={buildingAFloors}
-                    onSelect={(id) => scrollToSection(id)}
+                    items={
+                      buildingAFloors
+                    }
+                    onSelect={(
+                      id,
+                    ) =>
+                      scrollToSection(
+                        id,
+                      )
+                    }
                   />
                 )}
-                {openMenu === "b" && (
+
+                {openMenu ===
+                  "b" && (
                   <DropdownMenu
-                    items={buildingBFloors}
-                    onSelect={(id) => navigateToPageSection("/building-b", id)}
+                    items={
+                      buildingBMenuFloors
+                    }
+                    onSelect={(
+                      id,
+                    ) =>
+                      navigateToPageSection(
+                        "/building-b",
+                        id,
+                      )
+                    }
                   />
                 )}
               </div>
 
               <button
-                onClick={() => router.push("/")}
+                type="button"
+                onClick={() =>
+                  router.push("/")
+                }
                 className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 ring-1 ring-black/10 transition hover:translate-y-[-1px]"
               >
                 Back Home
               </button>
-              <a href="#contact-actions" className="btn-primary">
-                Contact Now <ArrowRight className="h-4 w-4" />
-              </a>
+
+              <Link
+                href={
+                  buildingInquiryUrl
+                }
+                className="btn-primary"
+              >
+                Request a Viewing
+
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
 
+            {/* MOBILE */}
+
             <button
-              onClick={() => setMobileOpen((p) => !p)}
+              type="button"
+              onClick={() =>
+                setMobileOpen(
+                  (previous) =>
+                    !previous,
+                )
+              }
               className="xl:hidden inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/55 ring-1 ring-black/10 hover:bg-white/70 transition"
               aria-label="Toggle menu"
             >
@@ -234,70 +1032,122 @@ export default function BuildingAPage() {
             </button>
           </div>
 
+          {/* =================================
+              MOBILE MENU
+          ================================= */}
+
           {mobileOpen && (
             <div className="xl:hidden pb-4">
               <div className="mt-2 rounded-3xl bg-[#FFF7DE]/95 backdrop-blur-xl ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.14)] overflow-hidden">
                 <div className="p-4 space-y-2">
+                  {/* BUILDING A */}
+
                   <div className="rounded-2xl bg-white/70 ring-1 ring-black/10 overflow-hidden">
                     <p className="px-4 pt-3 pb-1 text-[10px] tracking-[0.2em] font-bold text-slate-400">
                       BUILDING A
                     </p>
+
                     <div className="border-t border-black/5">
-                      {buildingAFloors.map((floor) => (
-                        <button
-                          key={floor.id}
-                          type="button"
-                          onClick={() => scrollToSection(floor.id)}
-                          className="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-black/[0.03] transition border-b border-black/5 last:border-0"
-                        >
-                          {floor.label}
-                        </button>
-                      ))}
+                      {buildingAFloors.map(
+                        (
+                          floor,
+                        ) => (
+                          <button
+                            key={
+                              floor.id
+                            }
+                            type="button"
+                            onClick={() =>
+                              scrollToSection(
+                                floor.id,
+                              )
+                            }
+                            className="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-black/[0.03] transition border-b border-black/5 last:border-0"
+                          >
+                            {
+                              floor.label
+                            }
+                          </button>
+                        ),
+                      )}
                     </div>
                   </div>
+
+                  {/* BUILDING B */}
 
                   <div className="rounded-2xl bg-white/70 ring-1 ring-black/10 overflow-hidden">
                     <p className="px-4 pt-3 pb-1 text-[10px] tracking-[0.2em] font-bold text-slate-400">
                       BUILDING B
                     </p>
+
                     <div className="border-t border-black/5">
-                      {buildingBFloors.map((floor) => (
-                        <button
-                          key={floor.id}
-                          type="button"
-                          onClick={() =>
-                            navigateToPageSection("/building-b", floor.id)
-                          }
-                          className="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-black/[0.03] transition border-b border-black/5 last:border-0"
-                        >
-                          {floor.label}
-                        </button>
-                      ))}
+                      {buildingBMenuFloors.map(
+                        (
+                          floor,
+                        ) => (
+                          <button
+                            key={
+                              floor.id
+                            }
+                            type="button"
+                            onClick={() =>
+                              navigateToPageSection(
+                                "/building-b",
+                                floor.id,
+                              )
+                            }
+                            className="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-black/[0.03] transition border-b border-black/5 last:border-0"
+                          >
+                            {
+                              floor.label
+                            }
+                          </button>
+                        ),
+                      )}
                     </div>
                   </div>
 
                   <button
+                    type="button"
                     onClick={() => {
-                      router.push("/");
-                      setMobileOpen(false);
+                      router.push(
+                        "/",
+                      );
+
+                      setMobileOpen(
+                        false,
+                      );
                     }}
                     className="w-full rounded-2xl bg-white/70 ring-1 ring-black/10 px-4 py-3 text-sm font-semibold text-left"
                   >
                     Back Home
                   </button>
-                  <a
-                    href="#contact-actions"
-                    onClick={() => setMobileOpen(false)}
+
+                  <Link
+                    href={
+                      buildingInquiryUrl
+                    }
+                    onClick={() =>
+                      setMobileOpen(
+                        false,
+                      )
+                    }
                     className="btn-primary w-full justify-center"
                   >
-                    Contact Now <ArrowRight className="h-4 w-4" />
-                  </a>
+                    Request a Viewing
+
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
               </div>
             </div>
           )}
         </Container>
       </nav>
+
+      {/* =====================================
+          HERO
+      ===================================== */}
 
       <section className="pt-16 pb-12 md:pt-20 md:pb-16">
         <Container>
@@ -307,6 +1157,7 @@ export default function BuildingAPage() {
               className="inline-flex items-center gap-2 rounded-full bg-white/55 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700"
             >
               <Building2 className="h-4 w-4" />
+
               Dedicated page
             </div>
 
@@ -314,9 +1165,14 @@ export default function BuildingAPage() {
               data-reveal
               className="mt-6 text-4xl md:text-6xl font-extrabold tracking-tight"
             >
-              Building A
+              {building.name}
+
               <span className="block text-slate-600">
-                Seven floors of excellence
+                {totalFloors}{" "}
+                {totalFloors === 1
+                  ? "floor"
+                  : "floors"}{" "}
+                of excellence
               </span>
             </h1>
 
@@ -324,19 +1180,44 @@ export default function BuildingAPage() {
               data-reveal
               className="mt-5 max-w-2xl text-lg text-slate-700 leading-relaxed"
             >
-              Explore the complete Building A experience including premium
-              ground-floor amenities, office spaces, occupied floors, and
-              currently available units.
+              {
+                heroDescription
+              }
             </p>
+
+            <div
+              data-reveal
+              className="mt-7"
+            >
+              <Link
+                href={
+                  buildingInquiryUrl
+                }
+                className="btn-primary"
+              >
+                Request a Viewing
+
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         </Container>
       </section>
 
-      <Section id="floor-labels" tone="soft">
+      {/* =====================================
+          FLOOR DIRECTORY
+      ===================================== */}
+
+      <Section
+        id="floor-labels"
+        tone="soft"
+      >
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/60 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
-            Building A Floor Labels
+            {building.name} Floor
+            Labels
           </div>
+
           <h2
             data-reveal
             className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight"
@@ -346,274 +1227,345 @@ export default function BuildingAPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <FloorLabelCard
-            floor="Ground Floor"
-            title="Himalayan Java & Tesla Clinic"
-            status="Active"
-          />
-          <FloorLabelCard
-            floor="1st Floor"
-            title="Vairav Tech"
-            status="Active"
-          />
-          <FloorLabelCard
-            floor="2nd Floor"
-            title="Family Health International 360"
-            status="Occupied"
-          />
-          <FloorLabelCard
-            floor="3rd Floor"
-            title="Prime Office Space"
-            status="Available"
-            highlight
-          />
-          <FloorLabelCard
-            floor="4th – 6th Floor"
-            title="Premium Fitness Center"
-            status="Coming Soon"
-          />
+          {primaryFloors.map(
+            (floor) => {
+              const floorTenants =
+                tenantsByFloor.get(
+                  floor.id,
+                ) || [];
+
+              return (
+                <FloorLabelCard
+                  key={
+                    floor.id
+                  }
+                  floor={
+                    floor.name
+                  }
+                  title={getFloorTitle(
+                    floor,
+                    floorTenants,
+                  )}
+                  status={formatStatus(
+                    floor.status,
+                  )}
+                  highlight={
+                    floor.status ===
+                    "available"
+                  }
+                />
+              );
+            },
+          )}
+
+          {futureFloors.length >
+            0 && (
+            <FloorLabelCard
+              floor={getFutureFloorRangeLabel(
+                futureFloors,
+              )}
+              title="Premium Fitness Center"
+              status={getCombinedFutureStatus(
+                futureFloors,
+              )}
+            />
+          )}
         </div>
       </Section>
 
-      <Section id="building-a-ground">
-        <TwoCol
-          left={
-            <>
-              <Kicker text="GROUND FLOOR • BUILDING A" />
-              <h2
-                data-reveal
-                className="text-3xl md:text-4xl font-extrabold tracking-tight"
-              >
-                Himalayan Java & Tesla Clinic
-              </h2>
-              <div data-reveal className="space-y-4">
-                <FeatureRow
-                  icon={<Coffee className="h-5 w-5" />}
-                  title="Himalayan Java"
-                  desc="Premium coffee experience with warm Nepali hospitality."
-                />
-                <FeatureRow
-                  icon={<Stethoscope className="h-5 w-5" />}
-                  title="Tesla Clinic"
-                  desc="Professional healthcare services with modern facilities and experienced practitioners."
-                />
-              </div>
-            </>
-          }
-          right={
-            <ImageCard
-              src="/javatesla.png"
-              alt="Tesla Clinic and Himalayan Java"
-              footerLeft="FACILITIES"
-              footerRight="Clinic + Café"
-              heightClass="h-[28rem] md:h-[34rem]"
-              crop="object-center"
-              zoom="scale-100"
-              fit="contain"
-            />
-          }
-        />
-      </Section>
+      {/* =====================================
+          INDIVIDUAL FLOOR SECTIONS
+      ===================================== */}
 
-      <Section id="building-a-1st" tone="soft">
-        <TwoCol
-          reverse
-          left={
-            <>
-              <Kicker text="1ST FLOOR • BUILDING A" />
-              <h2
-                data-reveal
-                className="text-3xl md:text-4xl font-extrabold tracking-tight"
-              >
-                Vairav Tech
-              </h2>
-              <div data-reveal>
-                <FeatureRow
-                  icon={<ShieldCheck className="h-5 w-5" />}
-                  title="Security Operations Excellence"
-                  desc="Vairav Technology is a powerhouse of cybersecurity and modern business security solutions."
-                />
-              </div>
-            </>
-          }
-          right={
-            <ImageCard
-              src="/vairav.png"
-              alt="Vairav Tech"
-              footerLeft="FLOOR AREA"
-              footerRight="3,500 sq. ft."
-              heightClass="h-[31.25rem]"
-              crop="object-contain"
-              zoom="scale-[0.55]"
-              fit="contain"
-            />
-          }
-        />
-      </Section>
+      {primaryFloors.map(
+        (floor, index) => {
+          const floorTenants =
+            tenantsByFloor.get(
+              floor.id,
+            ) || [];
 
-      <Section id="building-a-2nd">
-        <TwoCol
-          left={
-            <>
-              <Kicker text="2ND FLOOR • BUILDING A" />
-              <h2
-                data-reveal
-                className="text-3xl md:text-4xl font-extrabold tracking-tight"
-              >
-                Family Health International 360
-              </h2>
-              <div data-reveal>
-                <FeatureRow
-                  icon={<Building2 className="h-5 w-5" />}
-                  title="Occupied Floor"
-                  desc="This floor is currently occupied by Family Health International 360."
-                />
-              </div>
-            </>
-          }
-          right={
-             <ImageCard
-              src="/fhi.png"
-              alt="Family Health International 360"
-              footerLeft="FLOOR AREA"
-              footerRight="3,500 sq. ft."
-              heightClass="h-[31.25rem]"
-              crop="object-contain"
-              zoom="scale-[0.55]"
-              fit="contain"
-            />
-          }
-        />
-      </Section>
-<Section id="building-a-3rd">
-        <TwoCol
-          left={
-            <>
-              <Kicker text="3rd FLOOR • BUILDING A" />
-              <h2
-                data-reveal
-                className="text-3xl md:text-4xl font-extrabold tracking-tight"
-              >
-                Sigma Capital
-              </h2>
-              <div data-reveal>
-                <FeatureRow
-                  icon={<Building2 className="h-5 w-5" />}
-                  title="Occupied Floor"
-                  desc="This floor is currently occupied by Sigma Capital."
-                />
-              </div>
-            </>
-          }
-          right={
-             <ImageCard
-              src="/sigma.png"
-              alt="Sigma Capital"
-              footerLeft="FLOOR AREA"
-              footerRight="3,500 sq. ft."
-              heightClass="h-[31.25rem]"
-              crop="object-contain"
-              zoom="scale-[0.55]"
-              fit="contain"
-            />
-          }
-        />
-      </Section>
-    
+          const visual =
+            getFloorVisual(
+              floor,
+              floorTenants,
+              gallery,
+            );
 
-      <Section id="building-a-gym">
-        <div className="text-center">
-          <Kicker text="4TH, 5TH AND 6TH FLOORS • BUILDING A" />
-          <h2
-            data-reveal
-            className="mt-6 text-4xl md:text-5xl font-extrabold tracking-tight"
-          >
-            Premium Fitness Center
-            <span className="block text-slate-600">Coming soon</span>
-          </h2>
-          <p data-reveal className="mt-3 text-slate-700">
-            Three floors of wellness and future-ready fitness amenities.
-          </p>
-        </div>
-      </Section>
+          return (
+            <Section
+              key={
+                floor.id
+              }
+              id={getBuildingASectionId(
+                floor,
+              )}
+              tone={
+                index % 2 === 1
+                  ? "soft"
+                  : "base"
+              }
+            >
+              <TwoCol
+                left={
+                  <>
+                    <Kicker
+                      text={`${floor.name.toUpperCase()} • ${building.name.toUpperCase()}`}
+                    />
 
-      {/* <Section id="available-spaces" tone="soft">
-        <div className="text-center mb-10 md:mb-12">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/60 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
-            Leasing
+                    <h2
+                      data-reveal
+                      className="text-3xl md:text-4xl font-extrabold tracking-tight"
+                    >
+                      {getFloorTitle(
+                        floor,
+                        floorTenants,
+                      )}
+                    </h2>
+
+                    <div
+                      data-reveal
+                      className="space-y-1"
+                    >
+                      {floorTenants.length >
+                      0 ? (
+                        floorTenants.map(
+                          (
+                            tenant,
+                          ) => (
+                            <FeatureRow
+                              key={
+                                tenant.id
+                              }
+                              icon={getTenantIcon(
+                                tenant.name,
+                              )}
+                              title={
+                                tenant.name
+                              }
+                              desc={
+                                tenant.short_description ||
+                                tenant.description ||
+                                `${tenant.name} operates from ${floor.name} of ${building.name}.`
+                              }
+                            />
+                          ),
+                        )
+                      ) : (
+                        <FeatureRow
+                          icon={
+                            <Building2 className="h-5 w-5" />
+                          }
+                          title={formatStatus(
+                            floor.status,
+                          )}
+                          desc={
+                            floor.description ||
+                            getFloorStatusDescription(
+                              floor,
+                            )
+                          }
+                        />
+                      )}
+                    </div>
+
+                    {/* AVAILABLE FLOOR CTA */}
+
+                    {floor.status ===
+                      "available" && (
+                      <div
+                        data-reveal
+                        className="pt-3"
+                      >
+                        <Link
+                          href={getFloorInquiryUrl(
+                            floor.id,
+                          )}
+                          className="inline-flex items-center gap-2 rounded-2xl bg-amber-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_18px_45px_rgba(252,211,77,0.22)] transition hover:-translate-y-[1px]"
+                        >
+                          Request Viewing
+                          for{" "}
+                          {
+                            floor.name
+                          }
+
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                }
+                right={
+                  <ImageCard
+                    src={
+                      visual.src
+                    }
+                    alt={
+                      visual.alt
+                    }
+                    footerLeft="FLOOR AREA"
+                    footerRight={getFloorFooterValue(
+                      floor,
+                      floorTenants,
+                    )}
+                    heightClass="h-[28rem] md:h-[34rem]"
+                    crop="object-center"
+                    zoom={
+                      visual.isBackendImage
+                        ? "scale-100"
+                        : getStaticImageScale(
+                            floor,
+                          )
+                    }
+                    fit={
+                      visual.isBackendImage
+                        ? "cover"
+                        : "contain"
+                    }
+                  />
+                }
+              />
+            </Section>
+          );
+        },
+      )}
+
+      {/* =====================================
+          FUTURE / GYM FLOORS
+      ===================================== */}
+
+      {futureFloors.length >
+        0 && (
+        <Section id="building-a-gym">
+          <div className="text-center">
+            <Kicker
+              text={`${getFutureFloorRangeLabel(
+                futureFloors,
+              ).toUpperCase()} • ${building.name.toUpperCase()}`}
+            />
+
+            <h2
+              data-reveal
+              className="mt-6 text-4xl md:text-5xl font-extrabold tracking-tight"
+            >
+              Premium Fitness Center
+
+              <span className="block text-slate-600">
+                {getCombinedFutureStatus(
+                  futureFloors,
+                )}
+              </span>
+            </h2>
+
+            <p
+              data-reveal
+              className="mt-3 text-slate-700"
+            >
+              {getFutureFloorDescription(
+                futureFloors,
+              )}
+            </p>
+
+            {availableFutureFloors.length >
+              0 && (
+              <div
+                data-reveal
+                className="mt-7 flex flex-wrap justify-center gap-3"
+              >
+                {availableFutureFloors.map(
+                  (floor) => (
+                    <Link
+                      key={
+                        floor.id
+                      }
+                      href={getFloorInquiryUrl(
+                        floor.id,
+                      )}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-[0_18px_45px_rgba(15,23,42,0.18)] transition hover:-translate-y-[1px]"
+                    >
+                      Request{" "}
+                      {
+                        floor.name
+                      }
+
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  ),
+                )}
+              </div>
+            )}
           </div>
-          <h2
-            data-reveal
-            className="mt-5 text-4xl md:text-5xl font-extrabold tracking-tight"
-          >
-            Available Spaces
-          </h2>
-          <p data-reveal className="mt-3 text-lg text-slate-700">
-            Building A currently has a premium office floor ready for immediate
-            occupancy.
-          </p>
-        </div>
+        </Section>
+      )}
 
-        <div
-          className="grid lg:grid-cols-12 gap-6 max-w-6xl mx-auto"
-          data-reveal
-        >
-          <div className="lg:col-span-5 grid gap-5">
-            <SpaceCard
-              building="BUILDING A"
-              floor="3rd Floor"
-              title="Prime Office Space"
-              area="3,500 sq. ft."
-              phone="+977 9808100067"
-              email="buddhalifestyle.np@gmail.com"
-              tag="AVAILABLE NOW"
-            />
-          </div>
+      {/* =====================================
+          CONTACT
+      ===================================== */}
 
-          <div className="lg:col-span-7">
-            <FloorCarousel
-              title="Available Floors Preview"
-              images={floor3Images}
-              intervalMs={5000}
-              fit="contain"
-            />
-          </div>
-        </div>
-
-      </Section> */}
-
-      <Section id="contact-actions" tone="soft">
+      <Section
+        id="contact-actions"
+        tone="soft"
+      >
         <div className="max-w-5xl mx-auto rounded-[32px] bg-white/60 ring-1 ring-black/10 p-8 md:p-10 shadow-[0_30px_90px_rgba(15,23,42,0.08)]">
           <div className="text-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em]">
               REQUEST A VIEWING
             </div>
+
             <h2
               data-reveal
               className="mt-5 text-3xl md:text-4xl font-extrabold tracking-tight"
             >
-              Call or Email Instantly
+              Interested in{" "}
+              {building.name}?
             </h2>
-            <p data-reveal className="mt-3 text-slate-700 max-w-2xl mx-auto">
-              Tap call to dial, or email to open your mail app.
+
+            <p
+              data-reveal
+              className="mt-3 text-slate-700 max-w-2xl mx-auto"
+            >
+              Submit a viewing
+              request online, call
+              us directly, or send
+              us an email.
             </p>
           </div>
+
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="tel:+9779808100067"
+            <Link
+              href={
+                buildingInquiryUrl
+              }
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-4 text-white font-semibold shadow-[0_20px_60px_rgba(15,23,42,0.18)] hover:translate-y-[-1px] transition"
             >
-              <Phone className="h-5 w-5" /> Call Now
+              Request a Viewing
+
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+
+            <a
+              href="tel:+9779808100067"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-slate-900 font-semibold ring-1 ring-black/10 hover:translate-y-[-1px] transition"
+            >
+              <Phone className="h-5 w-5" />
+
+              Call Now
             </a>
+
             <a
               href="mailto:buddhalifestyle.np@gmail.com?subject=Inquiry%20for%20Building%20A"
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-slate-900 font-semibold ring-1 ring-black/10 hover:translate-y-[-1px] transition"
             >
-              <Mail className="h-5 w-5" /> Email Now
+              <Mail className="h-5 w-5" />
+
+              Email Now
             </a>
           </div>
         </div>
       </Section>
+
+      {/* =====================================
+          FOOTER
+      ===================================== */}
 
       <footer className="py-12">
         <Container>
@@ -621,45 +1573,105 @@ export default function BuildingAPage() {
             <div className="grid md:grid-cols-3 gap-10">
               <div>
                 <h3 className="text-xl font-extrabold tracking-tight">
-                  Building A
+                  {building.name}
                 </h3>
+
                 <p className="mt-3 text-slate-700 leading-relaxed">
-                  Premium office, café, clinic, and future wellness spaces in
-                  Subha Shree Bhawan.
+                  {building.short_description ||
+                    "Premium office, café, clinic, and future wellness spaces in Subha Shree Bhawan."}
                 </p>
-                <a href="/blog" className="mt-4 inline-flex font-semibold text-slate-700 hover:text-slate-950 transition">
+
+                <a
+                  href="/blog"
+                  className="mt-4 inline-flex font-semibold text-slate-700 hover:text-slate-950 transition"
+                >
                   Visit our blog →
                 </a>
               </div>
+
               <div>
                 <h4 className="text-xs font-semibold tracking-[0.18em] text-slate-500">
                   CONTACT
                 </h4>
+
                 <div className="mt-4 space-y-3 text-slate-700">
                   <div className="flex items-center gap-3">
                     <MapPin className="h-5 w-5 text-slate-400" />
-                    <span>Baluwatar, Kathmandu</span>
+
+                    <span>
+                      {building.address ||
+                        "Baluwatar, Kathmandu"}
+                    </span>
                   </div>
+
                   <div className="flex items-center gap-3">
                     <Phone className="h-5 w-5 text-slate-400" />
-                    <span>+977 980-8100067</span>
+
+                    <span>
+                      +977 980-8100067
+                    </span>
                   </div>
+
                   <div className="flex items-center gap-3">
                     <Mail className="h-5 w-5 text-slate-400" />
-                    <span>buddhalifestyle.np@gmail.com</span>
+
+                    <span>
+                      buddhalifestyle.np@gmail.com
+                    </span>
                   </div>
                 </div>
               </div>
+
               <div>
                 <h4 className="text-xs font-semibold tracking-[0.18em] text-slate-500">
                   HIGHLIGHTS
                 </h4>
+
                 <ul className="mt-4 space-y-3 text-slate-700">
-                  <li>Ground-floor premium amenities</li>
-                  <li>Technology and health tenants</li>
-                  <li>Available office floor</li>
-                  <li>Future gym and wellness zone</li>
+                  <li>
+                    Ground-floor
+                    premium amenities
+                  </li>
+
+                  <li>
+                    {tenants.length}{" "}
+                    active tenant
+                    {tenants.length ===
+                    1
+                      ? ""
+                      : "s"}
+                  </li>
+
+                  <li>
+                    {availableFloors.length >
+                    0
+                      ? `${availableFloors.length} available office ${
+                          availableFloors.length === 1
+                            ? "floor"
+                            : "floors"
+                        }`
+                      : "Live floor occupancy information"}
+                  </li>
+
+                  {futureFloors.length >
+                    0 && (
+                    <li>
+                      Future gym and
+                      wellness zone
+                    </li>
+                  )}
                 </ul>
+
+                <Link
+                  href={
+                    buildingInquiryUrl
+                  }
+                  className="mt-5 inline-flex items-center gap-2 font-semibold text-slate-900"
+                >
+                  Request a Viewing
+
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </div>
           </div>
@@ -669,6 +1681,484 @@ export default function BuildingAPage() {
   );
 }
 
+// ========================================
+// DATA HELPERS
+// ========================================
+
+function getBuildingASectionId(
+  floor: FloorData,
+) {
+  if (
+    floor.floor_number === 0
+  ) {
+    return "building-a-ground";
+  }
+
+  return `building-a-${floor.slug.replace(
+    /-floor$/,
+    "",
+  )}`;
+}
+
+function getBuildingBSectionId(
+  floor: FloorData,
+) {
+  if (
+    floor.floor_number === 0
+  ) {
+    return "building-b-ground";
+  }
+
+  return `building-b-${floor.slug.replace(
+    /-floor$/,
+    "",
+  )}`;
+}
+
+function formatStatus(
+  status: FloorStatus,
+) {
+  switch (status) {
+    case "available":
+      return "Available";
+
+    case "occupied":
+      return "Occupied";
+
+    case "coming_soon":
+      return "Coming Soon";
+
+    case "inactive":
+      return "Inactive";
+
+    default:
+      return status;
+  }
+}
+
+function getFloorTitle(
+  floor: FloorData,
+  floorTenants: TenantData[],
+) {
+  if (
+    floorTenants.length >
+    0
+  ) {
+    return floorTenants
+      .map(
+        (tenant) =>
+          tenant.name,
+      )
+      .join(" & ");
+  }
+
+  if (
+    floor.status ===
+    "available"
+  ) {
+    return "Prime Office Space";
+  }
+
+  if (
+    floor.status ===
+    "coming_soon"
+  ) {
+    return "Coming Soon";
+  }
+
+  return floor.name;
+}
+
+function getFloorStatusDescription(
+  floor: FloorData,
+) {
+  switch (floor.status) {
+    case "available":
+      return `${floor.name} is currently available for occupancy.`;
+
+    case "occupied":
+      return `${floor.name} is currently occupied.`;
+
+    case "coming_soon":
+      return `${floor.name} is currently being prepared and will be available soon.`;
+
+    case "inactive":
+      return `${floor.name} is currently inactive.`;
+
+    default:
+      return (
+        floor.description ||
+        ""
+      );
+  }
+}
+
+function getTenantIcon(
+  name: string,
+) {
+  const lower =
+    name.toLowerCase();
+
+  if (
+    lower.includes(
+      "java",
+    ) ||
+    lower.includes(
+      "coffee",
+    )
+  ) {
+    return (
+      <Coffee className="h-5 w-5" />
+    );
+  }
+
+  if (
+    lower.includes(
+      "clinic",
+    ) ||
+    lower.includes(
+      "health",
+    )
+  ) {
+    return (
+      <Stethoscope className="h-5 w-5" />
+    );
+  }
+
+  if (
+    lower.includes(
+      "vairav",
+    ) ||
+    lower.includes(
+      "security",
+    )
+  ) {
+    return (
+      <ShieldCheck className="h-5 w-5" />
+    );
+  }
+
+  return (
+    <Building2 className="h-5 w-5" />
+  );
+}
+
+// ========================================
+// IMAGES
+// ========================================
+
+function getFloorVisual(
+  floor: FloorData,
+  floorTenants: TenantData[],
+  gallery: GalleryItem[],
+) {
+  // ----------------------------------------
+  // 1. FLOOR GALLERY IMAGE
+  // ----------------------------------------
+
+  const floorImage =
+    gallery.find(
+      (item) =>
+        Number(
+          item.floor_id,
+        ) ===
+          Number(
+            floor.id,
+          ) &&
+        Boolean(
+          item.is_active,
+        ),
+    );
+
+  if (floorImage) {
+    return {
+      src:
+        getBackendImageUrl(
+          floorImage.image_url,
+        ),
+
+      alt:
+        floorImage.alt_text ||
+        floorImage.title ||
+        floor.name,
+
+      isBackendImage: true,
+    };
+  }
+
+  // ----------------------------------------
+  // 2. TENANT GALLERY IMAGE
+  // ----------------------------------------
+
+  const tenantIds =
+    floorTenants.map(
+      (tenant) =>
+        tenant.id,
+    );
+
+  const tenantImage =
+    gallery.find(
+      (item) =>
+        item.tenant_id !==
+          null &&
+        tenantIds.includes(
+          Number(
+            item.tenant_id,
+          ),
+        ) &&
+        Boolean(
+          item.is_active,
+        ),
+    );
+
+  if (tenantImage) {
+    return {
+      src:
+        getBackendImageUrl(
+          tenantImage.image_url,
+        ),
+
+      alt:
+        tenantImage.alt_text ||
+        tenantImage.title ||
+        floor.name,
+
+      isBackendImage: true,
+    };
+  }
+
+  // ----------------------------------------
+  // 3. ORIGINAL STATIC IMAGE
+  // ----------------------------------------
+
+  const fallback =
+    getStaticFloorImage(
+      floor.floor_number,
+    );
+
+  return {
+    src: fallback.src,
+    alt: fallback.alt,
+    isBackendImage: false,
+  };
+}
+
+function getStaticFloorImage(
+  floorNumber: number,
+) {
+  switch (floorNumber) {
+    case 0:
+      return {
+        src: "/javatesla.png",
+        alt: "Tesla Clinic and Himalayan Java",
+      };
+
+    case 1:
+      return {
+        src: "/vairav.png",
+        alt: "Vairav Tech",
+      };
+
+    case 2:
+      return {
+        src: "/fhi.png",
+        alt: "Family Health International 360",
+      };
+
+    case 3:
+      return {
+        src: "/sigma.png",
+        alt: "Sigma Capital",
+      };
+
+    default:
+      return {
+        src: "/subhashree.png",
+        alt: "Subha Shree Bhawan",
+      };
+  }
+}
+
+function getStaticImageScale(
+  floor: FloorData,
+) {
+  if (
+    floor.floor_number === 0
+  ) {
+    return "scale-100";
+  }
+
+  return "scale-[0.55]";
+}
+
+function getFloorFooterValue(
+  floor: FloorData,
+  floorTenants: TenantData[],
+) {
+  if (
+    floor.area_sqft !==
+      null &&
+    floor.area_sqft !==
+      undefined &&
+    Number(
+      floor.area_sqft,
+    ) > 0
+  ) {
+    return `${Number(
+      floor.area_sqft,
+    ).toLocaleString()} sq. ft.`;
+  }
+
+  if (
+    floorTenants.length >
+    0
+  ) {
+    return `${floorTenants.length} ${
+      floorTenants.length ===
+      1
+        ? "Tenant"
+        : "Tenants"
+    }`;
+  }
+
+  return formatStatus(
+    floor.status,
+  );
+}
+
+// ========================================
+// FUTURE FLOORS
+// ========================================
+
+function getFutureFloorRangeLabel(
+  floors: FloorData[],
+) {
+  if (!floors.length) {
+    return "";
+  }
+
+  if (
+    floors.length === 1
+  ) {
+    return floors[0].name;
+  }
+
+  return `${floors[0].name.replace(
+    " Floor",
+    "",
+  )} – ${floors[
+    floors.length - 1
+  ].name}`;
+}
+
+function getFutureFloorMenuLabel(
+  floors: FloorData[],
+) {
+  if (!floors.length) {
+    return "Future Floors";
+  }
+
+  if (
+    floors.length === 1
+  ) {
+    return floors[0].name;
+  }
+
+  const first =
+    floors[0].name.replace(
+      " Floor",
+      "",
+    );
+
+  const last =
+    floors[
+      floors.length - 1
+    ].name.replace(
+      " Floor",
+      "",
+    );
+
+  return `Gym (${first}–${last})`;
+}
+
+function getCombinedFutureStatus(
+  floors: FloorData[],
+) {
+  if (
+    floors.every(
+      (floor) =>
+        floor.status ===
+        "coming_soon",
+    )
+  ) {
+    return "Coming Soon";
+  }
+
+  if (
+    floors.some(
+      (floor) =>
+        floor.status ===
+        "available",
+    )
+  ) {
+    return "Available";
+  }
+
+  if (
+    floors.every(
+      (floor) =>
+        floor.status ===
+        "occupied",
+    )
+  ) {
+    return "Occupied";
+  }
+
+  return "In Development";
+}
+
+function getFutureFloorDescription(
+  floors: FloorData[],
+) {
+  const customDescriptions =
+    floors
+      .map(
+        (floor) =>
+          floor.description,
+      )
+      .filter(
+        (
+          description,
+        ): description is string =>
+          Boolean(
+            description &&
+              description.trim(),
+          ),
+      );
+
+  const meaningfulDescription =
+    customDescriptions.find(
+      (description) =>
+        !description
+          .toLowerCase()
+          .includes(
+            "floor of building a",
+          ),
+    );
+
+  if (
+    meaningfulDescription
+  ) {
+    return meaningfulDescription;
+  }
+
+  return "Three floors of wellness and future-ready fitness amenities.";
+}
+
+// ========================================
+// LAYOUT COMPONENTS
+// ========================================
+
 function Container({
   children,
   className = "",
@@ -677,7 +2167,9 @@ function Container({
   className?: string;
 }) {
   return (
-    <div className={`max-w-7xl mx-auto px-5 sm:px-6 ${className}`}>
+    <div
+      className={`max-w-7xl mx-auto px-5 sm:px-6 ${className}`}
+    >
       {children}
     </div>
   );
@@ -689,17 +2181,29 @@ function Section({
   children,
 }: {
   id?: string;
-  tone?: "base" | "soft";
-  children: React.ReactNode;
+
+  tone?:
+    | "base"
+    | "soft";
+
+  children:
+    React.ReactNode;
 }) {
   return (
-    <section id={id} className="relative py-14 md:py-20 scroll-mt-24">
-      {tone === "soft" && (
+    <section
+      id={id}
+      className="relative py-14 md:py-20 scroll-mt-24"
+    >
+      {tone ===
+        "soft" && (
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FFF2C7]/28 to-transparent" />
         </div>
       )}
-      <Container>{children}</Container>
+
+      <Container>
+        {children}
+      </Container>
     </section>
   );
 }
@@ -708,22 +2212,37 @@ function TwoCol({
   left,
   right,
 }: {
-  left: React.ReactNode;
-  right: React.ReactNode;
+  left:
+    React.ReactNode;
+
+  right:
+    React.ReactNode;
+
   reverse?: boolean;
 }) {
   return (
     <div className="group relative mx-auto max-w-5xl rounded-[36px] bg-white/65 p-2 shadow-[0_32px_100px_rgba(15,23,42,0.14)] ring-1 ring-black/[0.08] backdrop-blur-sm transition duration-500 hover:-translate-y-1 hover:shadow-[0_38px_120px_rgba(15,23,42,0.19)]">
-      <div className="building-visual">{right}</div>
+      <div className="building-visual">
+        {right}
+      </div>
+
       <div className="pointer-events-none absolute inset-2 rounded-[28px] bg-gradient-to-b from-slate-950/35 via-transparent to-transparent" />
+
       <div className="building-copy absolute left-2 top-2 z-10 p-5 md:p-8">
-        <div>{left}</div>
+        <div>
+          {left}
+        </div>
       </div>
     </div>
   );
 }
 
-function MediaCard({ children }: { children: React.ReactNode }) {
+function MediaCard({
+  children,
+}: {
+  children:
+    React.ReactNode;
+}) {
   return (
     <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden">
       {children}
@@ -731,7 +2250,11 @@ function MediaCard({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Kicker({ text }: { text: string }) {
+function Kicker({
+  text,
+}: {
+  text: string;
+}) {
   return (
     <div className="inline-flex items-center rounded-2xl border border-white/40 bg-white/90 px-4 py-2.5 text-[11px] font-bold tracking-[0.16em] text-slate-950 shadow-[0_12px_35px_rgba(15,23,42,0.16)] backdrop-blur-xl">
       {text}
@@ -746,27 +2269,46 @@ function FloorLabelCard({
   highlight = false,
 }: {
   floor: string;
+
   title: string;
+
   status: string;
+
   highlight?: boolean;
 }) {
   return (
     <div
-      className={`rounded-[24px] p-5 ring-1 shadow-[0_18px_50px_rgba(15,23,42,0.06)] ${highlight ? "bg-slate-900 text-white ring-slate-900" : "bg-white/65 text-slate-900 ring-black/10"}`}
+      className={`rounded-[24px] p-5 ring-1 shadow-[0_18px_50px_rgba(15,23,42,0.06)] ${
+        highlight
+          ? "bg-slate-900 text-white ring-slate-900"
+          : "bg-white/65 text-slate-900 ring-black/10"
+      }`}
     >
       <div className="flex items-center justify-between gap-3">
         <span
-          className={`text-xs font-bold tracking-[0.18em] ${highlight ? "text-white/80" : "text-slate-500"}`}
+          className={`text-xs font-bold tracking-[0.18em] ${
+            highlight
+              ? "text-white/80"
+              : "text-slate-500"
+          }`}
         >
           {floor.toUpperCase()}
         </span>
+
         <span
-          className={`rounded-full px-3 py-1 text-[10px] font-bold tracking-[0.18em] ${highlight ? "bg-white text-slate-900" : "bg-slate-900 text-white"}`}
+          className={`rounded-full px-3 py-1 text-[10px] font-bold tracking-[0.18em] ${
+            highlight
+              ? "bg-white text-slate-900"
+              : "bg-slate-900 text-white"
+          }`}
         >
           {status.toUpperCase()}
         </span>
       </div>
-      <h3 className="mt-4 text-lg font-extrabold tracking-tight">{title}</h3>
+
+      <h3 className="mt-4 text-lg font-extrabold tracking-tight">
+        {title}
+      </h3>
     </div>
   );
 }
@@ -782,45 +2324,80 @@ function ImageCard({
   fit = "cover",
 }: {
   src: string;
+
   alt: string;
+
   footerLeft?: string;
+
   footerRight?: string;
+
   crop?: string;
+
   heightClass?: string;
+
   zoom?: string;
-  fit?: "cover" | "contain";
+
+  fit?:
+    | "cover"
+    | "contain";
 }) {
-  const backdropClass = src.includes("fhi")
-    ? "bg-[#293b4b]"
-    : src.includes("vairav")
-      ? "bg-[#edf4f6]"
-      : src.includes("sigma")
-        ? "bg-[#edf8f7]"
-        : "bg-[#fffdfa]";
+  const lowerSrc =
+    src.toLowerCase();
+
+  const backdropClass =
+    lowerSrc.includes("fhi")
+      ? "bg-[#293b4b]"
+      : lowerSrc.includes(
+            "vairav",
+          )
+        ? "bg-[#edf4f6]"
+        : lowerSrc.includes(
+              "sigma",
+            )
+          ? "bg-[#edf8f7]"
+          : "bg-[#fffdfa]";
 
   return (
     <MediaCard>
-      <div className={`relative ${heightClass} overflow-hidden ${backdropClass}`}>
+      <div
+        className={`relative ${heightClass} overflow-hidden ${backdropClass}`}
+      >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(255,255,255,0.16),transparent_58%)]" />
+
         <img
           src={src}
           alt={alt}
           className={[
             "absolute inset-0 h-full w-full",
-            fit === "contain" ? "object-contain p-4" : "object-cover",
+
+            fit === "contain"
+              ? "object-contain p-4"
+              : "object-cover",
+
             crop,
+
             zoom,
           ].join(" ")}
         />
+
         <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
       </div>
-      {(footerLeft || footerRight) && (
+
+      {(footerLeft ||
+        footerRight) && (
         <div className="p-5 border-t border-black/5">
           <div className="flex items-center justify-between text-sm">
             <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
-              {footerLeft}
+              {
+                footerLeft
+              }
             </span>
-            <span className="font-semibold text-slate-900">{footerRight}</span>
+
+            <span className="font-semibold text-slate-900">
+              {
+                footerRight
+              }
+            </span>
           </div>
         </div>
       )}
@@ -833,8 +2410,11 @@ function FeatureRow({
   title,
   desc,
 }: {
-  icon: React.ReactNode;
+  icon:
+    React.ReactNode;
+
   title: string;
+
   desc: string;
 }) {
   return (
@@ -842,228 +2422,23 @@ function FeatureRow({
       <div className="shrink-0 self-start rounded-xl bg-amber-300 p-2.5 text-slate-950 shadow-[0_10px_30px_rgba(252,211,77,0.18)]">
         {icon}
       </div>
+
       <div>
-        <h4 className="font-bold tracking-tight text-white">{title}</h4>
-        <p className="mt-1.5 text-sm leading-relaxed text-slate-300">{desc}</p>
+        <h4 className="font-bold tracking-tight text-white">
+          {title}
+        </h4>
+
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
+          {desc}
+        </p>
       </div>
     </div>
   );
 }
 
-// function VacantFloorInfo({
-//   badge,
-//   floor,
-//   title,
-//   area,
-//   phone,
-//   ctaHref,
-//   ctaText,
-// }: {
-//   badge: string;
-//   floor: string;
-//   title: string;
-//   area: string;
-//   phone: string;
-//   ctaHref?: string;
-//   ctaText?: string;
-// }) {
-//   return (
-//     <div>
-//       <Kicker text={floor} />
-//       <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em]">
-//         {badge}
-//       </div>
-//       <h3
-//         data-reveal
-//         className="mt-6 text-3xl md:text-4xl font-extrabold tracking-tight"
-//       >
-//         {title}
-//       </h3>
-//       <div className="mt-7 rounded-3xl bg-white/55 ring-1 ring-black/10 p-5">
-//         <div className="flex items-center justify-between text-sm">
-//           <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
-//             FLOOR AREA
-//           </span>
-//           <span className="font-semibold">{area}</span>
-//         </div>
-//         <div className="mt-4 flex items-center justify-between text-sm border-t border-black/5 pt-4">
-//           <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
-//             CONTACT
-//           </span>
-//           <span className="font-semibold">{phone}</span>
-//         </div>
-//       </div>
-//       {ctaHref && (
-//         <div className="mt-6">
-//           <a href={ctaHref} className="btn-primary">
-//             {ctaText || "View Leasing Details"}{" "}
-//             <ArrowRight className="h-4 w-4" />
-//           </a>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-// function ComingSoonCard({
-//   title,
-//   subtitle = "Coming soon",
-// }: {
-//   title: string;
-//   subtitle?: string;
-// }) {
-//   return (
-//     <MediaCard>
-//       <div className="relative h-[320px] md:h-[520px] flex items-center justify-center overflow-hidden">
-//         <div className="absolute inset-0 bg-gradient-to-br from-[#FFF7DE] via-[#FFF2C7] to-white" />
-//         <div className="relative z-10 text-center px-6">
-//           <div className="inline-flex items-center rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em]">
-//             COMING SOON
-//           </div>
-//           <h4 className="mt-5 text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
-//             {title}
-//           </h4>
-//           <p className="mt-3 text-slate-600 text-base md:text-lg">{subtitle}</p>
-//         </div>
-//       </div>
-//     </MediaCard>
-//   );
-// }
-
-// function SpaceCard({
-//   building,
-//   floor,
-//   title,
-//   area,
-//   phone,
-//   email,
-//   tag,
-// }: {
-//   building: string;
-//   floor: string;
-//   title: string;
-//   area: string;
-//   phone: string;
-//   email: string;
-//   tag?: string;
-// }) {
-//   return (
-//     <div className="relative rounded-[28px] bg-white/55 ring-1 ring-black/10 p-7 shadow-[0_20px_70px_rgba(15,23,42,0.08)] hover:-translate-y-[2px] hover:shadow-[0_30px_95px_rgba(15,23,42,0.12)] transition">
-//       {tag && (
-//         <div className="absolute top-4 right-4 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold tracking-[0.18em] shadow-[0_18px_50px_rgba(2,6,23,0.16)]">
-//           {tag}
-//         </div>
-//       )}
-//       <p className="text-xs tracking-[0.18em] text-slate-500 font-semibold">
-//         {building}
-//       </p>
-//       <h3 className="mt-3 text-2xl font-extrabold tracking-tight">{floor}</h3>
-//       <p className="mt-2 text-slate-700">{title}</p>
-//       <div className="mt-6 space-y-3 text-sm">
-//         <div className="flex items-center justify-between border-t border-black/5 pt-4">
-//           <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
-//             FLOOR AREA
-//           </span>
-//           <span className="font-semibold">{area}</span>
-//         </div>
-//         <div className="flex flex-col gap-2 pt-3">
-//           <div className="inline-flex items-center gap-2 text-slate-800">
-//             <Phone className="h-4 w-4 text-slate-500" /> {phone}
-//           </div>
-//           <div className="inline-flex items-center gap-2 text-slate-800">
-//             <Mail className="h-4 w-4 text-slate-500" /> {email}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// function FloorCarousel({
-//   images,
-//   title = "Available Floors",
-//   intervalMs = 5000,
-//   fit = "contain",
-// }: {
-//   images: { src: string; alt: string; label?: string }[];
-//   title?: string;
-//   intervalMs?: number;
-//   fit?: "contain" | "cover";
-// }) {
-//   const [i, setI] = useState(0);
-//   const [paused, setPaused] = useState(false);
-//   const count = images.length;
-
-//   useEffect(() => {
-//     if (paused || count <= 1) return;
-//     const t = window.setInterval(
-//       () => setI((p) => (p + 1) % count),
-//       intervalMs,
-//     );
-//     return () => window.clearInterval(t);
-//   }, [paused, count, intervalMs]);
-
-//   const go = (next: number) => setI((next + count) % count);
-//   if (!images.length) return null;
-
-//   return (
-//     <div
-//       className="rounded-[28px] bg-white/55 ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden"
-//       onMouseEnter={() => setPaused(true)}
-//       onMouseLeave={() => setPaused(false)}
-//     >
-//       <div className="flex items-center justify-between px-5 md:px-6 py-4 border-b border-black/5">
-//         <div>
-//           <p className="text-[11px] tracking-[0.18em] text-slate-500 font-semibold">
-//             GALLERY
-//           </p>
-//           <h4 className="mt-1 text-lg md:text-xl font-extrabold tracking-tight text-slate-900">
-//             {title}
-//           </h4>
-//         </div>
-//         <div className="flex items-center gap-2">
-//           <button
-//             type="button"
-//             onClick={() => go(i - 1)}
-//             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/60 ring-1 ring-black/10"
-//           >
-//             ‹
-//           </button>
-//           <button
-//             type="button"
-//             onClick={() => go(i + 1)}
-//             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/60 ring-1 ring-black/10"
-//           >
-//             ›
-//           </button>
-//         </div>
-//       </div>
-//       <div className="relative h-[320px] md:h-[520px]">
-//         {images.map((img, idx) => (
-//           <div
-//             key={img.src + idx}
-//             className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
-//           >
-//             <img
-//               src={img.src}
-//               alt={img.alt}
-//               className={`absolute inset-0 h-full w-full ${fit === "contain" ? "object-contain" : "object-cover"}`}
-//             />
-//             {img.label && (
-//               <div className="absolute left-5 bottom-5">
-//                 <div className="rounded-2xl bg-white/70 backdrop-blur-xl ring-1 ring-black/10 px-4 py-2">
-//                   <p className="text-xs font-semibold text-slate-800">
-//                     {img.label}
-//                   </p>
-//                 </div>
-//               </div>
-//             )}
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
+// ========================================
+// DROPDOWN COMPONENTS
+// ========================================
 
 function DropdownPill({
   label,
@@ -1071,23 +2446,35 @@ function DropdownPill({
   onClick,
 }: {
   label: string;
+
   active?: boolean;
+
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={
+        onClick
+      }
       className={[
         "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200",
+
         active
           ? "bg-[#E8DFC8] text-slate-900 shadow-[0_4px_14px_rgba(15,23,42,0.08)]"
           : "bg-transparent text-slate-700 hover:bg-[#EDE4CF]",
       ].join(" ")}
     >
-      <span>{label}</span>
+      <span>
+        {label}
+      </span>
+
       <ChevronDown
-        className={`h-4 w-4 transition-transform duration-200 ${active ? "rotate-180" : ""}`}
+        className={`h-4 w-4 transition-transform duration-200 ${
+          active
+            ? "rotate-180"
+            : ""
+        }`}
       />
     </button>
   );
@@ -1097,25 +2484,49 @@ function DropdownMenu({
   items,
   onSelect,
 }: {
-  items: { label: string; id: string }[];
-  onSelect: (id: string) => void;
+  items: {
+    label: string;
+    id: string;
+  }[];
+
+  onSelect: (
+    id: string,
+  ) => void;
 }) {
   return (
     <div className="absolute left-0 top-[48px] z-50 w-[200px] overflow-hidden rounded-2xl border border-black/10 bg-[#F7F7F7]/95 shadow-[0_12px_40px_rgba(15,23,42,0.14)] backdrop-blur-xl">
       <div className="py-1">
-        {items.map((item, index) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => onSelect(item.id)}
-            className={[
-              "flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-black/[0.04]",
-              index !== items.length - 1 ? "border-b border-black/5" : "",
-            ].join(" ")}
-          >
-            {item.label}
-          </button>
-        ))}
+        {items.map(
+          (
+            item,
+            index,
+          ) => (
+            <button
+              key={
+                item.id
+              }
+              type="button"
+              onClick={() =>
+                onSelect(
+                  item.id,
+                )
+              }
+              className={[
+                "flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-black/[0.04]",
+
+                index !==
+                items.length -
+                  1
+                  ? "border-b border-black/5"
+                  : "",
+              ].join(" ")}
+            >
+              {
+                item.label
+              }
+            </button>
+          ),
+        )}
       </div>
     </div>
   );
