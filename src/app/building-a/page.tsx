@@ -80,9 +80,9 @@ interface FloorData {
   description: string | null;
 
   area_sqft:
-    | string
-    | number
-    | null;
+  | string
+  | number
+  | null;
 
   status: FloorStatus;
 
@@ -112,9 +112,9 @@ interface TenantData {
   email: string | null;
 
   status:
-    | "active"
-    | "inactive"
-    | "coming_soon";
+  | "active"
+  | "inactive"
+  | "coming_soon";
 
   sort_order: number;
 
@@ -141,10 +141,10 @@ interface GalleryItem {
   alt_text: string | null;
 
   category:
-    | "general"
-    | "building"
-    | "floor"
-    | "tenant";
+  | "general"
+  | "building"
+  | "floor"
+  | "tenant";
 
   is_featured: number;
   is_active: number;
@@ -255,9 +255,9 @@ export default function BuildingAPage() {
           ).sort(
             (a, b) =>
               a.sort_order -
-                b.sort_order ||
+              b.sort_order ||
               a.floor_number -
-                b.floor_number,
+              b.floor_number,
           );
 
           const buildingATenants = (
@@ -275,7 +275,7 @@ export default function BuildingAPage() {
             .sort(
               (a, b) =>
                 a.sort_order -
-                  b.sort_order ||
+                b.sort_order ||
                 a.id - b.id,
             );
 
@@ -318,9 +318,9 @@ export default function BuildingAPage() {
                 bFloors.sort(
                   (a, b) =>
                     a.sort_order -
-                      b.sort_order ||
+                    b.sort_order ||
                     a.floor_number -
-                      b.floor_number,
+                    b.floor_number,
                 ),
               );
             }
@@ -957,36 +957,36 @@ export default function BuildingAPage() {
 
                 {openMenu ===
                   "a" && (
-                  <DropdownMenu
-                    items={
-                      buildingAFloors
-                    }
-                    onSelect={(
-                      id,
-                    ) =>
-                      scrollToSection(
+                    <DropdownMenu
+                      items={
+                        buildingAFloors
+                      }
+                      onSelect={(
                         id,
-                      )
-                    }
-                  />
-                )}
+                      ) =>
+                        scrollToSection(
+                          id,
+                        )
+                      }
+                    />
+                  )}
 
                 {openMenu ===
                   "b" && (
-                  <DropdownMenu
-                    items={
-                      buildingBMenuFloors
-                    }
-                    onSelect={(
-                      id,
-                    ) =>
-                      navigateToPageSection(
-                        "/building-b",
+                    <DropdownMenu
+                      items={
+                        buildingBMenuFloors
+                      }
+                      onSelect={(
                         id,
-                      )
-                    }
-                  />
-                )}
+                      ) =>
+                        navigateToPageSection(
+                          "/building-b",
+                          id,
+                        )
+                      }
+                    />
+                  )}
               </div>
 
               <button
@@ -1260,16 +1260,16 @@ export default function BuildingAPage() {
 
           {futureFloors.length >
             0 && (
-            <FloorLabelCard
-              floor={getFutureFloorRangeLabel(
-                futureFloors,
-              )}
-              title="Premium Fitness Center"
-              status={getCombinedFutureStatus(
-                futureFloors,
-              )}
-            />
-          )}
+              <FloorLabelCard
+                floor={getFutureFloorRangeLabel(
+                  futureFloors,
+                )}
+                title="Premium Fitness Center"
+                status={getCombinedFutureStatus(
+                  futureFloors,
+                )}
+              />
+            )}
         </div>
       </Section>
 
@@ -1327,7 +1327,7 @@ export default function BuildingAPage() {
                       className="space-y-1"
                     >
                       {floorTenants.length >
-                      0 ? (
+                        0 ? (
                         floorTenants.map(
                           (
                             tenant,
@@ -1372,26 +1372,26 @@ export default function BuildingAPage() {
 
                     {floor.status ===
                       "available" && (
-                      <div
-                        data-reveal
-                        className="pt-3"
-                      >
-                        <Link
-                          href={getFloorInquiryUrl(
-                            floor.id,
-                          )}
-                          className="inline-flex items-center gap-2 rounded-2xl bg-amber-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_18px_45px_rgba(252,211,77,0.22)] transition hover:-translate-y-[1px]"
+                        <div
+                          data-reveal
+                          className="pt-3"
                         >
-                          Request Viewing
-                          for{" "}
-                          {
-                            floor.name
-                          }
+                          <Link
+                            href={getFloorInquiryUrl(
+                              floor.id,
+                            )}
+                            className="inline-flex items-center gap-2 rounded-2xl bg-amber-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_18px_45px_rgba(252,211,77,0.22)] transition hover:-translate-y-[1px]"
+                          >
+                            Request Viewing
+                            for{" "}
+                            {
+                              floor.name
+                            }
 
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </div>
-                    )}
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        </div>
+                      )}
                   </>
                 }
                 right={
@@ -1413,8 +1413,8 @@ export default function BuildingAPage() {
                       visual.isBackendImage
                         ? "scale-100"
                         : getStaticImageScale(
-                            floor,
-                          )
+                          floor,
+                        )
                     }
                     fit={
                       visual.isBackendImage
@@ -1435,67 +1435,67 @@ export default function BuildingAPage() {
 
       {futureFloors.length >
         0 && (
-        <Section id="building-a-gym">
-          <div className="text-center">
-            <Kicker
-              text={`${getFutureFloorRangeLabel(
-                futureFloors,
-              ).toUpperCase()} • ${building.name.toUpperCase()}`}
-            />
+          <Section id="building-a-gym">
+            <div className="text-center">
+              <Kicker
+                text={`${getFutureFloorRangeLabel(
+                  futureFloors,
+                ).toUpperCase()} • ${building.name.toUpperCase()}`}
+              />
 
-            <h2
-              data-reveal
-              className="mt-6 text-4xl md:text-5xl font-extrabold tracking-tight"
-            >
-              Premium Fitness Center
+              <h2
+                data-reveal
+                className="mt-6 text-4xl md:text-5xl font-extrabold tracking-tight"
+              >
+                Premium Fitness Center
 
-              <span className="block text-slate-600">
-                {getCombinedFutureStatus(
+                <span className="block text-slate-600">
+                  {getCombinedFutureStatus(
+                    futureFloors,
+                  )}
+                </span>
+              </h2>
+
+              <p
+                data-reveal
+                className="mt-3 text-slate-700"
+              >
+                {getFutureFloorDescription(
                   futureFloors,
                 )}
-              </span>
-            </h2>
+              </p>
 
-            <p
-              data-reveal
-              className="mt-3 text-slate-700"
-            >
-              {getFutureFloorDescription(
-                futureFloors,
-              )}
-            </p>
+              {availableFutureFloors.length >
+                0 && (
+                  <div
+                    data-reveal
+                    className="mt-7 flex flex-wrap justify-center gap-3"
+                  >
+                    {availableFutureFloors.map(
+                      (floor) => (
+                        <Link
+                          key={
+                            floor.id
+                          }
+                          href={getFloorInquiryUrl(
+                            floor.id,
+                          )}
+                          className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-[0_18px_45px_rgba(15,23,42,0.18)] transition hover:-translate-y-[1px]"
+                        >
+                          Request{" "}
+                          {
+                            floor.name
+                          }
 
-            {availableFutureFloors.length >
-              0 && (
-              <div
-                data-reveal
-                className="mt-7 flex flex-wrap justify-center gap-3"
-              >
-                {availableFutureFloors.map(
-                  (floor) => (
-                    <Link
-                      key={
-                        floor.id
-                      }
-                      href={getFloorInquiryUrl(
-                        floor.id,
-                      )}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-[0_18px_45px_rgba(15,23,42,0.18)] transition hover:-translate-y-[1px]"
-                    >
-                      Request{" "}
-                      {
-                        floor.name
-                      }
-
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  ),
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      ),
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
-          </div>
-        </Section>
-      )}
+            </div>
+          </Section>
+        )}
 
       {/* =====================================
           CONTACT
@@ -1581,12 +1581,12 @@ export default function BuildingAPage() {
                     "Premium office, café, clinic, and future wellness spaces in Subha Shree Bhawan."}
                 </p>
 
-                <a
+                <Link
                   href="/blog"
                   className="mt-4 inline-flex font-semibold text-slate-700 hover:text-slate-950 transition"
                 >
                   Visit our blog →
-                </a>
+                </Link>
               </div>
 
               <div>
@@ -1637,29 +1637,28 @@ export default function BuildingAPage() {
                     {tenants.length}{" "}
                     active tenant
                     {tenants.length ===
-                    1
+                      1
                       ? ""
                       : "s"}
                   </li>
 
                   <li>
                     {availableFloors.length >
-                    0
-                      ? `${availableFloors.length} available office ${
-                          availableFloors.length === 1
-                            ? "floor"
-                            : "floors"
-                        }`
+                      0
+                      ? `${availableFloors.length} available office ${availableFloors.length === 1
+                        ? "floor"
+                        : "floors"
+                      }`
                       : "Live floor occupancy information"}
                   </li>
 
                   {futureFloors.length >
                     0 && (
-                    <li>
-                      Future gym and
-                      wellness zone
-                    </li>
-                  )}
+                      <li>
+                        Future gym and
+                        wellness zone
+                      </li>
+                    )}
                 </ul>
 
                 <Link
@@ -1862,9 +1861,9 @@ function getFloorVisual(
         Number(
           item.floor_id,
         ) ===
-          Number(
-            floor.id,
-          ) &&
+        Number(
+          floor.id,
+        ) &&
         Boolean(
           item.is_active,
         ),
@@ -1900,7 +1899,7 @@ function getFloorVisual(
     gallery.find(
       (item) =>
         item.tenant_id !==
-          null &&
+        null &&
         tenantIds.includes(
           Number(
             item.tenant_id,
@@ -1997,9 +1996,9 @@ function getFloorFooterValue(
 ) {
   if (
     floor.area_sqft !==
-      null &&
+    null &&
     floor.area_sqft !==
-      undefined &&
+    undefined &&
     Number(
       floor.area_sqft,
     ) > 0
@@ -2013,12 +2012,11 @@ function getFloorFooterValue(
     floorTenants.length >
     0
   ) {
-    return `${floorTenants.length} ${
-      floorTenants.length ===
-      1
+    return `${floorTenants.length} ${floorTenants.length ===
+        1
         ? "Tenant"
         : "Tenants"
-    }`;
+      }`;
   }
 
   return formatStatus(
@@ -2132,7 +2130,7 @@ function getFutureFloorDescription(
         ): description is string =>
           Boolean(
             description &&
-              description.trim(),
+            description.trim(),
           ),
       );
 
@@ -2183,11 +2181,11 @@ function Section({
   id?: string;
 
   tone?:
-    | "base"
-    | "soft";
+  | "base"
+  | "soft";
 
   children:
-    React.ReactNode;
+  React.ReactNode;
 }) {
   return (
     <section
@@ -2196,10 +2194,10 @@ function Section({
     >
       {tone ===
         "soft" && (
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FFF2C7]/28 to-transparent" />
-        </div>
-      )}
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FFF2C7]/28 to-transparent" />
+          </div>
+        )}
 
       <Container>
         {children}
@@ -2213,10 +2211,10 @@ function TwoCol({
   right,
 }: {
   left:
-    React.ReactNode;
+  React.ReactNode;
 
   right:
-    React.ReactNode;
+  React.ReactNode;
 
   reverse?: boolean;
 }) {
@@ -2241,7 +2239,7 @@ function MediaCard({
   children,
 }: {
   children:
-    React.ReactNode;
+  React.ReactNode;
 }) {
   return (
     <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden">
@@ -2278,29 +2276,26 @@ function FloorLabelCard({
 }) {
   return (
     <div
-      className={`rounded-[24px] p-5 ring-1 shadow-[0_18px_50px_rgba(15,23,42,0.06)] ${
-        highlight
+      className={`rounded-[24px] p-5 ring-1 shadow-[0_18px_50px_rgba(15,23,42,0.06)] ${highlight
           ? "bg-slate-900 text-white ring-slate-900"
           : "bg-white/65 text-slate-900 ring-black/10"
-      }`}
+        }`}
     >
       <div className="flex items-center justify-between gap-3">
         <span
-          className={`text-xs font-bold tracking-[0.18em] ${
-            highlight
+          className={`text-xs font-bold tracking-[0.18em] ${highlight
               ? "text-white/80"
               : "text-slate-500"
-          }`}
+            }`}
         >
           {floor.toUpperCase()}
         </span>
 
         <span
-          className={`rounded-full px-3 py-1 text-[10px] font-bold tracking-[0.18em] ${
-            highlight
+          className={`rounded-full px-3 py-1 text-[10px] font-bold tracking-[0.18em] ${highlight
               ? "bg-white text-slate-900"
               : "bg-slate-900 text-white"
-          }`}
+            }`}
         >
           {status.toUpperCase()}
         </span>
@@ -2338,8 +2333,8 @@ function ImageCard({
   zoom?: string;
 
   fit?:
-    | "cover"
-    | "contain";
+  | "cover"
+  | "contain";
 }) {
   const lowerSrc =
     src.toLowerCase();
@@ -2348,12 +2343,12 @@ function ImageCard({
     lowerSrc.includes("fhi")
       ? "bg-[#293b4b]"
       : lowerSrc.includes(
-            "vairav",
-          )
+        "vairav",
+      )
         ? "bg-[#edf4f6]"
         : lowerSrc.includes(
-              "sigma",
-            )
+          "sigma",
+        )
           ? "bg-[#edf8f7]"
           : "bg-[#fffdfa]";
 
@@ -2385,22 +2380,22 @@ function ImageCard({
 
       {(footerLeft ||
         footerRight) && (
-        <div className="p-5 border-t border-black/5">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
-              {
-                footerLeft
-              }
-            </span>
+          <div className="p-5 border-t border-black/5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
+                {
+                  footerLeft
+                }
+              </span>
 
-            <span className="font-semibold text-slate-900">
-              {
-                footerRight
-              }
-            </span>
+              <span className="font-semibold text-slate-900">
+                {
+                  footerRight
+                }
+              </span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </MediaCard>
   );
 }
@@ -2411,7 +2406,7 @@ function FeatureRow({
   desc,
 }: {
   icon:
-    React.ReactNode;
+  React.ReactNode;
 
   title: string;
 
@@ -2470,11 +2465,10 @@ function DropdownPill({
       </span>
 
       <ChevronDown
-        className={`h-4 w-4 transition-transform duration-200 ${
-          active
+        className={`h-4 w-4 transition-transform duration-200 ${active
             ? "rotate-180"
             : ""
-        }`}
+          }`}
       />
     </button>
   );
@@ -2515,7 +2509,7 @@ function DropdownMenu({
                 "flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-black/[0.04]",
 
                 index !==
-                items.length -
+                  items.length -
                   1
                   ? "border-b border-black/5"
                   : "",

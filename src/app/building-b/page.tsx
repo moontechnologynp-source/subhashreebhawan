@@ -87,9 +87,9 @@ interface FloorData {
   description: string | null;
 
   area_sqft:
-    | number
-    | string
-    | null;
+  | number
+  | string
+  | null;
 
   status: FloorStatus;
 
@@ -122,9 +122,9 @@ interface TenantData {
   email: string | null;
 
   status:
-    | "active"
-    | "inactive"
-    | "coming_soon";
+  | "active"
+  | "inactive"
+  | "coming_soon";
 
   sort_order: number;
 
@@ -159,10 +159,10 @@ interface GalleryItem {
   alt_text: string | null;
 
   category:
-    | "general"
-    | "building"
-    | "floor"
-    | "tenant";
+  | "general"
+  | "building"
+  | "floor"
+  | "tenant";
 
   is_featured: number;
 
@@ -272,9 +272,9 @@ export default function BuildingBPage() {
           ).sort(
             (a, b) =>
               a.sort_order -
-                b.sort_order ||
+              b.sort_order ||
               a.floor_number -
-                b.floor_number
+              b.floor_number
           );
 
           const buildingBTenants = (
@@ -292,7 +292,7 @@ export default function BuildingBPage() {
             .sort(
               (a, b) =>
                 a.sort_order -
-                  b.sort_order ||
+                b.sort_order ||
                 a.id - b.id
             );
 
@@ -340,14 +340,14 @@ export default function BuildingBPage() {
                 aFloors.sort(
                   (a, b) =>
                     a.sort_order -
-                      b.sort_order ||
+                    b.sort_order ||
                     a.floor_number -
-                      b.floor_number
+                    b.floor_number
                 )
               );
             }
           } catch (
-            navigationError
+          navigationError
           ) {
             console.warn(
               "Unable to load Building A navigation:",
@@ -355,7 +355,7 @@ export default function BuildingBPage() {
             );
           }
         } catch (
-          loadError
+        loadError
         ) {
           console.error(
             "Building B load error:",
@@ -753,7 +753,7 @@ export default function BuildingBPage() {
               () =>
                 attemptScroll(
                   attemptsLeft -
-                    1
+                  1
                 ),
               100
             );
@@ -1008,36 +1008,36 @@ export default function BuildingBPage() {
 
                 {openMenu ===
                   "a" && (
-                  <DropdownMenu
-                    items={
-                      buildingAMenuFloors
-                    }
-                    onSelect={(
-                      id
-                    ) =>
-                      navigateToPageSection(
-                        "/building-a",
+                    <DropdownMenu
+                      items={
+                        buildingAMenuFloors
+                      }
+                      onSelect={(
                         id
-                      )
-                    }
-                  />
-                )}
+                      ) =>
+                        navigateToPageSection(
+                          "/building-a",
+                          id
+                        )
+                      }
+                    />
+                  )}
 
                 {openMenu ===
                   "b" && (
-                  <DropdownMenu
-                    items={
-                      buildingBMenuFloors
-                    }
-                    onSelect={(
-                      id
-                    ) =>
-                      scrollToSection(
+                    <DropdownMenu
+                      items={
+                        buildingBMenuFloors
+                      }
+                      onSelect={(
                         id
-                      )
-                    }
-                  />
-                )}
+                      ) =>
+                        scrollToSection(
+                          id
+                        )
+                      }
+                    />
+                  )}
               </div>
 
               <button
@@ -1345,8 +1345,8 @@ export default function BuildingBPage() {
           const website =
             mainTenant
               ? getTenantWebsite(
-                  mainTenant
-                )
+                mainTenant
+              )
               : null;
 
           return (
@@ -1385,7 +1385,7 @@ export default function BuildingBPage() {
                       className="space-y-1"
                     >
                       {floorTenants.length >
-                      0 ? (
+                        0 ? (
                         floorTenants.map(
                           (
                             tenant
@@ -1432,45 +1432,45 @@ export default function BuildingBPage() {
 
                     {(website ||
                       floor.status ===
-                        "available") && (
-                      <div
-                        data-reveal
-                        className="pt-3 flex flex-wrap gap-3"
-                      >
-                        {floor.status ===
-                          "available" && (
-                          <Link
-                            href={getFloorInquiryUrl(
-                              floor.id
+                      "available") && (
+                        <div
+                          data-reveal
+                          className="pt-3 flex flex-wrap gap-3"
+                        >
+                          {floor.status ===
+                            "available" && (
+                              <Link
+                                href={getFloorInquiryUrl(
+                                  floor.id
+                                )}
+                                className="inline-flex items-center gap-2 rounded-2xl bg-amber-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_18px_45px_rgba(252,211,77,0.22)] transition hover:-translate-y-[1px]"
+                              >
+                                Request Viewing
+                                for{" "}
+                                {
+                                  floor.name
+                                }
+
+                                <ArrowRight className="h-4 w-4" />
+                              </Link>
                             )}
-                            className="inline-flex items-center gap-2 rounded-2xl bg-amber-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_18px_45px_rgba(252,211,77,0.22)] transition hover:-translate-y-[1px]"
-                          >
-                            Request Viewing
-                            for{" "}
-                            {
-                              floor.name
-                            }
 
-                            <ArrowRight className="h-4 w-4" />
-                          </Link>
-                        )}
+                          {website && (
+                            <a
+                              href={
+                                website
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(15,23,42,0.18)] transition hover:translate-y-[-1px]"
+                            >
+                              Visit Website
 
-                        {website && (
-                          <a
-                            href={
-                              website
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-[0_20px_60px_rgba(15,23,42,0.18)] transition hover:translate-y-[-1px]"
-                          >
-                            Visit Website
-
-                            <ArrowRight className="h-4 w-4" />
-                          </a>
-                        )}
-                      </div>
-                    )}
+                              <ArrowRight className="h-4 w-4" />
+                            </a>
+                          )}
+                        </div>
+                      )}
                   </>
                 }
                 right={
@@ -1616,12 +1616,12 @@ export default function BuildingBPage() {
                     "A connected destination for dining, production, and technology-focused businesses."}
                 </p>
 
-                <a
+                <Link
                   href="/blog"
                   className="mt-4 inline-flex font-semibold text-slate-700 hover:text-slate-950 transition"
                 >
                   Visit our blog →
-                </a>
+                </Link>
               </div>
 
               {/* CONTACT */}
@@ -1679,7 +1679,7 @@ export default function BuildingBPage() {
                 </h4>
 
                 {tenants.length >
-                0 ? (
+                  0 ? (
                   <ul className="mt-4 space-y-3 text-slate-700">
                     {tenants.map(
                       (tenant) => (
@@ -1705,13 +1705,12 @@ export default function BuildingBPage() {
 
                 <p className="mt-5 text-sm font-semibold text-slate-700">
                   {availableFloors.length >
-                  0
-                    ? `${availableFloors.length} ${
-                        availableFloors.length ===
-                        1
-                          ? "floor is"
-                          : "floors are"
-                      } currently available.`
+                    0
+                    ? `${availableFloors.length} ${availableFloors.length ===
+                      1
+                      ? "floor is"
+                      : "floors are"
+                    } currently available.`
                     : "Floor availability is updated from the admin panel."}
                 </p>
               </div>
@@ -1978,9 +1977,9 @@ function getFloorVisual(
         Number(
           item.floor_id
         ) ===
-          Number(
-            floor.id
-          ) &&
+        Number(
+          floor.id
+        ) &&
         Boolean(
           item.is_active
         )
@@ -2018,7 +2017,7 @@ function getFloorVisual(
     gallery.find(
       (item) =>
         item.tenant_id !==
-          null &&
+        null &&
         tenantIds.includes(
           Number(
             item.tenant_id
@@ -2102,7 +2101,7 @@ function getStaticFloorImage(
   floorNumber: number
 ) {
   switch (
-    floorNumber
+  floorNumber
   ) {
     case 0:
       return {
@@ -2151,7 +2150,7 @@ function Container({
   className = "",
 }: {
   children:
-    React.ReactNode;
+  React.ReactNode;
 
   className?: string;
 }) {
@@ -2176,11 +2175,11 @@ function Section({
   id?: string;
 
   tone?:
-    | "base"
-    | "soft";
+  | "base"
+  | "soft";
 
   children:
-    React.ReactNode;
+  React.ReactNode;
 }) {
   return (
     <section
@@ -2189,10 +2188,10 @@ function Section({
     >
       {tone ===
         "soft" && (
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FFF2C7]/28 to-transparent" />
-        </div>
-      )}
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FFF2C7]/28 to-transparent" />
+          </div>
+        )}
 
       <Container>
         {children}
@@ -2210,10 +2209,10 @@ function TwoCol({
   right,
 }: {
   left:
-    React.ReactNode;
+  React.ReactNode;
 
   right:
-    React.ReactNode;
+  React.ReactNode;
 
   reverse?: boolean;
 }) {
@@ -2242,7 +2241,7 @@ function MediaCard({
   children,
 }: {
   children:
-    React.ReactNode;
+  React.ReactNode;
 }) {
   return (
     <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden">
@@ -2287,29 +2286,26 @@ function FloorLabelCard({
 }) {
   return (
     <div
-      className={`rounded-[24px] p-5 ring-1 shadow-[0_18px_50px_rgba(15,23,42,0.06)] ${
-        highlight
+      className={`rounded-[24px] p-5 ring-1 shadow-[0_18px_50px_rgba(15,23,42,0.06)] ${highlight
           ? "bg-slate-900 text-white ring-slate-900"
           : "bg-white/65 text-slate-900 ring-black/10"
-      }`}
+        }`}
     >
       <div className="flex items-center justify-between gap-3">
         <span
-          className={`text-xs font-bold tracking-[0.18em] ${
-            highlight
+          className={`text-xs font-bold tracking-[0.18em] ${highlight
               ? "text-white/80"
               : "text-slate-500"
-          }`}
+            }`}
         >
           {floor.toUpperCase()}
         </span>
 
         <span
-          className={`rounded-full px-3 py-1 text-[10px] font-bold tracking-[0.18em] ${
-            highlight
+          className={`rounded-full px-3 py-1 text-[10px] font-bold tracking-[0.18em] ${highlight
               ? "bg-white text-slate-900"
               : "bg-slate-900 text-white"
-          }`}
+            }`}
         >
           {status.toUpperCase()}
         </span>
@@ -2345,8 +2341,8 @@ function ImageCard({
   zoom?: string;
 
   fit?:
-    | "cover"
-    | "contain";
+  | "cover"
+  | "contain";
 }) {
   const lowerSrc =
     src.toLowerCase();
@@ -2355,13 +2351,13 @@ function ImageCard({
     lowerSrc.includes(
       "bengal"
     ) ||
-    lowerSrc.includes(
-      "swopna"
-    )
+      lowerSrc.includes(
+        "swopna"
+      )
       ? "bg-[#050505]"
       : lowerSrc.includes(
-            "moon"
-          )
+        "moon"
+      )
         ? "bg-[#f1f3f5]"
         : "bg-[#fffdfa]";
 
@@ -2402,7 +2398,7 @@ function FeatureRow({
   desc,
 }: {
   icon:
-    React.ReactNode;
+  React.ReactNode;
 
   title: string;
 
@@ -2461,11 +2457,10 @@ function DropdownPill({
       </span>
 
       <ChevronDown
-        className={`h-4 w-4 transition-transform duration-200 ${
-          active
+        className={`h-4 w-4 transition-transform duration-200 ${active
             ? "rotate-180"
             : ""
-        }`}
+          }`}
       />
     </button>
   );
@@ -2510,7 +2505,7 @@ function DropdownMenu({
                 "flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-black/[0.04]",
 
                 index !==
-                items.length -
+                  items.length -
                   1
                   ? "border-b border-black/5"
                   : "",
