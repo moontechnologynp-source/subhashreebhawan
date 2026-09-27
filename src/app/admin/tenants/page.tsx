@@ -7,7 +7,6 @@ import {
   useMemo,
   useState,
 } from "react";
-
 import { useRouter } from "next/navigation";
 
 // ========================================
@@ -23,101 +22,84 @@ interface Building {
 interface Floor {
   id: number;
   building_id: number;
-
   building_name: string;
   building_slug: string;
-
   name: string;
   floor_number: number;
   slug: string;
-
   status: string;
 }
 
 interface Tenant {
   id: number;
-
   floor_id: number;
-
   name: string;
   slug: string;
-
   short_description: string | null;
   description: string | null;
-
   logo: string | null;
-
   website_url: string | null;
-
   phone: string | null;
-
   email: string | null;
-
   status:
     | "active"
     | "inactive"
     | "coming_soon";
-
   sort_order: number;
-
   floor_name: string;
   floor_number: number;
   floor_slug: string;
-
   building_id: number;
   building_name: string;
   building_slug: string;
-
   created_at: string;
   updated_at: string;
 }
 
 interface TenantForm {
   floor_id: string;
-
   name: string;
   slug: string;
-
   short_description: string;
   description: string;
-
   logo: string;
-
   website_url: string;
-
   phone: string;
-
   email: string;
-
   status:
     | "active"
     | "inactive"
     | "coming_soon";
-
   sort_order: string;
 }
 
 const emptyForm: TenantForm = {
   floor_id: "",
-
   name: "",
   slug: "",
-
   short_description: "",
   description: "",
-
   logo: "",
-
   website_url: "",
-
   phone: "",
-
   email: "",
-
   status: "active",
-
   sort_order: "0",
 };
+
+const inputClass =
+  "mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200";
+
+// ========================================
+// HELPERS
+// ========================================
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 
 // ========================================
 // PAGE
@@ -157,9 +139,7 @@ export default function AdminTenantsPage() {
   const [
     moveOutTarget,
     setMoveOutTarget,
-  ] = useState<Tenant | null>(
-    null
-  );
+  ] = useState<Tenant | null>(null);
 
   const [
     movingOut,
@@ -182,88 +162,75 @@ export default function AdminTenantsPage() {
     setFloorFilter,
   ] = useState("all");
 
+  const [
+    logoUploading,
+    setLogoUploading,
+  ] = useState(false);
+
+  const [
+    logoUploadMessage,
+    setLogoUploadMessage,
+  ] = useState("");
+
   // ========================================
   // TOKEN
   // ========================================
 
-  const getToken = () => {
-    return localStorage.getItem(
-      "subhashree_admin_token"
+  const getToken = () =>
+    localStorage.getItem(
+      "subhashree_admin_token",
     );
+
+  const clearAuthAndRedirect = () => {
+    localStorage.removeItem(
+      "subhashree_admin_token",
+    );
+    localStorage.removeItem(
+      "subhashree_admin",
+    );
+    router.replace("/admin/login");
   };
 
   // ========================================
   // LOAD DATA
   // ========================================
 
-  const loadData =
-    useCallback(async () => {
+  const loadData = useCallback(
+    async () => {
       try {
         setLoading(true);
         setError("");
 
-        const token =
-          getToken();
+        const token = getToken();
 
         if (!token) {
-          router.replace(
-            "/admin/login"
-          );
-
+          router.replace("/admin/login");
           return;
         }
-
-        // ==================================
-        // VERIFY ADMIN
-        // ==================================
 
         const authResponse =
           await fetch(
             `${API_URL}/auth/me`,
             {
               headers: {
-                Authorization:
-                  `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
               },
-            }
+            },
           );
 
         if (!authResponse.ok) {
-          localStorage.removeItem(
-            "subhashree_admin_token"
-          );
-
-          localStorage.removeItem(
-            "subhashree_admin"
-          );
-
-          router.replace(
-            "/admin/login"
-          );
-
+          clearAuthAndRedirect();
           return;
         }
-
-        // ==================================
-        // LOAD DATA
-        // ==================================
 
         const [
           buildingsResponse,
           floorsResponse,
           tenantsResponse,
         ] = await Promise.all([
-          fetch(
-            `${API_URL}/buildings`
-          ),
-
-          fetch(
-            `${API_URL}/floors`
-          ),
-
-          fetch(
-            `${API_URL}/tenants`
-          ),
+          fetch(`${API_URL}/buildings`),
+          fetch(`${API_URL}/floors`),
+          fetch(`${API_URL}/tenants`),
         ]);
 
         const buildingsData =
@@ -281,7 +248,7 @@ export default function AdminTenantsPage() {
         ) {
           throw new Error(
             buildingsData.message ||
-              "Unable to load buildings"
+              "Unable to load buildings",
           );
         }
 
@@ -291,7 +258,7 @@ export default function AdminTenantsPage() {
         ) {
           throw new Error(
             floorsData.message ||
-              "Unable to load floors"
+              "Unable to load floors",
           );
         }
 
@@ -301,127 +268,239 @@ export default function AdminTenantsPage() {
         ) {
           throw new Error(
             tenantsData.message ||
-              "Unable to load tenants"
+              "Unable to load tenants",
           );
         }
 
         setBuildings(
-          buildingsData.buildings ||
-            []
+          buildingsData.buildings || [],
         );
-
-        setFloors(
-          floorsData.floors ||
-            []
-        );
-
+        setFloors(floorsData.floors || []);
         setTenants(
-          tenantsData.tenants ||
-            []
+          tenantsData.tenants || [],
         );
-      } catch (error) {
+      } catch (loadError) {
         console.error(
           "Load tenants error:",
-          error
+          loadError,
         );
 
         setError(
-          "Unable to load tenant information."
+          loadError instanceof Error
+            ? loadError.message
+            : "Unable to load tenant information.",
         );
       } finally {
         setLoading(false);
       }
-    }, [API_URL, router]);
+    },
+    [API_URL, router],
+  );
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
 
   // ========================================
-  // FILTER FLOORS BY BUILDING
+  // FILTERED FLOORS
   // ========================================
 
-  const floorsForForm =
-    useMemo(() => {
+  const floorsForForm = useMemo(
+    () => floors,
+    [floors],
+  );
+
+  const floorsForFilter = useMemo(() => {
+    if (buildingFilter === "all") {
       return floors;
-    }, [floors]);
+    }
 
-  // ========================================
-  // FILTER DISPLAY
-  // ========================================
+    return floors.filter(
+      (floor) =>
+        Number(floor.building_id) ===
+        Number(buildingFilter),
+    );
+  }, [floors, buildingFilter]);
 
-  const floorsForFilter =
-    useMemo(() => {
-      if (
-        buildingFilter ===
-        "all"
-      ) {
-        return floors;
-      }
+  const filteredTenants = useMemo(() => {
+    return tenants.filter((tenant) => {
+      const buildingMatches =
+        buildingFilter === "all" ||
+        Number(tenant.building_id) ===
+          Number(buildingFilter);
 
-      return floors.filter(
-        (floor) =>
-          Number(
-            floor.building_id
-          ) ===
-          Number(
-            buildingFilter
-          )
+      const floorMatches =
+        floorFilter === "all" ||
+        Number(tenant.floor_id) ===
+          Number(floorFilter);
+
+      return (
+        buildingMatches &&
+        floorMatches
       );
-    }, [
-      floors,
-      buildingFilter,
-    ]);
-
-  const filteredTenants =
-    useMemo(() => {
-      return tenants.filter(
-        (tenant) => {
-          const buildingMatches =
-            buildingFilter ===
-              "all" ||
-            Number(
-              tenant.building_id
-            ) ===
-              Number(
-                buildingFilter
-              );
-
-          const floorMatches =
-            floorFilter ===
-              "all" ||
-            Number(
-              tenant.floor_id
-            ) ===
-              Number(
-                floorFilter
-              );
-
-          return (
-            buildingMatches &&
-            floorMatches
-          );
-        }
-      );
-    }, [
-      tenants,
-      buildingFilter,
-      floorFilter,
-    ]);
+    });
+  }, [
+    tenants,
+    buildingFilter,
+    floorFilter,
+  ]);
 
   // ========================================
-  // FORM FIELD
+  // FIELD UPDATES
   // ========================================
 
   const updateField = (
     field: keyof TenantForm,
-    value: string
+    value: string,
   ) => {
     setForm((current) => ({
       ...current,
-
       [field]: value,
     }));
+  };
+
+  const handleNameChange = (
+    value: string,
+  ) => {
+    setForm((current) => ({
+      ...current,
+      name: value,
+      slug:
+        editingId === null
+          ? slugify(value)
+          : current.slug,
+    }));
+  };
+
+  // ========================================
+  // LOGO UPLOAD
+  // ========================================
+
+  const handleLogoUpload = async (
+    file: File,
+  ) => {
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setError(
+        "Please select a valid image file.",
+      );
+      return;
+    }
+
+    try {
+      setLogoUploading(true);
+      setLogoUploadMessage("");
+      setError("");
+      setMessage("");
+
+      const token = getToken();
+
+      if (!token) {
+        router.replace("/admin/login");
+        return;
+      }
+
+      const prepareResponse = await fetch(
+        `${API_URL}/uploads/image-url`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            purpose: "tenant",
+            contentType:
+              file.type ||
+              "application/octet-stream",
+            fileSize: file.size,
+            fileName: file.name,
+          }),
+        },
+      );
+
+      const prepareData =
+        await prepareResponse.json();
+
+      if (prepareResponse.status === 401) {
+        clearAuthAndRedirect();
+        return;
+      }
+
+      if (
+        !prepareResponse.ok ||
+        !prepareData.success ||
+        !prepareData.uploadUrl
+      ) {
+        throw new Error(
+          prepareData.message ||
+            "Unable to prepare logo upload.",
+        );
+      }
+
+      const uploadResponse = await fetch(
+        prepareData.uploadUrl,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type":
+              file.type ||
+              "application/octet-stream",
+          },
+          body: file,
+        },
+      );
+
+      let uploadData: any = {};
+
+      try {
+        uploadData =
+          await uploadResponse.json();
+      } catch {
+        uploadData = {};
+      }
+
+      if (!uploadResponse.ok) {
+        throw new Error(
+          uploadData.message ||
+            "Logo upload failed.",
+        );
+      }
+
+      const finalUrl =
+        uploadData.url ||
+        uploadData.downloadUrl ||
+        prepareData.url ||
+        prepareData.publicUrl ||
+        "";
+
+      if (!finalUrl) {
+        throw new Error(
+          "Upload completed, but image URL was not returned.",
+        );
+      }
+
+      setForm((current) => ({
+        ...current,
+        logo: finalUrl,
+      }));
+
+      setLogoUploadMessage(
+        "Logo uploaded successfully.",
+      );
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Unable to upload logo.",
+      );
+    } finally {
+      setLogoUploading(false);
+    }
   };
 
   // ========================================
@@ -433,18 +512,15 @@ export default function AdminTenantsPage() {
 
     setForm({
       ...emptyForm,
-
       floor_id:
         floors.length > 0
-          ? String(
-              floors[0].id
-            )
+          ? String(floors[0].id)
           : "",
     });
 
     setError("");
     setMessage("");
-
+    setLogoUploadMessage("");
     setShowForm(true);
 
     window.scrollTo({
@@ -458,57 +534,32 @@ export default function AdminTenantsPage() {
   // ========================================
 
   const openEditForm = (
-    tenant: Tenant
+    tenant: Tenant,
   ) => {
-    setEditingId(
-      tenant.id
-    );
+    setEditingId(tenant.id);
 
     setForm({
-      floor_id: String(
-        tenant.floor_id
-      ),
-
+      floor_id: String(tenant.floor_id),
       name: tenant.name,
-
       slug: tenant.slug,
-
       short_description:
-        tenant.short_description ||
-        "",
-
+        tenant.short_description || "",
       description:
-        tenant.description ||
-        "",
-
-      logo:
-        tenant.logo ||
-        "",
-
+        tenant.description || "",
+      logo: tenant.logo || "",
       website_url:
-        tenant.website_url ||
-        "",
-
-      phone:
-        tenant.phone ||
-        "",
-
-      email:
-        tenant.email ||
-        "",
-
-      status:
-        tenant.status,
-
+        tenant.website_url || "",
+      phone: tenant.phone || "",
+      email: tenant.email || "",
+      status: tenant.status,
       sort_order: String(
-        tenant.sort_order ??
-          0
+        tenant.sort_order ?? 0,
       ),
     });
 
     setError("");
     setMessage("");
-
+    setLogoUploadMessage("");
     setShowForm(true);
 
     window.scrollTo({
@@ -518,20 +569,16 @@ export default function AdminTenantsPage() {
   };
 
   // ========================================
-  // CANCEL FORM
+  // CANCEL
   // ========================================
 
   const cancelForm = () => {
     setEditingId(null);
-
-    setForm(
-      emptyForm
-    );
-
+    setForm(emptyForm);
     setShowForm(false);
-
     setError("");
     setMessage("");
+    setLogoUploadMessage("");
   };
 
   // ========================================
@@ -539,7 +586,7 @@ export default function AdminTenantsPage() {
   // ========================================
 
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
 
@@ -548,33 +595,36 @@ export default function AdminTenantsPage() {
 
     if (!form.floor_id) {
       setError(
-        "Please select a floor."
+        "Please select a floor.",
       );
-
       return;
     }
 
-    if (
-      !form.name.trim()
-    ) {
+    if (!form.name.trim()) {
       setError(
-        "Tenant name is required."
+        "Tenant name is required.",
       );
+      return;
+    }
 
+    const finalSlug =
+      form.slug.trim() ||
+      slugify(form.name);
+
+    if (!finalSlug) {
+      setError(
+        "Tenant slug is required.",
+      );
       return;
     }
 
     try {
       setSaving(true);
 
-      const token =
-        getToken();
+      const token = getToken();
 
       if (!token) {
-        router.replace(
-          "/admin/login"
-        );
-
+        router.replace("/admin/login");
         return;
       }
 
@@ -588,81 +638,37 @@ export default function AdminTenantsPage() {
           ? "PUT"
           : "POST";
 
-      const response =
-        await fetch(
-          url,
-          {
-            method,
-
-            headers: {
-              "Content-Type":
-                "application/json",
-
-              Authorization:
-                `Bearer ${token}`,
-            },
-
-            body:
-              JSON.stringify({
-                floor_id:
-                  Number(
-                    form.floor_id
-                  ),
-
-                name:
-                  form.name.trim(),
-
-                slug:
-                  form.slug.trim(),
-
-                short_description:
-                  form.short_description,
-
-                description:
-                  form.description,
-
-                logo:
-                  form.logo,
-
-                website_url:
-                  form.website_url,
-
-                phone:
-                  form.phone,
-
-                email:
-                  form.email,
-
-                status:
-                  form.status,
-
-                sort_order:
-                  Number(
-                    form.sort_order
-                  ) || 0,
-              }),
-          }
-        );
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type":
+            "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          floor_id: Number(form.floor_id),
+          name: form.name.trim(),
+          slug: finalSlug,
+          short_description:
+            form.short_description.trim(),
+          description:
+            form.description.trim(),
+          logo: form.logo.trim(),
+          website_url:
+            form.website_url.trim(),
+          phone: form.phone.trim(),
+          email: form.email.trim(),
+          status: form.status,
+          sort_order:
+            Number(form.sort_order) || 0,
+        }),
+      });
 
       const data =
         await response.json();
 
-      if (
-        response.status ===
-        401
-      ) {
-        localStorage.removeItem(
-          "subhashree_admin_token"
-        );
-
-        localStorage.removeItem(
-          "subhashree_admin"
-        );
-
-        router.replace(
-          "/admin/login"
-        );
-
+      if (response.status === 401) {
+        clearAuthAndRedirect();
         return;
       }
 
@@ -672,35 +678,31 @@ export default function AdminTenantsPage() {
       ) {
         setError(
           data.message ||
-            "Unable to save tenant."
+            "Unable to save tenant.",
         );
-
         return;
       }
 
       setMessage(
         editingId !== null
           ? "Tenant updated successfully."
-          : "Tenant created successfully."
+          : "Tenant created successfully.",
       );
 
       setEditingId(null);
-
-      setForm(
-        emptyForm
-      );
-
+      setForm(emptyForm);
       setShowForm(false);
+      setLogoUploadMessage("");
 
       await loadData();
-    } catch (error) {
+    } catch (saveError) {
       console.error(
         "Save tenant error:",
-        error
+        saveError,
       );
 
       setError(
-        "Unable to connect to the backend."
+        "Unable to connect to the backend.",
       );
     } finally {
       setSaving(false);
@@ -708,799 +710,642 @@ export default function AdminTenantsPage() {
   };
 
   // ========================================
-  // OPEN MOVE OUT
+  // MOVE OUT
   // ========================================
 
   const openMoveOutModal = (
-    tenant: Tenant
+    tenant: Tenant,
   ) => {
     setError("");
     setMessage("");
-
-    setMoveOutTarget(
-      tenant
-    );
+    setMoveOutTarget(tenant);
   };
 
-  // ========================================
-  // CLOSE MOVE OUT
-  // ========================================
+  const closeMoveOutModal = () => {
+    if (movingOut) {
+      return;
+    }
 
-  const closeMoveOutModal =
-    () => {
-      if (movingOut) {
+    setMoveOutTarget(null);
+  };
+
+  const handleMoveOut = async () => {
+    if (!moveOutTarget) {
+      return;
+    }
+
+    const tenantName =
+      moveOutTarget.name;
+
+    try {
+      setMovingOut(true);
+      setError("");
+      setMessage("");
+
+      const token = getToken();
+
+      if (!token) {
+        router.replace("/admin/login");
         return;
       }
 
-      setMoveOutTarget(
-        null
+      const response = await fetch(
+        `${API_URL}/tenants/${moveOutTarget.id}/move-out`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
-    };
 
-  // ========================================
-  // MOVE TENANT OUT
-  // ========================================
+      const data =
+        await response.json();
 
-  const handleMoveOut =
-    async () => {
-      if (!moveOutTarget) {
+      if (response.status === 401) {
+        clearAuthAndRedirect();
         return;
       }
 
-      const tenantName =
-        moveOutTarget.name;
-
-      try {
-        setMovingOut(true);
-
-        setError("");
-        setMessage("");
-
-        const token =
-          getToken();
-
-        if (!token) {
-          router.replace(
-            "/admin/login"
-          );
-
-          return;
-        }
-
-        const response =
-          await fetch(
-            `${API_URL}/tenants/${moveOutTarget.id}/move-out`,
-            {
-              method:
-                "PATCH",
-
-              headers: {
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
-          );
-
-        const data =
-          await response.json();
-
-        if (
-          response.status ===
-          401
-        ) {
-          localStorage.removeItem(
-            "subhashree_admin_token"
-          );
-
-          localStorage.removeItem(
-            "subhashree_admin"
-          );
-
-          router.replace(
-            "/admin/login"
-          );
-
-          return;
-        }
-
-        if (
-          !response.ok ||
-          !data.success
-        ) {
-          setError(
-            data.message ||
-              "Unable to move tenant out."
-          );
-
-          return;
-        }
-
-        setMoveOutTarget(
-          null
-        );
-
-        setMessage(
-          data.message ||
-            `${tenantName} moved out successfully.`
-        );
-
-        await loadData();
-      } catch (error) {
-        console.error(
-          "Move out tenant error:",
-          error
-        );
-
+      if (
+        !response.ok ||
+        !data.success
+      ) {
         setError(
-          "Unable to connect to the backend."
+          data.message ||
+            "Unable to move tenant out.",
         );
-      } finally {
-        setMovingOut(
-          false
-        );
+        return;
       }
-    };
+
+      setMoveOutTarget(null);
+
+      setMessage(
+        data.message ||
+          `${tenantName} moved out successfully.`,
+      );
+
+      await loadData();
+    } catch (moveOutError) {
+      console.error(
+        "Move out tenant error:",
+        moveOutError,
+      );
+
+      setError(
+        "Unable to connect to the backend.",
+      );
+    } finally {
+      setMovingOut(false);
+    }
+  };
 
   // ========================================
   // STATUS STYLES
   // ========================================
 
   const getStatusClasses = (
-    status: Tenant["status"]
+    status: Tenant["status"],
   ) => {
     switch (status) {
       case "active":
         return "bg-emerald-50 text-emerald-700";
-
       case "coming_soon":
         return "bg-amber-50 text-amber-700";
-
       case "inactive":
         return "bg-slate-100 text-slate-600";
-
       default:
         return "bg-slate-100 text-slate-600";
     }
   };
 
   // ========================================
+  // LOADING
+  // ========================================
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-slate-50 p-12 text-center text-slate-600">
+        Loading tenants...
+      </main>
+    );
+  }
+
+  // ========================================
   // UI
   // ========================================
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      {/* ===================================
-          HEADER
-      =================================== */}
-
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+    <main className="min-h-screen bg-slate-50 p-5 text-slate-900 md:p-10">
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <button
               type="button"
               onClick={() =>
-                router.push(
-                  "/admin"
-                )
+                router.push("/admin")
               }
-              className="mb-1 text-sm font-medium text-slate-500 hover:text-slate-900"
+              className="text-sm font-medium text-slate-600 hover:text-slate-900"
             >
               ← Dashboard
             </button>
 
-            <h1 className="text-xl font-semibold text-slate-900">
-              Tenants
+            <h1 className="mt-3 text-3xl font-bold">
+              Manage tenants
             </h1>
+
+            <p className="mt-2 text-slate-500">
+              Add tenants, update their
+              information, upload logos
+              and move them out when
+              they leave.
+            </p>
           </div>
 
           <button
             type="button"
-            onClick={
-              openCreateForm
-            }
-            className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            onClick={openCreateForm}
+            className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white shadow-sm transition hover:bg-slate-800"
           >
-            + Add Tenant
+            + New tenant
           </button>
-        </div>
-      </header>
-
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        {/* ===================================
-            MESSAGES
-        =================================== */}
+        </header>
 
         {error && (
-          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
             {error}
           </div>
         )}
 
         {message && (
-          <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          <div className="mb-5 rounded-xl border border-green-200 bg-green-50 p-4 text-green-800">
             {message}
           </div>
         )}
 
-        {/* ===================================
-            FORM
-        =================================== */}
+        {logoUploadMessage && (
+          <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-800">
+            {logoUploadMessage}
+          </div>
+        )}
 
         {showForm && (
           <form
-            onSubmit={
-              handleSubmit
-            }
-            className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+            onSubmit={handleSubmit}
+            className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
           >
-            <div className="mb-6 flex items-start justify-between gap-4">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">
-                  {editingId !==
-                  null
-                    ? "Edit Tenant"
-                    : "Add Tenant"}
+                <h2 className="text-2xl font-bold">
+                  {editingId !== null
+                    ? "Edit tenant"
+                    : "Create tenant"}
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  Manage business,
-                  contact and floor
-                  information.
+                  Fill the tenant
+                  details below and save
+                  them to the website.
                 </p>
               </div>
 
               <button
                 type="button"
-                onClick={
-                  cancelForm
-                }
-                className="text-sm font-medium text-slate-500 hover:text-slate-900"
+                onClick={cancelForm}
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Cancel
               </button>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2">
-              {/* FLOOR */}
-
-              <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Floor *
+            <fieldset
+              disabled={
+                saving || logoUploading
+              }
+              className="space-y-5 disabled:opacity-60"
+            >
+              <div className="grid gap-5 md:grid-cols-2">
+                <label className="block font-medium">
+                  Floor
+                  <select
+                    required
+                    className={inputClass}
+                    value={form.floor_id}
+                    onChange={(event) =>
+                      updateField(
+                        "floor_id",
+                        event.target.value,
+                      )
+                    }
+                  >
+                    <option value="">
+                      Select a floor
+                    </option>
+                    {floorsForForm.map(
+                      (floor) => (
+                        <option
+                          key={floor.id}
+                          value={floor.id}
+                        >
+                          {
+                            floor.building_name
+                          }{" "}
+                          · {floor.name}
+                        </option>
+                      ),
+                    )}
+                  </select>
                 </label>
 
-                <select
-                  value={
-                    form.floor_id
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "floor_id",
-                      event.target
-                        .value
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none"
-                >
-                  <option value="">
-                    Select Floor
-                  </option>
-
-                  {floorsForForm.map(
-                    (floor) => (
-                      <option
-                        key={
-                          floor.id
-                        }
-                        value={
-                          floor.id
-                        }
-                      >
-                        {
-                          floor.building_name
-                        }{" "}
-                        —{" "}
-                        {
-                          floor.name
-                        }
-                      </option>
-                    )
-                  )}
-                </select>
+                <label className="block font-medium">
+                  Status
+                  <select
+                    className={inputClass}
+                    value={form.status}
+                    onChange={(event) =>
+                      updateField(
+                        "status",
+                        event.target.value as TenantForm["status"],
+                      )
+                    }
+                  >
+                    <option value="active">
+                      Active
+                    </option>
+                    <option value="coming_soon">
+                      Coming Soon
+                    </option>
+                    <option value="inactive">
+                      Inactive
+                    </option>
+                  </select>
+                </label>
               </div>
 
-              {/* NAME */}
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Tenant Name *
+              <div className="grid gap-5 md:grid-cols-2">
+                <label className="block font-medium">
+                  Tenant name
+                  <input
+                    required
+                    className={inputClass}
+                    value={form.name}
+                    onChange={(event) =>
+                      handleNameChange(
+                        event.target.value,
+                      )
+                    }
+                  />
                 </label>
 
-                <input
-                  value={
-                    form.name
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "name",
-                      event.target
-                        .value
-                    )
-                  }
-                  placeholder="Moon Technology"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-slate-700 focus:ring-2 focus:ring-slate-200"
-                />
+                <label className="block font-medium">
+                  URL slug
+                  <input
+                    required
+                    className={inputClass}
+                    value={form.slug}
+                    onChange={(event) =>
+                      updateField(
+                        "slug",
+                        event.target.value,
+                      )
+                    }
+                  />
+                </label>
               </div>
 
-              {/* SLUG */}
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Slug
-                </label>
-
-                <input
-                  value={
-                    form.slug
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "slug",
-                      event.target
-                        .value
-                    )
-                  }
-                  placeholder="moon-technology"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none"
-                />
-
-                <p className="mt-1 text-xs text-slate-400">
-                  Leave blank when
-                  creating to generate
-                  it from the tenant
-                  name.
-                </p>
-              </div>
-
-              {/* SHORT DESCRIPTION */}
-
-              <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Short Description
-                </label>
-
-                <input
-                  value={
-                    form.short_description
-                  }
-                  onChange={(
-                    event
-                  ) =>
+              <label className="block font-medium">
+                Short description
+                <textarea
+                  rows={3}
+                  className={inputClass}
+                  value={form.short_description}
+                  onChange={(event) =>
                     updateField(
                       "short_description",
-                      event.target
-                        .value
+                      event.target.value,
                     )
                   }
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none"
                 />
-              </div>
+              </label>
 
-              {/* DESCRIPTION */}
-
-              <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Full Description
-                </label>
-
+              <label className="block font-medium">
+                Full description
                 <textarea
-                  rows={4}
-                  value={
-                    form.description
-                  }
-                  onChange={(
-                    event
-                  ) =>
+                  rows={5}
+                  className={inputClass}
+                  value={form.description}
+                  onChange={(event) =>
                     updateField(
                       "description",
-                      event.target
-                        .value
+                      event.target.value,
                     )
                   }
-                  className="w-full resize-none rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none"
                 />
-              </div>
+              </label>
 
-              {/* WEBSITE */}
+              <div className="rounded-2xl border border-slate-200 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold text-slate-900">
+                      Tenant logo
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Upload a logo from
+                      your laptop or
+                      paste a URL
+                      manually.
+                    </p>
+                  </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Website
+                  <label className="inline-flex cursor-pointer items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
+                    {logoUploading
+                      ? "Uploading..."
+                      : "Upload logo"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={
+                        logoUploading
+                      }
+                      onChange={async (
+                        event,
+                      ) => {
+                        const file =
+                          event.target
+                            .files?.[0];
+                        if (file) {
+                          await handleLogoUpload(
+                            file,
+                          );
+                        }
+                        event.target.value =
+                          "";
+                      }}
+                    />
+                  </label>
+                </div>
+
+                <label className="mt-4 block font-medium">
+                  Logo URL
+                  <input
+                    className={inputClass}
+                    value={form.logo}
+                    onChange={(event) =>
+                      updateField(
+                        "logo",
+                        event.target.value,
+                      )
+                    }
+                    placeholder="Uploaded logo URL will appear here"
+                  />
                 </label>
 
-                <input
-                  value={
-                    form.website_url
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "website_url",
-                      event.target
-                        .value
-                    )
-                  }
-                  placeholder="https://..."
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none"
-                />
+                {form.logo && (
+                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <img
+                      src={form.logo}
+                      alt="Tenant logo preview"
+                      className="h-24 w-24 rounded-xl object-contain"
+                    />
+
+                    <div className="mt-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateField(
+                            "logo",
+                            "",
+                          )
+                        }
+                        className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100"
+                      >
+                        Remove logo
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* PHONE */}
+              <div className="grid gap-5 md:grid-cols-2">
+                <label className="block font-medium">
+                  Website URL
+                  <input
+                    className={inputClass}
+                    value={form.website_url}
+                    onChange={(event) =>
+                      updateField(
+                        "website_url",
+                        event.target.value,
+                      )
+                    }
+                  />
+                </label>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
+                <label className="block font-medium">
+                  Sort order
+                  <input
+                    type="number"
+                    className={inputClass}
+                    value={form.sort_order}
+                    onChange={(event) =>
+                      updateField(
+                        "sort_order",
+                        event.target.value,
+                      )
+                    }
+                  />
+                </label>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <label className="block font-medium">
                   Phone
+                  <input
+                    className={inputClass}
+                    value={form.phone}
+                    onChange={(event) =>
+                      updateField(
+                        "phone",
+                        event.target.value,
+                      )
+                    }
+                  />
                 </label>
 
-                <input
-                  value={
-                    form.phone
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "phone",
-                      event.target
-                        .value
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none"
-                />
-              </div>
-
-              {/* EMAIL */}
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
+                <label className="block font-medium">
                   Email
+                  <input
+                    type="email"
+                    className={inputClass}
+                    value={form.email}
+                    onChange={(event) =>
+                      updateField(
+                        "email",
+                        event.target.value,
+                      )
+                    }
+                  />
                 </label>
-
-                <input
-                  type="email"
-                  value={
-                    form.email
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "email",
-                      event.target
-                        .value
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none"
-                />
               </div>
 
-              {/* STATUS */}
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Status
-                </label>
-
-                <select
-                  value={
-                    form.status
+              <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-5">
+                <button
+                  type="submit"
+                  disabled={
+                    saving || logoUploading
                   }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "status",
-                      event.target
-                        .value
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none"
+                  className="rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <option value="active">
-                    Active
-                  </option>
+                  {saving
+                    ? "Saving..."
+                    : editingId !== null
+                      ? "Update tenant"
+                      : "Create tenant"}
+                </button>
 
-                  <option value="inactive">
-                    Inactive
-                  </option>
-
-                  <option value="coming_soon">
-                    Coming Soon
-                  </option>
-                </select>
+                <button
+                  type="button"
+                  onClick={cancelForm}
+                  className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
               </div>
-
-              {/* LOGO */}
-
-              <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Logo / Image URL
-                </label>
-
-                <input
-                  value={
-                    form.logo
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "logo",
-                      event.target
-                        .value
-                    )
-                  }
-                  placeholder="/uploads/gallery/..."
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none"
-                />
-
-                <p className="mt-1 text-xs text-slate-400">
-                  Later we will select
-                  this directly from
-                  the Gallery uploader.
-                </p>
-              </div>
-
-              {/* SORT */}
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Sort Order
-                </label>
-
-                <input
-                  type="number"
-                  value={
-                    form.sort_order
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    updateField(
-                      "sort_order",
-                      event.target
-                        .value
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={
-                  cancelForm
-                }
-                className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                disabled={
-                  saving
-                }
-                className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
-              >
-                {saving
-                  ? "Saving..."
-                  : editingId !==
-                    null
-                    ? "Update Tenant"
-                    : "Create Tenant"}
-              </button>
-            </div>
+            </fieldset>
           </form>
         )}
 
-        {/* ===================================
-            HEADER / FILTERS
-        =================================== */}
-
-        <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Current Tenants
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              {tenants.length}{" "}
-              tenants currently in
-              the database.
-            </p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {/* BUILDING FILTER */}
-
-            <div>
-              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">
-                Building
-              </label>
-
+        <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block font-medium">
+              Filter by building
               <select
-                value={
-                  buildingFilter
-                }
-                onChange={(
-                  event
-                ) => {
+                className={inputClass}
+                value={buildingFilter}
+                onChange={(event) => {
                   setBuildingFilter(
-                    event.target
-                      .value
+                    event.target.value,
                   );
-
-                  setFloorFilter(
-                    "all"
-                  );
+                  setFloorFilter("all");
                 }}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm"
               >
                 <option value="all">
-                  All Buildings
+                  All buildings
                 </option>
-
-                {buildings.map(
-                  (building) => (
-                    <option
-                      key={
-                        building.id
-                      }
-                      value={
-                        building.id
-                      }
-                    >
-                      {
-                        building.name
-                      }
-                    </option>
-                  )
-                )}
+                {buildings.map((building) => (
+                  <option
+                    key={building.id}
+                    value={building.id}
+                  >
+                    {building.name}
+                  </option>
+                ))}
               </select>
-            </div>
+            </label>
 
-            {/* FLOOR FILTER */}
-
-            <div>
-              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400">
-                Floor
-              </label>
-
+            <label className="block font-medium">
+              Filter by floor
               <select
-                value={
-                  floorFilter
-                }
-                onChange={(
-                  event
-                ) =>
+                className={inputClass}
+                value={floorFilter}
+                onChange={(event) =>
                   setFloorFilter(
-                    event.target
-                      .value
+                    event.target.value,
                   )
                 }
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm"
               >
                 <option value="all">
-                  All Floors
+                  All floors
                 </option>
-
                 {floorsForFilter.map(
                   (floor) => (
                     <option
-                      key={
-                        floor.id
-                      }
-                      value={
-                        floor.id
-                      }
+                      key={floor.id}
+                      value={floor.id}
                     >
                       {
-                        floor.name
-                      }
+                        floor.building_name
+                      }{" "}
+                      · {floor.name}
                     </option>
-                  )
+                  ),
                 )}
               </select>
-            </div>
+            </label>
           </div>
-        </div>
+        </section>
 
-        {/* ===================================
-            TENANT LIST
-        =================================== */}
-
-        {loading ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-            Loading tenants...
-          </div>
-        ) : filteredTenants.length ===
+        <div className="space-y-5">
+          {filteredTenants.length ===
           0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
-            <p className="font-medium text-slate-800">
-              No tenants found.
-            </p>
-
-            <button
-              type="button"
-              onClick={
-                openCreateForm
-              }
-              className="mt-4 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white"
-            >
-              Add Tenant
-            </button>
-          </div>
-        ) : (
-          <div className="grid gap-5 lg:grid-cols-2">
-            {filteredTenants.map(
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+              <h3 className="text-lg font-semibold text-slate-900">
+                No tenants found
+              </h3>
+              <p className="mt-2 text-slate-500">
+                Try changing the
+                filters or create a new
+                tenant.
+              </p>
+            </div>
+          ) : (
+            filteredTenants.map(
               (tenant) => (
                 <div
-                  key={
-                    tenant.id
-                  }
+                  key={tenant.id}
                   className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-lg font-semibold text-slate-900">
-                          {
-                            tenant.name
-                          }
-                        </h3>
+                  <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex min-w-0 gap-4">
+                      {tenant.logo ? (
+                        <img
+                          src={tenant.logo}
+                          alt={`${tenant.name} logo`}
+                          className="h-20 w-20 shrink-0 rounded-xl border border-slate-200 object-contain p-2"
+                        />
+                      ) : (
+                        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                          No Logo
+                        </div>
+                      )}
 
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusClasses(
-                            tenant.status
-                          )}`}
-                        >
-                          {tenant.status
-                            .replace(
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="truncate text-xl font-semibold text-slate-900">
+                            {tenant.name}
+                          </h2>
+
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold uppercase ${getStatusClasses(
+                              tenant.status,
+                            )}`}
+                          >
+                            {tenant.status.replace(
                               "_",
-                              " "
-                            )
-                            .toUpperCase()}
-                        </span>
+                              " ",
+                            )}
+                          </span>
+                        </div>
+
+                        <p className="mt-1 text-sm text-slate-500">
+                          /tenants/
+                          {tenant.slug}
+                        </p>
+
+                        <p className="mt-2 text-sm text-slate-600">
+                          {tenant.building_name} ·{" "}
+                          {tenant.floor_name}
+                        </p>
                       </div>
-
-                      <p className="mt-1 text-sm font-medium text-slate-500">
-                        {
-                          tenant.building_name
-                        }{" "}
-                        ·{" "}
-                        {
-                          tenant.floor_name
-                        }
-                      </p>
                     </div>
-
-                    {/* ACTIONS */}
 
                     <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                       <button
                         type="button"
                         onClick={() =>
                           openEditForm(
-                            tenant
+                            tenant,
                           )
                         }
                         className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
@@ -1512,7 +1357,7 @@ export default function AdminTenantsPage() {
                         type="button"
                         onClick={() =>
                           openMoveOutModal(
-                            tenant
+                            tenant,
                           )
                         }
                         className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
@@ -1527,16 +1372,19 @@ export default function AdminTenantsPage() {
                       "No short description added."}
                   </p>
 
+                  {tenant.description && (
+                    <p className="mt-3 text-sm leading-6 text-slate-600">
+                      {tenant.description}
+                    </p>
+                  )}
+
                   <div className="mt-5 space-y-2 border-t border-slate-100 pt-5 text-sm">
                     {tenant.phone && (
                       <p className="text-slate-600">
                         <span className="font-medium text-slate-800">
                           Phone:
                         </span>{" "}
-
-                        {
-                          tenant.phone
-                        }
+                        {tenant.phone}
                       </p>
                     )}
 
@@ -1545,10 +1393,7 @@ export default function AdminTenantsPage() {
                         <span className="font-medium text-slate-800">
                           Email:
                         </span>{" "}
-
-                        {
-                          tenant.email
-                        }
+                        {tenant.email}
                       </p>
                     )}
 
@@ -1557,30 +1402,21 @@ export default function AdminTenantsPage() {
                         <span className="font-medium text-slate-800">
                           Website:
                         </span>{" "}
-
-                        {
-                          tenant.website_url
-                        }
+                        {tenant.website_url}
                       </p>
                     )}
                   </div>
                 </div>
-              )
-            )}
-          </div>
-        )}
+              ),
+            )
+          )}
+        </div>
       </div>
-
-      {/* ===================================
-          MOVE OUT CONFIRMATION
-      =================================== */}
 
       {moveOutTarget && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-sm"
-          onMouseDown={(
-            event
-          ) => {
+          onMouseDown={(event) => {
             if (
               event.target ===
               event.currentTarget
@@ -1606,10 +1442,7 @@ export default function AdminTenantsPage() {
                   className="mt-2 text-xl font-semibold text-slate-900"
                 >
                   Move out{" "}
-                  {
-                    moveOutTarget.name
-                  }
-                  ?
+                  {moveOutTarget.name}?
                 </h2>
               </div>
 
@@ -1618,9 +1451,7 @@ export default function AdminTenantsPage() {
                 onClick={
                   closeMoveOutModal
                 }
-                disabled={
-                  movingOut
-                }
+                disabled={movingOut}
                 className="rounded-lg px-2 py-1 text-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Close move out confirmation"
               >
@@ -1641,12 +1472,9 @@ export default function AdminTenantsPage() {
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 This will remove{" "}
-                {
-                  moveOutTarget.name
-                }{" "}
-                from the tenant list
-                and the public
-                website.
+                {moveOutTarget.name} from
+                the tenant list and the
+                public website.
               </p>
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -1657,11 +1485,10 @@ export default function AdminTenantsPage() {
                 }
                 , that floor will
                 automatically become
-                available for rent.
-                If another tenant
-                remains on the floor,
-                it will stay
-                occupied.
+                available for rent. If
+                another tenant remains
+                on the floor, it will
+                stay occupied.
               </p>
             </div>
 
@@ -1671,9 +1498,7 @@ export default function AdminTenantsPage() {
                 onClick={
                   closeMoveOutModal
                 }
-                disabled={
-                  movingOut
-                }
+                disabled={movingOut}
                 className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancel
@@ -1684,9 +1509,7 @@ export default function AdminTenantsPage() {
                 onClick={
                   handleMoveOut
                 }
-                disabled={
-                  movingOut
-                }
+                disabled={movingOut}
                 className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {movingOut
