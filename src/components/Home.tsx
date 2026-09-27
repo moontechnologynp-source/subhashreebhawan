@@ -7,7 +7,10 @@ import React, {
   useState,
 } from "react";
 
-import { useRouter } from "next/navigation";
+import {
+  useRouter,
+} from "next/navigation";
+
 import Link from "next/link";
 
 import {
@@ -52,19 +55,30 @@ type FloorStatus =
 
 interface BuildingData {
   id: number;
+
   name: string;
+
   slug: string;
 
-  short_description: string | null;
-  description: string | null;
+  short_description:
+    | string
+    | null;
 
-  address: string | null;
+  description:
+    | string
+    | null;
+
+  address:
+    | string
+    | null;
 
   total_floors: number;
 
   status: string;
 
-  featured_image: string | null;
+  featured_image:
+    | string
+    | null;
 
   is_featured: number;
 
@@ -77,6 +91,7 @@ interface FloorData {
   building_id: number;
 
   building_name: string;
+
   building_slug: string;
 
   name: string;
@@ -85,18 +100,25 @@ interface FloorData {
 
   slug: string;
 
-  description: string | null;
+  description:
+    | string
+    | null;
 
   area_sqft:
-  | number
-  | string
-  | null;
+    | number
+    | string
+    | null;
 
-  status: FloorStatus;
+  status:
+    FloorStatus;
 
-  tenant_name: string | null;
+  tenant_name:
+    | string
+    | null;
 
-  featured_image: string | null;
+  featured_image:
+    | string
+    | null;
 
   sort_order: number;
 }
@@ -110,22 +132,34 @@ interface TenantData {
 
   slug: string;
 
-  short_description: string | null;
+  short_description:
+    | string
+    | null;
 
-  description: string | null;
+  description:
+    | string
+    | null;
 
-  logo: string | null;
+  logo:
+    | string
+    | null;
 
-  website_url: string | null;
+  website_url:
+    | string
+    | null;
 
-  phone: string | null;
+  phone:
+    | string
+    | null;
 
-  email: string | null;
+  email:
+    | string
+    | null;
 
   status:
-  | "active"
-  | "inactive"
-  | "coming_soon";
+    | "active"
+    | "inactive"
+    | "coming_soon";
 
   sort_order: number;
 
@@ -145,25 +179,37 @@ interface TenantData {
 interface GalleryItem {
   id: number;
 
-  building_id: number | null;
+  building_id:
+    | number
+    | null;
 
-  floor_id: number | null;
+  floor_id:
+    | number
+    | null;
 
-  tenant_id: number | null;
+  tenant_id:
+    | number
+    | null;
 
-  title: string | null;
+  title:
+    | string
+    | null;
 
-  description: string | null;
+  description:
+    | string
+    | null;
 
   image_url: string;
 
-  alt_text: string | null;
+  alt_text:
+    | string
+    | null;
 
   category:
-  | "general"
-  | "building"
-  | "floor"
-  | "tenant";
+    | "general"
+    | "building"
+    | "floor"
+    | "tenant";
 
   is_featured: number;
 
@@ -171,11 +217,27 @@ interface GalleryItem {
 
   is_active: number;
 
-  building_name: string | null;
+  building_name:
+    | string
+    | null;
 
-  floor_name: string | null;
+  floor_name:
+    | string
+    | null;
 
-  tenant_name: string | null;
+  tenant_name:
+    | string
+    | null;
+}
+
+interface FloorVisual {
+  src: string;
+
+  alt: string;
+
+  fit:
+    | "cover"
+    | "contain";
 }
 
 // ========================================
@@ -192,13 +254,18 @@ const BUILDING_B_INQUIRY_URL =
   "/inquiry?building=building-b";
 
 // ========================================
-// FALLBACK DATA
+// FALLBACK BUILDINGS
 // ========================================
 
-const fallbackBuildingA: BuildingData = {
+const fallbackBuildingA:
+  BuildingData = {
   id: -1,
-  name: "Building A",
-  slug: "building-a",
+
+  name:
+    "Building A",
+
+  slug:
+    "building-a",
 
   short_description:
     "Seven floors of excellence",
@@ -211,19 +278,26 @@ const fallbackBuildingA: BuildingData = {
 
   total_floors: 7,
 
-  status: "active",
+  status:
+    "active",
 
-  featured_image: null,
+  featured_image:
+    null,
 
   is_featured: 1,
 
   sort_order: 1,
 };
 
-const fallbackBuildingB: BuildingData = {
+const fallbackBuildingB:
+  BuildingData = {
   id: -2,
-  name: "Building B",
-  slug: "building-b",
+
+  name:
+    "Building B",
+
+  slug:
+    "building-b",
 
   short_description:
     "Connected excellence",
@@ -236,16 +310,23 @@ const fallbackBuildingB: BuildingData = {
 
   total_floors: 3,
 
-  status: "active",
+  status:
+    "active",
 
-  featured_image: null,
+  featured_image:
+    null,
 
   is_featured: 1,
 
   sort_order: 2,
 };
 
-const fallbackFloorsA: FloorData[] = [
+// ========================================
+// FALLBACK FLOORS — BUILDING A
+// ========================================
+
+const fallbackFloorsA:
+  FloorData[] = [
   {
     id: -101,
 
@@ -265,16 +346,20 @@ const fallbackFloorsA: FloorData[] = [
     slug:
       "ground-floor",
 
-    description: null,
+    description:
+      null,
 
-    area_sqft: null,
+    area_sqft:
+      null,
 
     status:
       "occupied",
 
-    tenant_name: null,
+    tenant_name:
+      null,
 
-    featured_image: null,
+    featured_image:
+      null,
 
     sort_order: 0,
   },
@@ -298,16 +383,20 @@ const fallbackFloorsA: FloorData[] = [
     slug:
       "1st-floor",
 
-    description: null,
+    description:
+      null,
 
-    area_sqft: 3500,
+    area_sqft:
+      3500,
 
     status:
       "occupied",
 
-    tenant_name: null,
+    tenant_name:
+      null,
 
-    featured_image: null,
+    featured_image:
+      null,
 
     sort_order: 1,
   },
@@ -331,16 +420,20 @@ const fallbackFloorsA: FloorData[] = [
     slug:
       "2nd-floor",
 
-    description: null,
+    description:
+      null,
 
-    area_sqft: 3500,
+    area_sqft:
+      3500,
 
     status:
       "occupied",
 
-    tenant_name: null,
+    tenant_name:
+      null,
 
-    featured_image: null,
+    featured_image:
+      null,
 
     sort_order: 2,
   },
@@ -364,16 +457,20 @@ const fallbackFloorsA: FloorData[] = [
     slug:
       "3rd-floor",
 
-    description: null,
+    description:
+      null,
 
-    area_sqft: 3500,
+    area_sqft:
+      3500,
 
     status:
       "occupied",
 
-    tenant_name: null,
+    tenant_name:
+      null,
 
-    featured_image: null,
+    featured_image:
+      null,
 
     sort_order: 3,
   },
@@ -397,16 +494,20 @@ const fallbackFloorsA: FloorData[] = [
     slug:
       "4th-floor",
 
-    description: null,
+    description:
+      null,
 
-    area_sqft: null,
+    area_sqft:
+      null,
 
     status:
       "coming_soon",
 
-    tenant_name: null,
+    tenant_name:
+      null,
 
-    featured_image: null,
+    featured_image:
+      null,
 
     sort_order: 4,
   },
@@ -430,16 +531,20 @@ const fallbackFloorsA: FloorData[] = [
     slug:
       "5th-floor",
 
-    description: null,
+    description:
+      null,
 
-    area_sqft: null,
+    area_sqft:
+      null,
 
     status:
       "coming_soon",
 
-    tenant_name: null,
+    tenant_name:
+      null,
 
-    featured_image: null,
+    featured_image:
+      null,
 
     sort_order: 5,
   },
@@ -463,22 +568,31 @@ const fallbackFloorsA: FloorData[] = [
     slug:
       "6th-floor",
 
-    description: null,
+    description:
+      null,
 
-    area_sqft: null,
+    area_sqft:
+      null,
 
     status:
       "coming_soon",
 
-    tenant_name: null,
+    tenant_name:
+      null,
 
-    featured_image: null,
+    featured_image:
+      null,
 
     sort_order: 6,
   },
 ];
 
-const fallbackFloorsB: FloorData[] = [
+// ========================================
+// FALLBACK FLOORS — BUILDING B
+// ========================================
+
+const fallbackFloorsB:
+  FloorData[] = [
   {
     id: -201,
 
@@ -498,16 +612,20 @@ const fallbackFloorsB: FloorData[] = [
     slug:
       "ground-floor",
 
-    description: null,
+    description:
+      null,
 
-    area_sqft: null,
+    area_sqft:
+      null,
 
     status:
       "occupied",
 
-    tenant_name: null,
+    tenant_name:
+      null,
 
-    featured_image: null,
+    featured_image:
+      null,
 
     sort_order: 0,
   },
@@ -531,16 +649,20 @@ const fallbackFloorsB: FloorData[] = [
     slug:
       "1st-floor",
 
-    description: null,
+    description:
+      null,
 
-    area_sqft: null,
+    area_sqft:
+      null,
 
     status:
       "occupied",
 
-    tenant_name: null,
+    tenant_name:
+      null,
 
-    featured_image: null,
+    featured_image:
+      null,
 
     sort_order: 1,
   },
@@ -564,22 +686,31 @@ const fallbackFloorsB: FloorData[] = [
     slug:
       "2nd-floor",
 
-    description: null,
+    description:
+      null,
 
-    area_sqft: null,
+    area_sqft:
+      null,
 
     status:
       "occupied",
 
-    tenant_name: null,
+    tenant_name:
+      null,
 
-    featured_image: null,
+    featured_image:
+      null,
 
     sort_order: 2,
   },
 ];
 
-const fallbackTenants: TenantData[] = [
+// ========================================
+// FALLBACK TENANTS
+// ========================================
+
+const fallbackTenants:
+  TenantData[] = [
   {
     id: -301,
 
@@ -594,17 +725,23 @@ const fallbackTenants: TenantData[] = [
     short_description:
       "Premium coffee experience with warm Nepali hospitality.",
 
-    description: null,
+    description:
+      null,
 
-    logo: null,
+    logo:
+      null,
 
-    website_url: null,
+    website_url:
+      null,
 
-    phone: null,
+    phone:
+      null,
 
-    email: null,
+    email:
+      null,
 
-    status: "active",
+    status:
+      "active",
 
     sort_order: 1,
 
@@ -639,17 +776,23 @@ const fallbackTenants: TenantData[] = [
     short_description:
       "Professional healthcare services with modern facilities and experienced practitioners.",
 
-    description: null,
+    description:
+      null,
 
-    logo: null,
+    logo:
+      null,
 
-    website_url: null,
+    website_url:
+      null,
 
-    phone: null,
+    phone:
+      null,
 
-    email: null,
+    email:
+      null,
 
-    status: "active",
+    status:
+      "active",
 
     sort_order: 2,
 
@@ -684,17 +827,23 @@ const fallbackTenants: TenantData[] = [
     short_description:
       "Vairav Technology is a powerhouse of cybersecurity.",
 
-    description: null,
+    description:
+      null,
 
-    logo: null,
+    logo:
+      null,
 
-    website_url: null,
+    website_url:
+      null,
 
-    phone: null,
+    phone:
+      null,
 
-    email: null,
+    email:
+      null,
 
-    status: "active",
+    status:
+      "active",
 
     sort_order: 1,
 
@@ -729,17 +878,23 @@ const fallbackTenants: TenantData[] = [
     short_description:
       "The 2nd floor is currently occupied by Family Health International 360.",
 
-    description: null,
+    description:
+      null,
 
-    logo: null,
+    logo:
+      null,
 
-    website_url: null,
+    website_url:
+      null,
 
-    phone: null,
+    phone:
+      null,
 
-    email: null,
+    email:
+      null,
 
-    status: "active",
+    status:
+      "active",
 
     sort_order: 1,
 
@@ -772,19 +927,26 @@ const fallbackTenants: TenantData[] = [
       "sigma-capital",
 
     short_description:
-      "This floor is currently occupied by Sigma Capital.",
+      "This floor was occupied by Sigma Capital.",
 
-    description: null,
+    description:
+      null,
 
-    logo: null,
+    logo:
+      null,
 
-    website_url: null,
+    website_url:
+      null,
 
-    phone: null,
+    phone:
+      null,
 
-    email: null,
+    email:
+      null,
 
-    status: "active",
+    // Sigma has moved out.
+    status:
+      "inactive",
 
     sort_order: 1,
 
@@ -819,18 +981,23 @@ const fallbackTenants: TenantData[] = [
     short_description:
       "Contemporary Nepali and international cuisine crafted with premium service.",
 
-    description: null,
+    description:
+      null,
 
-    logo: null,
+    logo:
+      null,
 
     website_url:
       "https://thebengalrestaurantandbar.com/",
 
-    phone: null,
+    phone:
+      null,
 
-    email: null,
+    email:
+      null,
 
-    status: "active",
+    status:
+      "active",
 
     sort_order: 1,
 
@@ -865,18 +1032,23 @@ const fallbackTenants: TenantData[] = [
     short_description:
       "Dreams into Frames.",
 
-    description: null,
+    description:
+      null,
 
-    logo: null,
+    logo:
+      null,
 
     website_url:
       "https://swopnachitra.com/",
 
-    phone: null,
+    phone:
+      null,
 
-    email: null,
+    email:
+      null,
 
-    status: "active",
+    status:
+      "active",
 
     sort_order: 1,
 
@@ -911,18 +1083,23 @@ const fallbackTenants: TenantData[] = [
     short_description:
       "Software, cloud and technology services for modern organizations.",
 
-    description: null,
+    description:
+      null,
 
-    logo: null,
+    logo:
+      null,
 
     website_url:
       "https://www.moontechnology.com.np/",
 
-    phone: null,
+    phone:
+      null,
 
-    email: null,
+    email:
+      null,
 
-    status: "active",
+    status:
+      "active",
 
     sort_order: 1,
 
@@ -949,34 +1126,51 @@ const fallbackTenants: TenantData[] = [
 // ========================================
 
 export default function Home() {
-  const router = useRouter();
+  const router =
+    useRouter();
 
   const [
     menuOpen,
     setMenuOpen,
-  ] = useState(false);
+  ] =
+    useState(
+      false,
+    );
 
   const [
     navShadow,
     setNavShadow,
-  ] = useState(false);
+  ] =
+    useState(
+      false,
+    );
 
   const [
     openMenu,
     setOpenMenu,
   ] =
     useState<
-      "a" | "b" | null
-    >(null);
+      "a" |
+      "b" |
+      null
+    >(
+      null,
+    );
 
   const dropdownRef =
-    useRef<HTMLDivElement | null>(
+    useRef<
+      HTMLDivElement |
       null
+    >(
+      null,
     );
 
   const heroVideoRef =
-    useRef<HTMLVideoElement | null>(
+    useRef<
+      HTMLVideoElement |
       null
+    >(
+      null,
     );
 
   // ========================================
@@ -987,56 +1181,76 @@ export default function Home() {
     buildingA,
     setBuildingA,
   ] =
-    useState<BuildingData>(
-      fallbackBuildingA
+    useState<
+      BuildingData
+    >(
+      fallbackBuildingA,
     );
 
   const [
     buildingB,
     setBuildingB,
   ] =
-    useState<BuildingData>(
-      fallbackBuildingB
+    useState<
+      BuildingData
+    >(
+      fallbackBuildingB,
     );
 
   const [
     floorsA,
     setFloorsA,
   ] =
-    useState<FloorData[]>(
-      fallbackFloorsA
+    useState<
+      FloorData[]
+    >(
+      fallbackFloorsA,
     );
 
   const [
     floorsB,
     setFloorsB,
   ] =
-    useState<FloorData[]>(
-      fallbackFloorsB
+    useState<
+      FloorData[]
+    >(
+      fallbackFloorsB,
     );
 
   const [
     tenants,
     setTenants,
   ] =
-    useState<TenantData[]>(
-      fallbackTenants
+    useState<
+      TenantData[]
+    >(
+      fallbackTenants.filter(
+        (
+          tenant,
+        ) =>
+          tenant.status ===
+          "active",
+      ),
     );
 
   const [
     galleryA,
     setGalleryA,
   ] =
-    useState<GalleryItem[]>(
-      []
+    useState<
+      GalleryItem[]
+    >(
+      [],
     );
 
   const [
     galleryB,
     setGalleryB,
   ] =
-    useState<GalleryItem[]>(
-      []
+    useState<
+      GalleryItem[]
+    >(
+      [],
     );
 
   // ========================================
@@ -1044,7 +1258,8 @@ export default function Home() {
   // ========================================
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled =
+      false;
 
     const loadData =
       async () => {
@@ -1056,11 +1271,11 @@ export default function Home() {
           ] =
             await Promise.all([
               getBuildingBySlug(
-                "building-a"
+                "building-a",
               ),
 
               getBuildingBySlug(
-                "building-b"
+                "building-b",
               ),
 
               getTenants(),
@@ -1074,87 +1289,121 @@ export default function Home() {
           ] =
             await Promise.all([
               getFloorsByBuilding(
-                buildingAData.id
+                buildingAData.id,
               ),
 
               getFloorsByBuilding(
-                buildingBData.id
+                buildingBData.id,
               ),
 
               getGalleryByBuilding(
-                buildingAData.id
+                buildingAData.id,
               ),
 
               getGalleryByBuilding(
-                buildingBData.id
+                buildingBData.id,
               ),
             ]);
 
-          if (cancelled) {
+          if (
+            cancelled
+          ) {
             return;
           }
 
           setBuildingA(
-            buildingAData
+            buildingAData,
           );
 
           setBuildingB(
-            buildingBData
+            buildingBData,
           );
 
           setFloorsA(
             sortFloors(
-              floorsAData
-            )
+              floorsAData,
+            ),
           );
 
           setFloorsB(
             sortFloors(
-              floorsBData
-            )
+              floorsBData,
+            ),
           );
 
+          // ====================================
+          // ACTIVE TENANTS ONLY
+          // ====================================
+
           setTenants(
-            tenantData
+            (
+              tenantData as
+                TenantData[]
+            )
+              .filter(
+                (
+                  tenant,
+                ) =>
+                  tenant.status ===
+                  "active",
+              )
+              .sort(
+                (
+                  a,
+                  b,
+                ) =>
+                  a.sort_order -
+                    b.sort_order ||
+                  a.id -
+                    b.id,
+              ),
           );
 
           setGalleryA(
-            galleryAData.filter(
+            (
+              galleryAData as
+                GalleryItem[]
+            ).filter(
               (
-                item: GalleryItem
+                item,
               ) =>
                 Boolean(
-                  item.is_active
-                )
-            )
+                  item.is_active,
+                ),
+            ),
           );
 
           setGalleryB(
-            galleryBData.filter(
+            (
+              galleryBData as
+                GalleryItem[]
+            ).filter(
               (
-                item: GalleryItem
+                item,
               ) =>
                 Boolean(
-                  item.is_active
-                )
-            )
+                  item.is_active,
+                ),
+            ),
           );
-        } catch (error) {
+        } catch (
+          error
+        ) {
           console.error(
             "Homepage backend load error:",
-            error
+            error,
           );
 
-          // Keep fallback content
-          // if API is temporarily
-          // unavailable.
+          // Fallback content remains
+          // if API is temporarily down.
         }
       };
 
     loadData();
 
     return () => {
-      cancelled = true;
+      cancelled =
+        true;
     };
   }, []);
 
@@ -1171,25 +1420,29 @@ export default function Home() {
         >();
 
       tenants.forEach(
-        (tenant) => {
+        (
+          tenant,
+        ) => {
           const current =
             map.get(
-              tenant.floor_id
+              tenant.floor_id,
             ) || [];
 
           current.push(
-            tenant
+            tenant,
           );
 
           map.set(
             tenant.floor_id,
-            current
+            current,
           );
-        }
+        },
       );
 
       return map;
-    }, [tenants]);
+    }, [
+      tenants,
+    ]);
 
   // ========================================
   // BUILDING A FLOOR GROUPS
@@ -1199,24 +1452,30 @@ export default function Home() {
     useMemo(
       () =>
         floorsA.filter(
-          (floor) =>
+          (
+            floor,
+          ) =>
             floor.floor_number <=
-            3
+            3,
         ),
-
-      [floorsA]
+      [
+        floorsA,
+      ],
     );
 
   const futureFloorsA =
     useMemo(
       () =>
         floorsA.filter(
-          (floor) =>
+          (
+            floor,
+          ) =>
             floor.floor_number >=
-            4
+            4,
         ),
-
-      [floorsA]
+      [
+        floorsA,
+      ],
     );
 
   // ========================================
@@ -1227,15 +1486,17 @@ export default function Home() {
     useMemo(() => {
       const items =
         primaryFloorsA.map(
-          (floor) => ({
+          (
+            floor,
+          ) => ({
             label:
               floor.name,
 
             id:
               getBuildingASectionId(
-                floor
+                floor,
               ),
-          })
+          }),
         );
 
       if (
@@ -1245,7 +1506,7 @@ export default function Home() {
         items.push({
           label:
             getFutureFloorMenuLabel(
-              futureFloorsA
+              futureFloorsA,
             ),
 
           id:
@@ -1263,18 +1524,21 @@ export default function Home() {
     useMemo(
       () =>
         floorsB.map(
-          (floor) => ({
+          (
+            floor,
+          ) => ({
             label:
               floor.name,
 
             id:
               getBuildingBSectionId(
-                floor
+                floor,
               ),
-          })
+          }),
         ),
-
-      [floorsB]
+      [
+        floorsB,
+      ],
     );
 
   // ========================================
@@ -1288,15 +1552,28 @@ export default function Home() {
           ...floorsA,
           ...floorsB,
         ].filter(
-          (floor) =>
-            floor.status ===
-            "available"
-        ),
+          (
+            floor,
+          ) => {
+            const floorTenants =
+              tenantsByFloor.get(
+                floor.id,
+              ) || [];
 
+            return (
+              getEffectiveFloorStatus(
+                floor,
+                floorTenants,
+              ) ===
+              "available"
+            );
+          },
+        ),
       [
         floorsA,
         floorsB,
-      ]
+        tenantsByFloor,
+      ],
     );
 
   // ========================================
@@ -1307,35 +1584,44 @@ export default function Home() {
     useMemo(
       () =>
         tenants.find(
-          (tenant) =>
-            tenant.name
-              .toLowerCase()
-              .includes(
-                "java"
-              ) ||
-            tenant.name
-              .toLowerCase()
-              .includes(
-                "coffee"
-              )
-        ),
+          (
+            tenant,
+          ) => {
+            const value =
+              tenant.name
+                .toLowerCase();
 
-      [tenants]
+            return (
+              value.includes(
+                "java",
+              ) ||
+              value.includes(
+                "coffee",
+              )
+            );
+          },
+        ),
+      [
+        tenants,
+      ],
     );
 
   const clinicTenant =
     useMemo(
       () =>
         tenants.find(
-          (tenant) =>
+          (
+            tenant,
+          ) =>
             tenant.name
               .toLowerCase()
               .includes(
-                "clinic"
-              )
+                "clinic",
+              ),
         ),
-
-      [tenants]
+      [
+        tenants,
+      ],
     );
 
   // ========================================
@@ -1347,16 +1633,19 @@ export default function Home() {
       const video =
         heroVideoRef.current;
 
-      if (!video) {
+      if (
+        !video
+      ) {
         return;
       }
 
       try {
-        video.currentTime = 1;
+        video.currentTime =
+          1;
 
         await video.play();
       } catch {
-        // Ignore autoplay restrictions.
+        // Browser autoplay restriction.
       }
     };
 
@@ -1365,13 +1654,16 @@ export default function Home() {
       const video =
         heroVideoRef.current;
 
-      if (!video) {
+      if (
+        !video
+      ) {
         return;
       }
 
       video.pause();
 
-      video.currentTime = 2;
+      video.currentTime =
+        2;
     };
 
   // ========================================
@@ -1383,7 +1675,7 @@ export default function Home() {
       () =>
         setNavShadow(
           window.scrollY >
-          10
+          10,
         );
 
     onScroll();
@@ -1392,14 +1684,15 @@ export default function Home() {
       "scroll",
       onScroll,
       {
-        passive: true,
-      }
+        passive:
+          true,
+      },
     );
 
     return () =>
       window.removeEventListener(
         "scroll",
-        onScroll
+        onScroll,
       );
   }, []);
 
@@ -1408,49 +1701,60 @@ export default function Home() {
   // ========================================
 
   useEffect(() => {
-    const handler = (
-      event: Event
-    ) => {
-      const target =
-        event.target as
-        | HTMLElement
-        | null;
+    const handler =
+      (
+        event:
+          Event,
+      ) => {
+        const target =
+          event.target as
+            | HTMLElement
+            | null;
 
-      const anchor =
-        target?.closest("a");
+        const anchor =
+          target?.closest(
+            "a",
+          );
 
-      const href =
-        anchor?.getAttribute(
-          "href"
-        ) || "";
+        const href =
+          anchor?.getAttribute(
+            "href",
+          ) ||
+          "";
 
-      if (
-        href.startsWith("#") ||
-        href.startsWith(
-          "/building-a"
-        ) ||
-        href.startsWith(
-          "/building-b"
-        ) ||
-        href.startsWith(
-          "/inquiry"
-        )
-      ) {
-        setMenuOpen(false);
+        if (
+          href.startsWith(
+            "#",
+          ) ||
+          href.startsWith(
+            "/building-a",
+          ) ||
+          href.startsWith(
+            "/building-b",
+          ) ||
+          href.startsWith(
+            "/inquiry",
+          )
+        ) {
+          setMenuOpen(
+            false,
+          );
 
-        setOpenMenu(null);
-      }
-    };
+          setOpenMenu(
+            null,
+          );
+        }
+      };
 
     document.addEventListener(
       "click",
-      handler
+      handler,
     );
 
     return () =>
       document.removeEventListener(
         "click",
-        handler
+        handler,
       );
   }, []);
 
@@ -1459,28 +1763,33 @@ export default function Home() {
   // ========================================
 
   useEffect(() => {
-    const handleClickOutside = (
-      event: MouseEvent
-    ) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(
-          event.target as Node
-        )
-      ) {
-        setOpenMenu(null);
-      }
-    };
+    const handleClickOutside =
+      (
+        event:
+          MouseEvent,
+      ) => {
+        if (
+          dropdownRef.current &&
+          !dropdownRef.current.contains(
+            event.target as
+              Node,
+          )
+        ) {
+          setOpenMenu(
+            null,
+          );
+        }
+      };
 
     document.addEventListener(
       "mousedown",
-      handleClickOutside
+      handleClickOutside,
     );
 
     return () =>
       document.removeEventListener(
         "mousedown",
-        handleClickOutside
+        handleClickOutside,
       );
   }, []);
 
@@ -1489,56 +1798,69 @@ export default function Home() {
   // ========================================
 
   useEffect(() => {
-    const els =
+    const elements =
       Array.from(
-        document.querySelectorAll<HTMLElement>(
-          "[data-reveal]"
-        )
+        document.querySelectorAll<
+          HTMLElement
+        >(
+          "[data-reveal]",
+        ),
       );
 
-    if (!els.length) {
+    if (
+      !elements.length
+    ) {
       return;
     }
 
-    els.forEach(
-      (element) =>
+    elements.forEach(
+      (
+        element,
+      ) =>
         element.classList.add(
-          "reveal"
-        )
+          "reveal",
+        ),
     );
 
     const observer =
       new IntersectionObserver(
-        (entries) => {
+        (
+          entries,
+        ) => {
           entries.forEach(
-            (entry) => {
+            (
+              entry,
+            ) => {
               if (
                 entry.isIntersecting
               ) {
                 (
-                  entry.target as HTMLElement
+                  entry.target as
+                    HTMLElement
                 ).classList.add(
-                  "reveal-in"
+                  "reveal-in",
                 );
 
                 observer.unobserve(
-                  entry.target
+                  entry.target,
                 );
               }
-            }
+            },
           );
         },
-
         {
-          threshold: 0.12,
-        }
+          threshold:
+            0.12,
+        },
       );
 
-    els.forEach(
-      (element) =>
+    elements.forEach(
+      (
+        element,
+      ) =>
         observer.observe(
-          element
-        )
+          element,
+        ),
     );
 
     return () =>
@@ -1555,26 +1877,32 @@ export default function Home() {
   // FLOOR NAVIGATION
   // ========================================
 
-  const navigateToFloor = (
-    pathname:
-      | "/building-a"
-      | "/building-b",
+  const navigateToFloor =
+    (
+      pathname:
+        | "/building-a"
+        | "/building-b",
 
-    id: string
-  ) => {
-    queuePendingSectionScroll(
-      pathname,
-      id
-    );
+      id:
+        string,
+    ) => {
+      queuePendingSectionScroll(
+        pathname,
+        id,
+      );
 
-    setMenuOpen(false);
+      setMenuOpen(
+        false,
+      );
 
-    setOpenMenu(null);
+      setOpenMenu(
+        null,
+      );
 
-    router.push(
-      pathname
-    );
-  };
+      router.push(
+        pathname,
+      );
+    };
 
   // ========================================
   // HERO POSTER
@@ -1582,7 +1910,7 @@ export default function Home() {
 
   const heroPoster =
     resolveMediaUrl(
-      buildingA.featured_image
+      buildingA.featured_image,
     ) ||
     "/buildingA.png";
 
@@ -1592,11 +1920,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#FAF6EA] text-slate-900 antialiased">
-      {/* ===================================
-          BACKGROUND
-      =================================== */}
+
+      {/* BACKGROUND */}
 
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+
         <div className="absolute inset-0 bg-gradient-to-b from-[#FFF7DE] via-[#FAF6EA] to-[#FAF6EA]" />
 
         <div className="absolute -top-56 left-1/2 h-[760px] w-[760px] -translate-x-1/2 rounded-full bg-[#FFD27A]/25 blur-[90px] animate-float-slow" />
@@ -1606,9 +1934,7 @@ export default function Home() {
         <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(#0f172a_1px,transparent_1px)] [background-size:54px_54px]" />
       </div>
 
-      {/* ===================================
-          NAVIGATION
-      =================================== */}
+      {/* NAVIGATION */}
 
       <nav
         className={[
@@ -1621,10 +1947,14 @@ export default function Home() {
           navShadow
             ? "shadow-[0_14px_60px_rgba(15,23,42,0.10)]"
             : "",
-        ].join(" ")}
+        ].join(
+          " ",
+        )}
       >
         <Container>
+
           <div className="flex items-center justify-between">
+
             <a
               href="#hero"
               className="inline-flex items-center gap-3 group"
@@ -1636,8 +1966,7 @@ export default function Home() {
               />
 
               <span className="text-[15px] md:text-base font-semibold tracking-tight">
-                Subha Shree
-                Bhawan
+                Subha Shree Bhawan
               </span>
             </a>
 
@@ -1649,7 +1978,9 @@ export default function Home() {
               }
               className="hidden md:flex items-center gap-1"
             >
+
               <div className="relative">
+
                 <DropdownPill
                   label={
                     buildingA.name
@@ -1663,7 +1994,7 @@ export default function Home() {
                       openMenu ===
                         "a"
                         ? null
-                        : "a"
+                        : "a",
                     )
                   }
                 />
@@ -1675,11 +2006,11 @@ export default function Home() {
                         buildingAFloors
                       }
                       onSelect={(
-                        id
+                        id,
                       ) =>
                         navigateToFloor(
                           "/building-a",
-                          id
+                          id,
                         )
                       }
                     />
@@ -1687,6 +2018,7 @@ export default function Home() {
               </div>
 
               <div className="relative">
+
                 <DropdownPill
                   label={
                     buildingB.name
@@ -1700,7 +2032,7 @@ export default function Home() {
                       openMenu ===
                         "b"
                         ? null
-                        : "b"
+                        : "b",
                     )
                   }
                 />
@@ -1712,11 +2044,11 @@ export default function Home() {
                         buildingBFloors
                       }
                       onSelect={(
-                        id
+                        id,
                       ) =>
                         navigateToFloor(
                           "/building-b",
-                          id
+                          id,
                         )
                       }
                     />
@@ -1732,8 +2064,6 @@ export default function Home() {
                     AVAILABLE SPACES
                   </a>
                 )}
-
-              {/* REQUEST VIEWING */}
 
               <a
                 href={
@@ -1753,8 +2083,10 @@ export default function Home() {
               type="button"
               onClick={() =>
                 setMenuOpen(
-                  (previous) =>
-                    !previous
+                  (
+                    previous,
+                  ) =>
+                    !previous,
                 )
               }
               className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/55 ring-1 ring-black/10 hover:bg-white/70 transition"
@@ -1768,98 +2100,52 @@ export default function Home() {
             </button>
           </div>
 
-          {/* =================================
-              MOBILE MENU
-          ================================= */}
+          {/* MOBILE MENU */}
 
           {menuOpen && (
             <div className="md:hidden mt-4 mb-3 rounded-3xl bg-[#FFF7DE]/95 backdrop-blur-xl ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.14)] overflow-hidden animate-pop-in">
+
               <div className="p-4 space-y-2">
-                {/* BUILDING A */}
 
-                <div className="rounded-2xl bg-white/70 ring-1 ring-black/10 overflow-hidden">
-                  <p className="px-4 pt-3 pb-1 text-[10px] tracking-[0.2em] font-bold text-slate-400">
-                    {buildingA.name.toUpperCase()}
-                  </p>
+                <MobileBuildingMenu
+                  title={
+                    buildingA.name
+                  }
+                  floors={
+                    buildingAFloors
+                  }
+                  inquiryHref={
+                    BUILDING_A_INQUIRY_URL
+                  }
+                  onSelect={(
+                    id,
+                  ) =>
+                    navigateToFloor(
+                      "/building-a",
+                      id,
+                    )
+                  }
+                />
 
-                  <div className="border-t border-black/5">
-                    {buildingAFloors.map(
-                      (floor) => (
-                        <button
-                          key={
-                            floor.id
-                          }
-                          type="button"
-                          onClick={() =>
-                            navigateToFloor(
-                              "/building-a",
-                              floor.id
-                            )
-                          }
-                          className="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-black/[0.03] transition border-b border-black/5 last:border-0"
-                        >
-                          {
-                            floor.label
-                          }
-                        </button>
-                      )
-                    )}
-                  </div>
-
-                  <a
-                    href={
-                      BUILDING_A_INQUIRY_URL
-                    }
-                    className="flex items-center justify-between border-t border-black/5 px-4 py-3 text-sm font-bold text-slate-900"
-                  >
-                    Request Viewing
-
-                    <ArrowRight className="h-4 w-4" />
-                  </a>
-                </div>
-
-                {/* BUILDING B */}
-
-                <div className="rounded-2xl bg-white/70 ring-1 ring-black/10 overflow-hidden">
-                  <p className="px-4 pt-3 pb-1 text-[10px] tracking-[0.2em] font-bold text-slate-400">
-                    {buildingB.name.toUpperCase()}
-                  </p>
-
-                  <div className="border-t border-black/5">
-                    {buildingBFloors.map(
-                      (floor) => (
-                        <button
-                          key={
-                            floor.id
-                          }
-                          type="button"
-                          onClick={() =>
-                            navigateToFloor(
-                              "/building-b",
-                              floor.id
-                            )
-                          }
-                          className="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-black/[0.03] transition border-b border-black/5 last:border-0"
-                        >
-                          {
-                            floor.label
-                          }
-                        </button>
-                      )
-                    )}
-                  </div>
-
-                  <a
-                    href={
-                      BUILDING_B_INQUIRY_URL
-                    }
-                    className="flex items-center justify-between border-t border-black/5 px-4 py-3 text-sm font-bold text-slate-900"
-                  >
-                    Request Viewing
-
-                    <ArrowRight className="h-4 w-4" />
-                  </a>
-                </div>
+                <MobileBuildingMenu
+                  title={
+                    buildingB.name
+                  }
+                  floors={
+                    buildingBFloors
+                  }
+                  inquiryHref={
+                    BUILDING_B_INQUIRY_URL
+                  }
+                  onSelect={(
+                    id,
+                  ) =>
+                    navigateToFloor(
+                      "/building-b",
+                      id,
+                    )
+                  }
+                />
 
                 {availableFloors.length >
                   0 && (
@@ -1867,13 +2153,12 @@ export default function Home() {
                       href="#available-spaces"
                       onClick={() =>
                         setMenuOpen(
-                          false
+                          false,
                         )
                       }
                       className="block rounded-2xl bg-black/[0.03] ring-1 ring-black/10 px-4 py-3 text-sm font-semibold"
                     >
-                      Available
-                      Spaces
+                      Available Spaces
                     </a>
                   )}
 
@@ -1893,40 +2178,37 @@ export default function Home() {
         </Container>
       </nav>
 
-      {/* ===================================
-          HERO
-      =================================== */}
+      {/* HERO */}
 
       <section
         id="hero"
         className="relative pt-28 md:pt-32 pb-14 md:pb-20"
       >
         <Container>
+
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+
             {/* HERO COPY */}
 
             <div className="lg:col-span-7">
+
               <div
                 data-reveal
                 className="inline-flex items-center gap-2 rounded-full bg-white/55 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700"
               >
                 <Star className="h-4 w-4 text-slate-900" />
 
-                Premium
-                commercial
-                complex
+                Premium commercial complex
               </div>
 
               <h1
                 data-reveal
                 className="mt-6 text-[42px] leading-[1.06] md:text-[64px] md:leading-[1.02] font-extrabold tracking-tight"
               >
-                Built for modern
-                brands.
+                Built for modern brands.
 
                 <span className="block text-slate-600 font-extrabold">
-                  Designed to feel
-                  premium.
+                  Designed to feel premium.
                 </span>
               </h1>
 
@@ -1934,16 +2216,9 @@ export default function Home() {
                 data-reveal
                 className="mt-5 md:mt-6 text-lg md:text-xl text-slate-700 leading-relaxed max-w-2xl"
               >
-                Subha Shree
-                Bhawan in
-                Baluwatar offers
-                a refined,
-                professional
-                environment for
-                offices, premium
-                services, and
-                growth-ready
-                businesses.
+                Subha Shree Bhawan in Baluwatar offers a refined,
+                professional environment for offices, premium services,
+                and growth-ready businesses.
               </p>
 
               {/* HERO ACTIONS */}
@@ -1952,6 +2227,7 @@ export default function Home() {
                 data-reveal
                 className="mt-9 md:mt-10 flex flex-wrap gap-3"
               >
+
                 <button
                   type="button"
                   onClick={() => {
@@ -1963,7 +2239,7 @@ export default function Home() {
                     ) {
                       navigateToFloor(
                         "/building-a",
-                        first.id
+                        first.id,
                       );
                     }
                   }}
@@ -1980,8 +2256,7 @@ export default function Home() {
                       href="#available-spaces"
                       className="btn-secondary"
                     >
-                      View Available
-                      Spaces
+                      View Available Spaces
 
                       <ArrowRight className="h-4 w-4" />
                     </a>
@@ -2005,6 +2280,7 @@ export default function Home() {
                 data-reveal
                 className="mt-11 md:mt-12 grid sm:grid-cols-3 gap-3 max-w-2xl"
               >
+
                 <InfoTile
                   title="Buildings"
                   value="2 connected"
@@ -2038,6 +2314,7 @@ export default function Home() {
               data-reveal
             >
               <MediaCard>
+
                 <div
                   className="relative h-[410px] md:h-[440px]"
                   onMouseEnter={
@@ -2050,7 +2327,9 @@ export default function Home() {
                     const video =
                       heroVideoRef.current;
 
-                    if (!video) {
+                    if (
+                      !video
+                    ) {
                       return;
                     }
 
@@ -2081,29 +2360,34 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7DE] via-[#FFF7DE]/20 to-transparent" />
 
                   <div className="absolute top-5 left-5">
+
                     <div className="rounded-2xl bg-white/70 backdrop-blur-xl ring-1 ring-black/10 px-3 py-2">
+
                       <p className="text-[11px] tracking-[0.18em] text-slate-600 font-semibold">
-                        HOVER TO
-                        PLAY
+                        HOVER TO PLAY
                       </p>
                     </div>
                   </div>
 
                   <div className="absolute left-5 right-5 bottom-5">
+
                     <div className="rounded-2xl bg-white/70 backdrop-blur-xl ring-1 ring-black/10 p-4">
+
                       <p className="text-[11px] tracking-[0.18em] text-slate-500 font-semibold">
                         CONTACT
                       </p>
 
                       <div className="mt-2 grid gap-1 text-sm text-slate-700">
+
                         <div className="flex items-center gap-2">
+
                           <Phone className="h-4 w-4 text-slate-400" />
 
-                          +977
-                          980-8100067
+                          +977 980-8100067
                         </div>
 
                         <div className="flex items-center gap-2">
+
                           <Mail className="h-4 w-4 text-slate-400" />
 
                           buddhalifestyle.np@gmail.com
@@ -2127,7 +2411,9 @@ export default function Home() {
                 {/* HERO MINI STATS */}
 
                 <div className="p-5 border-t border-black/5">
+
                   <div className="grid grid-cols-3 gap-3 text-sm">
+
                     <MiniStat
                       title="Café"
                       value={
@@ -2172,9 +2458,7 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* ===================================
-          BUILDING A
-      =================================== */}
+      {/* BUILDING A */}
 
       <SectionHeader
         title={
@@ -2188,18 +2472,26 @@ export default function Home() {
       />
 
       {primaryFloorsA.map(
-        (floor) => {
+        (
+          floor,
+        ) => {
           const floorTenants =
             tenantsByFloor.get(
-              floor.id
+              floor.id,
             ) || [];
+
+          const effectiveStatus =
+            getEffectiveFloorStatus(
+              floor,
+              floorTenants,
+            );
 
           const visual =
             getFloorVisual(
               floor,
               floorTenants,
               galleryA,
-              "a"
+              "a",
             );
 
           return (
@@ -2208,7 +2500,7 @@ export default function Home() {
                 floor.id
               }
               id={getBuildingASectionId(
-                floor
+                floor,
               )}
               tone={
                 floor.floor_number ===
@@ -2219,150 +2511,86 @@ export default function Home() {
             >
               <TwoCol
                 left={
-                  <>
-                    <Kicker
-                      text={`${floor.name.toUpperCase()} • ${buildingA.name.toUpperCase()}`}
-                    />
-
-                    <h3
-                      data-reveal
-                      className="text-3xl md:text-4xl font-extrabold tracking-tight"
-                    >
-                      {getFloorTitle(
-                        floor,
-                        floorTenants
-                      )}
-                    </h3>
-
-                    <div
-                      data-reveal
-                      className="space-y-1"
-                    >
-                      {floorTenants.length >
-                        0 ? (
-                        floorTenants.map(
-                          (
-                            tenant
-                          ) => (
-                            <FeatureRow
-                              key={
-                                tenant.id
-                              }
-                              icon={getTenantIcon(
-                                tenant
-                              )}
-                              title={
-                                tenant.name
-                              }
-                              desc={
-                                tenant.short_description ||
-                                tenant.description ||
-                                `${tenant.name} operates from ${floor.name} of ${buildingA.name}.`
-                              }
-                            />
-                          )
-                        )
-                      ) : (
-                        <FeatureRow
-                          icon={
-                            <Building2 className="h-5 w-5" />
-                          }
-                          title={formatStatus(
-                            floor.status
-                          )}
-                          desc={
-                            floor.description ||
-                            getFloorStatusDescription(
-                              floor
-                            )
-                          }
-                        />
-                      )}
-                    </div>
-
-                    {/* AVAILABLE FLOOR INQUIRY */}
-
-                    {floor.status ===
-                      "available" && (
-                        <div
-                          data-reveal
-                          className="pt-3"
-                        >
-                          <a
-                            href={getFloorInquiryUrl(
-                              floor
-                            )}
-                            className="inline-flex items-center gap-2 rounded-2xl bg-amber-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_18px_45px_rgba(252,211,77,0.22)] transition hover:-translate-y-[1px]"
-                          >
-                            Request Viewing
-                            for{" "}
-                            {
-                              floor.name
-                            }
-
-                            <ArrowRight className="h-4 w-4" />
-                          </a>
-                        </div>
-                      )}
-                  </>
-                }
-
-                right={
-                  <ImageCard
-                    src={
-                      visual.src
+                  <FloorCopy
+                    floor={
+                      floor
                     }
-                    alt={
-                      visual.alt
+                    building={
+                      buildingA
                     }
-                    footerLeft={
-                      floor.floor_number ===
-                        0
-                        ? "FACILITIES"
-                        : "FLOOR AREA"
-                    }
-                    footerRight={getFloorFooterValue(
-                      floor,
+                    floorTenants={
                       floorTenants
-                    )}
-                    heightClass={
-                      floor.floor_number ===
-                        0
-                        ? "h-[28rem] md:h-[34rem]"
-                        : "h-[31.25rem]"
                     }
-                    crop="object-center"
-                    zoom={
-                      visual.isBackendImage
-                        ? "scale-100"
-                        : getStaticImageScale(
-                          floor
-                        )
-                    }
-                    fit={
-                      visual.isBackendImage
-                        ? "cover"
-                        : "contain"
+                    effectiveStatus={
+                      effectiveStatus
                     }
                   />
+                }
+                right={
+                  visual ? (
+                    <ImageCard
+                      src={
+                        visual.src
+                      }
+                      alt={
+                        visual.alt
+                      }
+                      footerLeft={
+                        floor.floor_number ===
+                          0
+                          ? "FACILITIES"
+                          : "FLOOR AREA"
+                      }
+                      footerRight={getFloorFooterValue(
+                        floor,
+                        floorTenants,
+                      )}
+                      heightClass={
+                        floor.floor_number ===
+                          0
+                          ? "h-[28rem] md:h-[34rem]"
+                          : "h-[31.25rem]"
+                      }
+                      crop="object-center"
+                      zoom="scale-100"
+                      fit={
+                        visual.fit
+                      }
+                    />
+                  ) : (
+                    <NoFloorImage
+                      floor={
+                        floor
+                      }
+                      floorTenants={
+                        floorTenants
+                      }
+                      heightClass={
+                        floor.floor_number ===
+                          0
+                          ? "h-[28rem] md:h-[34rem]"
+                          : "h-[31.25rem]"
+                      }
+                    />
+                  )
                 }
               />
             </Section>
           );
-        }
+        },
       )}
 
-      {/* ===================================
-          BUILDING A FUTURE FLOORS
-      =================================== */}
+      {/* BUILDING A FUTURE FLOORS */}
 
       {futureFloorsA.length >
         0 && (
           <Section id="building-a-gym">
+
             <div className="text-center">
+
               <Kicker
                 text={`${getFutureFloorRangeLabel(
-                  futureFloorsA
+                  futureFloorsA,
                 ).toUpperCase()} • ${buildingA.name.toUpperCase()}`}
               />
 
@@ -2370,12 +2598,11 @@ export default function Home() {
                 data-reveal
                 className="mt-6 text-4xl md:text-5xl font-extrabold tracking-tight"
               >
-                Premium Fitness
-                Center
+                Premium Fitness Center
 
                 <span className="block text-slate-600">
                   {getCombinedFutureStatus(
-                    futureFloorsA
+                    futureFloorsA,
                   )}
                 </span>
               </h3>
@@ -2385,11 +2612,9 @@ export default function Home() {
                 className="mt-3 text-slate-700"
               >
                 {getFutureFloorDescription(
-                  futureFloorsA
+                  futureFloorsA,
                 )}
               </p>
-
-              {/* AVAILABLE FUTURE FLOORS */}
 
               <div
                 data-reveal
@@ -2397,18 +2622,22 @@ export default function Home() {
               >
                 {futureFloorsA
                   .filter(
-                    (floor) =>
+                    (
+                      floor,
+                    ) =>
                       floor.status ===
-                      "available"
+                      "available",
                   )
                   .map(
-                    (floor) => (
+                    (
+                      floor,
+                    ) => (
                       <a
                         key={
                           floor.id
                         }
                         href={getFloorInquiryUrl(
-                          floor
+                          floor,
                         )}
                         className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-[0_18px_45px_rgba(15,23,42,0.18)] transition hover:-translate-y-[1px]"
                       >
@@ -2419,16 +2648,14 @@ export default function Home() {
 
                         <ArrowRight className="h-4 w-4" />
                       </a>
-                    )
+                    ),
                   )}
               </div>
             </div>
           </Section>
         )}
 
-      {/* ===================================
-          BUILDING B
-      =================================== */}
+      {/* BUILDING B */}
 
       <SectionHeader
         title={
@@ -2445,18 +2672,26 @@ export default function Home() {
       />
 
       {floorsB.map(
-        (floor) => {
+        (
+          floor,
+        ) => {
           const floorTenants =
             tenantsByFloor.get(
-              floor.id
+              floor.id,
             ) || [];
+
+          const effectiveStatus =
+            getEffectiveFloorStatus(
+              floor,
+              floorTenants,
+            );
 
           const visual =
             getFloorVisual(
               floor,
               floorTenants,
               galleryB,
-              "b"
+              "b",
             );
 
           return (
@@ -2465,7 +2700,7 @@ export default function Home() {
                 floor.id
               }
               id={getBuildingBSectionId(
-                floor
+                floor,
               )}
               tone={
                 floor.floor_number ===
@@ -2476,119 +2711,53 @@ export default function Home() {
             >
               <TwoCol
                 left={
-                  <>
-                    <Kicker
-                      text={`${floor.name.toUpperCase()} • ${buildingB.name.toUpperCase()}`}
-                    />
-
-                    <h3
-                      data-reveal
-                      className="text-3xl md:text-4xl font-extrabold tracking-tight"
-                    >
-                      {getFloorTitle(
-                        floor,
-                        floorTenants
-                      )}
-                    </h3>
-
-                    <div
-                      data-reveal
-                      className="space-y-1"
-                    >
-                      {floorTenants.length >
-                        0 ? (
-                        floorTenants.map(
-                          (
-                            tenant
-                          ) => (
-                            <FeatureRow
-                              key={
-                                tenant.id
-                              }
-                              icon={getTenantIcon(
-                                tenant
-                              )}
-                              title={
-                                tenant.name
-                              }
-                              desc={
-                                tenant.short_description ||
-                                tenant.description ||
-                                `${tenant.name} operates from ${floor.name} of ${buildingB.name}.`
-                              }
-                            />
-                          )
-                        )
-                      ) : (
-                        <FeatureRow
-                          icon={
-                            <Building2 className="h-5 w-5" />
-                          }
-                          title={formatStatus(
-                            floor.status
-                          )}
-                          desc={
-                            floor.description ||
-                            getFloorStatusDescription(
-                              floor
-                            )
-                          }
-                        />
-                      )}
-                    </div>
-
-                    {/* AVAILABLE FLOOR INQUIRY */}
-
-                    {floor.status ===
-                      "available" && (
-                        <div
-                          data-reveal
-                          className="pt-3"
-                        >
-                          <a
-                            href={getFloorInquiryUrl(
-                              floor
-                            )}
-                            className="inline-flex items-center gap-2 rounded-2xl bg-amber-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_18px_45px_rgba(252,211,77,0.22)] transition hover:-translate-y-[1px]"
-                          >
-                            Request Viewing
-                            for{" "}
-                            {
-                              floor.name
-                            }
-
-                            <ArrowRight className="h-4 w-4" />
-                          </a>
-                        </div>
-                      )}
-                  </>
-                }
-
-                right={
-                  <ImageCard
-                    src={
-                      visual.src
+                  <FloorCopy
+                    floor={
+                      floor
                     }
-                    alt={
-                      visual.alt
+                    building={
+                      buildingB
                     }
-                    fit={
-                      visual.isBackendImage
-                        ? "cover"
-                        : "contain"
+                    floorTenants={
+                      floorTenants
                     }
-                    zoom="scale-100"
+                    effectiveStatus={
+                      effectiveStatus
+                    }
                   />
+                }
+                right={
+                  visual ? (
+                    <ImageCard
+                      src={
+                        visual.src
+                      }
+                      alt={
+                        visual.alt
+                      }
+                      fit={
+                        visual.fit
+                      }
+                      zoom="scale-100"
+                    />
+                  ) : (
+                    <NoFloorImage
+                      floor={
+                        floor
+                      }
+                      floorTenants={
+                        floorTenants
+                      }
+                    />
+                  )
                 }
               />
             </Section>
           );
-        }
+        },
       )}
 
-      {/* ===================================
-          AVAILABLE SPACES
-      =================================== */}
+      {/* AVAILABLE SPACES */}
 
       {availableFloors.length >
         0 && (
@@ -2596,7 +2765,9 @@ export default function Home() {
             id="available-spaces"
             tone="soft"
           >
+
             <div className="text-center mb-10 md:mb-12">
+
               <div className="inline-flex items-center gap-2 rounded-full bg-white/60 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700">
                 Leasing
               </div>
@@ -2605,18 +2776,14 @@ export default function Home() {
                 data-reveal
                 className="mt-5 text-4xl md:text-5xl font-extrabold tracking-tight"
               >
-                Available
-                Spaces
+                Available Spaces
               </h2>
 
               <p
                 data-reveal
                 className="mt-3 text-lg text-slate-700"
               >
-                Premium
-                commercial floors
-                currently ready
-                for occupancy.
+                Premium commercial floors currently ready for occupancy.
               </p>
             </div>
 
@@ -2625,7 +2792,9 @@ export default function Home() {
               className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 max-w-6xl mx-auto"
             >
               {availableFloors.map(
-                (floor) => (
+                (
+                  floor,
+                ) => (
                   <AvailableFloorCard
                     key={
                       floor.id
@@ -2634,7 +2803,7 @@ export default function Home() {
                       floor
                     }
                     inquiryHref={getFloorInquiryUrl(
-                      floor
+                      floor,
                     )}
                     onView={() =>
                       navigateToFloor(
@@ -2646,26 +2815,26 @@ export default function Home() {
                         floor.building_slug ===
                           "building-b"
                           ? getBuildingBSectionId(
-                            floor
-                          )
+                              floor,
+                            )
                           : getBuildingASectionId(
-                            floor
-                          )
+                              floor,
+                            ),
                       )
                     }
                   />
-                )
+                ),
               )}
             </div>
           </Section>
         )}
 
-      {/* ===================================
-          GENERAL VIEWING CTA
-      =================================== */}
+      {/* GENERAL CTA */}
 
       <Section tone="base">
+
         <div className="mx-auto max-w-5xl rounded-[32px] bg-slate-900 px-7 py-10 text-center text-white shadow-[0_30px_90px_rgba(15,23,42,0.18)] md:px-12 md:py-14">
+
           <div
             data-reveal
             className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold tracking-[0.18em]"
@@ -2677,26 +2846,22 @@ export default function Home() {
             data-reveal
             className="mt-5 text-3xl font-extrabold tracking-tight md:text-5xl"
           >
-            Looking for the
-            right space?
+            Looking for the right space?
           </h2>
 
           <p
             data-reveal
             className="mx-auto mt-4 max-w-2xl leading-relaxed text-slate-300"
           >
-            Send us your
-            requirements and our
-            team can help you
-            choose the most
-            suitable building
-            and floor.
+            Send us your requirements and our team can help you choose
+            the most suitable building and floor.
           </p>
 
           <div
             data-reveal
             className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"
           >
+
             <a
               href={
                 GENERAL_INQUIRY_URL
@@ -2720,24 +2885,24 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ===================================
-          FAQ
-      =================================== */}
+      {/* FAQ */}
 
       <Section
         id="faq"
         tone="soft"
       >
+
         <div className="mx-auto max-w-4xl">
+
           <div className="text-center">
+
             <Kicker text="FREQUENTLY ASKED QUESTIONS" />
 
             <h2
               data-reveal
               className="mt-6 text-4xl font-extrabold tracking-tight md:text-5xl"
             >
-              Commercial rental
-              questions,
+              Commercial rental questions,
 
               <span className="block text-slate-600">
                 answered clearly.
@@ -2748,11 +2913,7 @@ export default function Home() {
               data-reveal
               className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-slate-600"
             >
-              Helpful guidance
-              for choosing a
-              commercial
-              building in
-              Kathmandu.
+              Helpful guidance for choosing a commercial building in Kathmandu.
             </p>
           </div>
 
@@ -2760,48 +2921,10 @@ export default function Home() {
             data-reveal
             className="mt-10 space-y-3"
           >
-            {[
-              {
-                question:
-                  "What should I consider when renting a commercial building in Kathmandu?",
-
-                answer:
-                  "Important factors include location, accessibility, parking, building quality, facilities, maintenance, rental cost, lease terms, and whether the property suits your business requirements.",
-              },
-
-              {
-                question:
-                  "Is location important when choosing commercial property?",
-
-                answer:
-                  "Yes. Location can affect customer accessibility, employee commuting, business visibility, transportation, and overall convenience.",
-              },
-
-              {
-                question:
-                  "Should I consider parking when renting a commercial building?",
-
-                answer:
-                  "Yes. Parking can be especially important for businesses that receive regular customers, employees, suppliers, and visitors.",
-              },
-
-              {
-                question:
-                  "What facilities should a commercial building have?",
-
-                answer:
-                  "Depending on your business, useful facilities can include electricity, water, internet connectivity, parking, lift access, security, ventilation, natural lighting, and proper maintenance.",
-              },
-
-              {
-                question:
-                  "Should I choose a commercial building based only on rent?",
-
-                answer:
-                  "No. Monthly rent is only one part of the total value. Accessibility, facilities, parking, building quality, maintenance, and location should also be considered.",
-              },
-            ].map(
-              (item) => (
+            {FAQ_ITEMS.map(
+              (
+                item,
+              ) => (
                 <details
                   key={
                     item.question
@@ -2809,6 +2932,7 @@ export default function Home() {
                   className="group rounded-[22px] bg-white/70 ring-1 ring-black/[0.08] shadow-[0_12px_40px_rgba(15,23,42,0.05)] open:bg-white"
                 >
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-5 px-5 py-5 font-bold text-slate-900 md:px-6 [&::-webkit-details-marker]:hidden">
+
                     <span>
                       {
                         item.question
@@ -2816,6 +2940,7 @@ export default function Home() {
                     </span>
 
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FFF0BF] text-amber-900 transition group-open:rotate-180">
+
                       <ChevronDown className="h-4 w-4" />
                     </span>
                   </summary>
@@ -2826,36 +2951,31 @@ export default function Home() {
                     }
                   </div>
                 </details>
-              )
+              ),
             )}
           </div>
         </div>
       </Section>
 
-      {/* ===================================
-          FOOTER
-      =================================== */}
+      {/* FOOTER */}
 
       <footer className="py-12 md:py-14">
+
         <Container>
+
           <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 p-7 md:p-8">
+
             <div className="grid md:grid-cols-4 gap-10">
-              {/* ABOUT */}
 
               <div>
+
                 <h3 className="text-xl font-extrabold tracking-tight">
-                  Subha Shree
-                  Bhawan
+                  Subha Shree Bhawan
                 </h3>
 
                 <p className="mt-3 text-slate-700 leading-relaxed">
-                  A premium
-                  commercial
-                  destination
-                  offering
-                  world-class
-                  business spaces
-                  and amenities.
+                  A premium commercial destination offering world-class
+                  business spaces and amenities.
                 </p>
 
                 <img
@@ -2865,33 +2985,34 @@ export default function Home() {
                 />
               </div>
 
-              {/* CONTACT */}
-
               <div>
+
                 <h4 className="text-xs font-semibold tracking-[0.18em] text-slate-500">
                   CONTACT
                 </h4>
 
                 <div className="mt-4 space-y-3 text-slate-700">
+
                   <div className="flex items-center gap-3">
+
                     <MapPin className="h-5 w-5 text-slate-400" />
 
                     <span>
-                      Kathmandu,
-                      Nepal
+                      Kathmandu, Nepal
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
+
                     <Phone className="h-5 w-5 text-slate-400" />
 
                     <span>
-                      +977
-                      980-8100067
+                      +977 980-8100067
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
+
                     <Mail className="h-5 w-5 text-slate-400" />
 
                     <span>
@@ -2912,21 +3033,23 @@ export default function Home() {
                 </a>
               </div>
 
-              {/* FEATURES */}
-
               <div>
+
                 <h4 className="text-xs font-semibold tracking-[0.18em] text-slate-500">
                   FEATURES
                 </h4>
 
                 <ul className="mt-4 space-y-3 text-slate-700">
+
                   {[
                     "Prime location",
                     "Modern infrastructure",
                     "24/7 security",
                     "Underground parking",
                   ].map(
-                    (text) => (
+                    (
+                      text,
+                    ) => (
                       <li
                         key={
                           text
@@ -2935,16 +3058,17 @@ export default function Home() {
                       >
                         <ArrowRight className="h-4 w-4 text-slate-400" />
 
-                        {text}
+                        {
+                          text
+                        }
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
 
-              {/* EXPLORE */}
-
               <div>
+
                 <h4 className="text-xs font-semibold tracking-[0.18em] text-slate-500">
                   EXPLORE
                 </h4>
@@ -2958,9 +3082,8 @@ export default function Home() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
 
-
-
                 <div className="mt-5 space-y-2 text-sm">
+
                   <a
                     href={
                       BUILDING_A_INQUIRY_URL
@@ -2987,10 +3110,7 @@ export default function Home() {
             </div>
 
             <div className="mt-8 pt-6 border-t border-black/5 text-center text-slate-500 text-sm">
-              &copy; 2026
-              Subha Shree
-              Bhawan. All
-              rights reserved.
+              &copy; 2026 Subha Shree Bhawan. All rights reserved.
             </div>
           </div>
         </Container>
@@ -3000,27 +3120,76 @@ export default function Home() {
 }
 
 // ========================================
-// DATA HELPERS
+// FAQ
+// ========================================
+
+const FAQ_ITEMS = [
+  {
+    question:
+      "What should I consider when renting a commercial building in Kathmandu?",
+
+    answer:
+      "Important factors include location, accessibility, parking, building quality, facilities, maintenance, rental cost, lease terms, and whether the property suits your business requirements.",
+  },
+
+  {
+    question:
+      "Is location important when choosing commercial property?",
+
+    answer:
+      "Yes. Location can affect customer accessibility, employee commuting, business visibility, transportation, and overall convenience.",
+  },
+
+  {
+    question:
+      "Should I consider parking when renting a commercial building?",
+
+    answer:
+      "Yes. Parking can be especially important for businesses that receive regular customers, employees, suppliers, and visitors.",
+  },
+
+  {
+    question:
+      "What facilities should a commercial building have?",
+
+    answer:
+      "Depending on your business, useful facilities can include electricity, water, internet connectivity, parking, lift access, security, ventilation, natural lighting, and proper maintenance.",
+  },
+
+  {
+    question:
+      "Should I choose a commercial building based only on rent?",
+
+    answer:
+      "No. Monthly rent is only one part of the total value. Accessibility, facilities, parking, building quality, maintenance, and location should also be considered.",
+  },
+];
+
+// ========================================
+// HELPERS
 // ========================================
 
 function sortFloors(
-  floors: FloorData[]
+  floors:
+    FloorData[],
 ) {
-  return [...floors].sort(
-    (a, b) =>
+  return [
+    ...floors,
+  ].sort(
+    (
+      a,
+      b,
+    ) =>
       a.sort_order -
-      b.sort_order ||
+        b.sort_order ||
       a.floor_number -
-      b.floor_number
+        b.floor_number,
   );
 }
 
-// ========================================
-// INQUIRY HELPER
-// ========================================
-
 function getFloorInquiryUrl(
-  floor: FloorData
+  floor:
+    FloorData,
 ) {
   const buildingSlug =
     floor.building_slug ===
@@ -3028,31 +3197,29 @@ function getFloorInquiryUrl(
       ? "building-b"
       : "building-a";
 
-  // Negative IDs are fallback/demo
-  // data. Do not send fake floor IDs
-  // to the backend inquiry form.
-
   if (
     Number(
-      floor.id
-    ) <= 0
+      floor.id,
+    ) <=
+    0
   ) {
     return `/inquiry?building=${encodeURIComponent(
-      buildingSlug
+      buildingSlug,
     )}`;
   }
 
   return `/inquiry?building=${encodeURIComponent(
-    buildingSlug
+    buildingSlug,
   )}&floor=${encodeURIComponent(
     String(
-      floor.id
-    )
+      floor.id,
+    ),
   )}`;
 }
 
 function getBuildingASectionId(
-  floor: FloorData
+  floor:
+    FloorData,
 ) {
   if (
     floor.floor_number ===
@@ -3063,12 +3230,13 @@ function getBuildingASectionId(
 
   return `building-a-${floor.slug.replace(
     /-floor$/,
-    ""
+    "",
   )}`;
 }
 
 function getBuildingBSectionId(
-  floor: FloorData
+  floor:
+    FloorData,
 ) {
   if (
     floor.floor_number ===
@@ -3079,14 +3247,17 @@ function getBuildingBSectionId(
 
   return `building-b-${floor.slug.replace(
     /-floor$/,
-    ""
+    "",
   )}`;
 }
 
 function formatStatus(
-  status: FloorStatus
+  status:
+    FloorStatus,
 ) {
-  switch (status) {
+  switch (
+    status
+  ) {
     case "available":
       return "Available";
 
@@ -3104,9 +3275,50 @@ function formatStatus(
   }
 }
 
+// ========================================
+// EFFECTIVE FLOOR STATUS
+// ========================================
+
+function getEffectiveFloorStatus(
+  floor:
+    FloorData,
+
+  floorTenants:
+    TenantData[],
+):
+  FloorStatus {
+  // Any active tenant means occupied.
+
+  if (
+    floorTenants.length >
+    0
+  ) {
+    return "occupied";
+  }
+
+  // Preserve intentional special statuses.
+
+  if (
+    floor.status ===
+      "coming_soon" ||
+    floor.status ===
+      "inactive"
+  ) {
+    return floor.status;
+  }
+
+  // No active tenant means available,
+  // even if the stored floor value is stale.
+
+  return "available";
+}
+
 function getFloorTitle(
-  floor: FloorData,
-  floorTenants: TenantData[]
+  floor:
+    FloorData,
+
+  floorTenants:
+    TenantData[],
 ) {
   if (
     floorTenants.length >
@@ -3114,33 +3326,62 @@ function getFloorTitle(
   ) {
     return floorTenants
       .map(
-        (tenant) =>
-          tenant.name
+        (
+          tenant,
+        ) =>
+          tenant.name,
       )
-      .join(" & ");
+      .join(
+        " & ",
+      );
   }
 
+  const status =
+    getEffectiveFloorStatus(
+      floor,
+      floorTenants,
+    );
+
   if (
-    floor.status ===
+    status ===
     "available"
   ) {
-    return "Prime Office Space";
+    return "Available";
   }
 
   if (
-    floor.status ===
+    status ===
     "coming_soon"
   ) {
     return "Coming Soon";
+  }
+
+  if (
+    status ===
+    "inactive"
+  ) {
+    return "Inactive";
   }
 
   return floor.name;
 }
 
 function getFloorStatusDescription(
-  floor: FloorData
+  floor:
+    FloorData,
+
+  floorTenants:
+    TenantData[],
 ) {
-  switch (floor.status) {
+  const status =
+    getEffectiveFloorStatus(
+      floor,
+      floorTenants,
+    );
+
+  switch (
+    status
+  ) {
     case "available":
       return `${floor.name} is currently available for occupancy.`;
 
@@ -3162,20 +3403,24 @@ function getFloorStatusDescription(
 }
 
 function getFloorFooterValue(
-  floor: FloorData,
-  floorTenants: TenantData[]
+  floor:
+    FloorData,
+
+  floorTenants:
+    TenantData[],
 ) {
   if (
     floor.area_sqft !==
-    null &&
+      null &&
     floor.area_sqft !==
-    undefined &&
+      undefined &&
     Number(
-      floor.area_sqft
-    ) > 0
+      floor.area_sqft,
+    ) >
+      0
   ) {
     return `${Number(
-      floor.area_sqft
+      floor.area_sqft,
     ).toLocaleString()} sq. ft.`;
   }
 
@@ -3183,30 +3428,39 @@ function getFloorFooterValue(
     floorTenants.length >
     0
   ) {
-    return `${floorTenants.length} ${floorTenants.length ===
-        1
+    return `${floorTenants.length} ${
+      floorTenants.length ===
+      1
         ? "Tenant"
         : "Tenants"
-      }`;
+    }`;
   }
 
   return formatStatus(
-    floor.status
+    getEffectiveFloorStatus(
+      floor,
+      floorTenants,
+    ),
   );
 }
 
+// ========================================
+// TENANT ICON
+// ========================================
+
 function getTenantIcon(
-  tenant: TenantData
+  tenant:
+    TenantData,
 ) {
   const value =
     `${tenant.name} ${tenant.slug}`.toLowerCase();
 
   if (
     value.includes(
-      "java"
+      "java",
     ) ||
     value.includes(
-      "coffee"
+      "coffee",
     )
   ) {
     return (
@@ -3216,10 +3470,10 @@ function getTenantIcon(
 
   if (
     value.includes(
-      "clinic"
+      "clinic",
     ) ||
     value.includes(
-      "health"
+      "health",
     )
   ) {
     return (
@@ -3229,10 +3483,10 @@ function getTenantIcon(
 
   if (
     value.includes(
-      "vairav"
+      "vairav",
     ) ||
     value.includes(
-      "security"
+      "security",
     )
   ) {
     return (
@@ -3242,10 +3496,10 @@ function getTenantIcon(
 
   if (
     value.includes(
-      "restaurant"
+      "restaurant",
     ) ||
     value.includes(
-      "bengal"
+      "bengal",
     )
   ) {
     return (
@@ -3255,13 +3509,13 @@ function getTenantIcon(
 
   if (
     value.includes(
-      "swopna"
+      "swopna",
     ) ||
     value.includes(
-      "film"
+      "film",
     ) ||
     value.includes(
-      "production"
+      "production",
     )
   ) {
     return (
@@ -3271,13 +3525,13 @@ function getTenantIcon(
 
   if (
     value.includes(
-      "moon"
+      "moon",
     ) ||
     value.includes(
-      "technology"
+      "technology",
     ) ||
     value.includes(
-      "software"
+      "software",
     )
   ) {
     return (
@@ -3291,25 +3545,27 @@ function getTenantIcon(
 }
 
 // ========================================
-// IMAGES
+// MEDIA URL
 // ========================================
 
 function resolveMediaUrl(
   imageUrl:
     | string
     | null
-    | undefined
+    | undefined,
 ) {
-  if (!imageUrl) {
+  if (
+    !imageUrl
+  ) {
     return "";
   }
 
   if (
     imageUrl.startsWith(
-      "http://"
+      "http://",
     ) ||
     imageUrl.startsWith(
-      "https://"
+      "https://",
     )
   ) {
     return imageUrl;
@@ -3317,153 +3573,76 @@ function resolveMediaUrl(
 
   if (
     imageUrl.startsWith(
-      "/uploads/"
+      "/uploads/",
     )
   ) {
     return getBackendImageUrl(
-      imageUrl
+      imageUrl,
     );
   }
 
   return imageUrl;
 }
 
+// ========================================
+// FLOOR IMAGE LOGIC
+// ========================================
+
 function getFloorVisual(
-  floor: FloorData,
-  floorTenants: TenantData[],
-  gallery: GalleryItem[],
+  floor:
+    FloorData,
+
+  floorTenants:
+    TenantData[],
+
+  gallery:
+    GalleryItem[],
+
   building:
     | "a"
-    | "b"
-) {
+    | "b",
+):
+  | FloorVisual
+  | null {
   // ======================================
-  // CURRENT TENANT IDS
+  // NO ACTIVE TENANT
   // ======================================
-
-  const tenantIds =
-    floorTenants.map(
-      (tenant) =>
-        Number(
-          tenant.id
-        )
-    );
-
-  // ======================================
-  // FLOOR IMAGE ONLY
   //
-  // A proper floor image must not belong
-  // to a tenant.
-  // ======================================
-
-  const floorImage =
-    gallery.find(
-      (item) =>
-        Number(
-          item.floor_id
-        ) ===
-          Number(
-            floor.id
-          ) &&
-        (
-          item.tenant_id ===
-            null ||
-          item.tenant_id ===
-            undefined
-        ) &&
-        Boolean(
-          item.is_active
-        )
-    );
-
-  // ======================================
-  // AVAILABLE / EMPTY FLOOR
-  // ======================================
+  // When tenant moves out:
+  //
+  // old logo disappears
+  // old gallery image disappears
+  // old static image disappears
+  // floor becomes Available
 
   if (
-    floor.status ===
-      "available" ||
     floorTenants.length ===
-      0
+    0
   ) {
-    // If an actual floor image exists,
-    // use that image.
-    if (floorImage) {
-      return {
-        src:
-          resolveMediaUrl(
-            floorImage.image_url
-          ),
-
-        alt:
-          floorImage.alt_text ||
-          floorImage.title ||
-          `${floor.name} available for rent`,
-
-        isBackendImage:
-          true,
-      };
-    }
-
-    // Never show an old tenant image
-    // when the floor is empty.
-    return {
-      src:
-        "/subhashree.png",
-
-      alt:
-        `${floor.name} available for rent`,
-
-      isBackendImage:
-        false,
-    };
+    return null;
   }
 
   // ======================================
-  // CURRENT TENANT GALLERY IMAGE
+  // 1. TENANT LOGO
   // ======================================
-
-  const tenantImage =
-    gallery.find(
-      (item) =>
-        item.tenant_id !==
-          null &&
-        tenantIds.includes(
-          Number(
-            item.tenant_id
-          )
-        ) &&
-        Boolean(
-          item.is_active
-        )
-    );
-
-  if (tenantImage) {
-    return {
-      src:
-        resolveMediaUrl(
-          tenantImage.image_url
-        ),
-
-      alt:
-        tenantImage.alt_text ||
-        tenantImage.title ||
-        floor.name,
-
-      isBackendImage:
-        true,
-    };
-  }
-
-  // ======================================
-  // CURRENT TENANT LOGO
-  // ======================================
+  //
+  // This has FIRST priority.
+  //
+  // If you later change a tenant logo in:
+  //
+  // Admin → Tenants → Edit → Replace Logo
+  //
+  // the homepage automatically changes.
 
   const tenantWithLogo =
     floorTenants.find(
-      (tenant) =>
+      (
+        tenant,
+      ) =>
         Boolean(
-          tenant.logo
-        )
+          tenant.logo &&
+          tenant.logo.trim(),
+        ),
     );
 
   if (
@@ -3472,59 +3651,118 @@ function getFloorVisual(
     return {
       src:
         resolveMediaUrl(
-          tenantWithLogo.logo
+          tenantWithLogo.logo,
         ),
 
       alt:
         tenantWithLogo.name,
 
-      isBackendImage:
-        true,
+      fit:
+        "contain",
     };
   }
 
   // ======================================
-  // FLOOR IMAGE
+  // 2. TENANT GALLERY IMAGE
   // ======================================
 
-  if (floorImage) {
+  const tenantIds =
+    floorTenants.map(
+      (
+        tenant,
+      ) =>
+        Number(
+          tenant.id,
+        ),
+    );
+
+  const tenantImage =
+    gallery.find(
+      (
+        item,
+      ) =>
+        item.tenant_id !==
+          null &&
+        tenantIds.includes(
+          Number(
+            item.tenant_id,
+          ),
+        ) &&
+        Boolean(
+          item.is_active,
+        ),
+    );
+
+  if (
+    tenantImage
+  ) {
     return {
       src:
         resolveMediaUrl(
-          floorImage.image_url
+          tenantImage.image_url,
         ),
 
       alt:
-        floorImage.alt_text ||
-        floorImage.title ||
+        tenantImage.alt_text ||
+        tenantImage.title ||
+        floorTenants[0]
+          ?.name ||
         floor.name,
 
-      isBackendImage:
-        true,
+      fit:
+        "cover",
     };
   }
 
   // ======================================
-  // OLD STATIC FALLBACK
+  // TEMPORARY OLD STATIC IMAGES
+  // ======================================
   //
-  // This is only reached while the floor
-  // is occupied.
+  // Keep these only until you upload all
+  // current tenant logos in Admin.
+  //
+  // Each static image is allowed ONLY when
+  // its matching company is currently active.
+
+  const tenantSearch =
+    floorTenants
+      .map(
+        (
+          tenant,
+        ) =>
+          `${tenant.name} ${tenant.slug}`,
+      )
+      .join(
+        " ",
+      )
+      .toLowerCase();
+
+  // ======================================
+  // BUILDING A
   // ======================================
 
-  return building === "a"
-    ? getStaticBuildingAImage(
-        floor.floor_number
-      )
-    : getStaticBuildingBImage(
-        floor.floor_number
-      );
-}
+  if (
+    building ===
+    "a"
+  ) {
+    // Ground Floor:
+    // Himalayan Java + Tesla Clinic
 
-function getStaticBuildingAImage(
-  floorNumber: number
-) {
-  switch (floorNumber) {
-    case 0:
+    if (
+      floor.floor_number ===
+        0 &&
+      (
+        tenantSearch.includes(
+          "himalayan java",
+        ) ||
+        tenantSearch.includes(
+          "himalayan-java",
+        ) ||
+        tenantSearch.includes(
+          "tesla",
+        )
+      )
+    ) {
       return {
         src:
           "/javatesla.png",
@@ -3532,11 +3770,21 @@ function getStaticBuildingAImage(
         alt:
           "Tesla Clinic and Himalayan Java",
 
-        isBackendImage:
-          false,
+        fit:
+          "contain",
       };
+    }
 
-    case 1:
+    // 1st Floor:
+    // Vairav Tech
+
+    if (
+      floor.floor_number ===
+        1 &&
+      tenantSearch.includes(
+        "vairav",
+      )
+    ) {
       return {
         src:
           "/vairav.png",
@@ -3544,11 +3792,29 @@ function getStaticBuildingAImage(
         alt:
           "Vairav Tech",
 
-        isBackendImage:
-          false,
+        fit:
+          "contain",
       };
+    }
 
-    case 2:
+    // 2nd Floor:
+    // Family Health International
+
+    if (
+      floor.floor_number ===
+        2 &&
+      (
+        tenantSearch.includes(
+          "family health",
+        ) ||
+        tenantSearch.includes(
+          "family-health",
+        ) ||
+        tenantSearch.includes(
+          "fhi",
+        )
+      )
+    ) {
       return {
         src:
           "/fhi.png",
@@ -3556,11 +3822,22 @@ function getStaticBuildingAImage(
         alt:
           "Family Health International 360",
 
-        isBackendImage:
-          false,
+        fit:
+          "contain",
       };
+    }
 
-    case 3:
+    // 3rd Floor:
+    // Sigma can appear ONLY if Sigma itself
+    // becomes an active tenant again.
+
+    if (
+      floor.floor_number ===
+        3 &&
+      tenantSearch.includes(
+        "sigma",
+      )
+    ) {
       return {
         src:
           "/sigma.png",
@@ -3568,29 +3845,30 @@ function getStaticBuildingAImage(
         alt:
           "Sigma Capital",
 
-        isBackendImage:
-          false,
+        fit:
+          "contain",
       };
-
-    default:
-      return {
-        src:
-          "/subhashree.png",
-
-        alt:
-          "Subha Shree Bhawan",
-
-        isBackendImage:
-          false,
-      };
+    }
   }
-}
 
-function getStaticBuildingBImage(
-  floorNumber: number
-) {
-  switch (floorNumber) {
-    case 0:
+  // ======================================
+  // BUILDING B
+  // ======================================
+
+  if (
+    building ===
+    "b"
+  ) {
+    // Ground Floor:
+    // Bengal Restaurant
+
+    if (
+      floor.floor_number ===
+        0 &&
+      tenantSearch.includes(
+        "bengal",
+      )
+    ) {
       return {
         src:
           "/bengal.jpg",
@@ -3598,11 +3876,21 @@ function getStaticBuildingBImage(
         alt:
           "The Bengal Restaurant",
 
-        isBackendImage:
-          false,
+        fit:
+          "contain",
       };
+    }
 
-    case 1:
+    // 1st Floor:
+    // Swopna Chitra
+
+    if (
+      floor.floor_number ===
+        1 &&
+      tenantSearch.includes(
+        "swopna",
+      )
+    ) {
       return {
         src:
           "/Swopna.png",
@@ -3610,11 +3898,21 @@ function getStaticBuildingBImage(
         alt:
           "Swopna Chitra",
 
-        isBackendImage:
-          false,
+        fit:
+          "contain",
       };
+    }
 
-    case 2:
+    // 2nd Floor:
+    // Moon Technology
+
+    if (
+      floor.floor_number ===
+        2 &&
+      tenantSearch.includes(
+        "moon",
+      )
+    ) {
       return {
         src:
           "/moon.jpeg",
@@ -3622,45 +3920,31 @@ function getStaticBuildingBImage(
         alt:
           "Moon Technology",
 
-        isBackendImage:
-          false,
+        fit:
+          "contain",
       };
-
-    default:
-      return {
-        src:
-          "/subhashree.png",
-
-        alt:
-          "Subha Shree Bhawan",
-
-        isBackendImage:
-          false,
-      };
-  }
-}
-
-function getStaticImageScale(
-  floor: FloorData
-) {
-  if (
-    floor.floor_number ===
-    0
-  ) {
-    return "scale-100";
+    }
   }
 
-  return "scale-[0.55]";
+  // New tenant exists but no image has
+  // been uploaded yet.
+  //
+  // Never use the previous tenant image.
+
+  return null;
 }
 
 // ========================================
-// BUILDING A FUTURE FLOORS
+// FUTURE FLOORS
 // ========================================
 
 function getFutureFloorMenuLabel(
-  floors: FloorData[]
+  floors:
+    FloorData[],
 ) {
-  if (!floors.length) {
+  if (
+    !floors.length
+  ) {
     return "Future Floors";
   }
 
@@ -3674,24 +3958,28 @@ function getFutureFloorMenuLabel(
   const first =
     floors[0].name.replace(
       " Floor",
-      ""
+      "",
     );
 
   const last =
     floors[
-      floors.length - 1
+      floors.length -
+        1
     ].name.replace(
       " Floor",
-      ""
+      "",
     );
 
   return `Gym (${first}–${last})`;
 }
 
 function getFutureFloorRangeLabel(
-  floors: FloorData[]
+  floors:
+    FloorData[],
 ) {
-  if (!floors.length) {
+  if (
+    !floors.length
+  ) {
     return "";
   }
 
@@ -3704,21 +3992,26 @@ function getFutureFloorRangeLabel(
 
   return `${floors[0].name.replace(
     " Floor",
-    ""
-  )} – ${floors[
-      floors.length - 1
+    "",
+  )} – ${
+    floors[
+      floors.length -
+        1
     ].name
-    }`;
+  }`;
 }
 
 function getCombinedFutureStatus(
-  floors: FloorData[]
+  floors:
+    FloorData[],
 ) {
   if (
     floors.every(
-      (floor) =>
+      (
+        floor,
+      ) =>
         floor.status ===
-        "coming_soon"
+        "coming_soon",
     )
   ) {
     return "Coming Soon";
@@ -3726,9 +4019,11 @@ function getCombinedFutureStatus(
 
   if (
     floors.some(
-      (floor) =>
+      (
+        floor,
+      ) =>
         floor.status ===
-        "available"
+        "available",
     )
   ) {
     return "Available";
@@ -3736,9 +4031,11 @@ function getCombinedFutureStatus(
 
   if (
     floors.every(
-      (floor) =>
+      (
+        floor,
+      ) =>
         floor.status ===
-        "occupied"
+        "occupied",
     )
   ) {
     return "Occupied";
@@ -3748,33 +4045,37 @@ function getCombinedFutureStatus(
 }
 
 function getFutureFloorDescription(
-  floors: FloorData[]
+  floors:
+    FloorData[],
 ) {
-  const descriptions =
+  const useful =
     floors
       .map(
-        (floor) =>
-          floor.description
+        (
+          floor,
+        ) =>
+          floor.description,
       )
       .filter(
         (
-          description
-        ): description is string =>
+          description,
+        ): description is
+          string =>
           Boolean(
             description &&
-            description.trim()
-          )
+            description.trim(),
+          ),
+      )
+      .find(
+        (
+          description,
+        ) =>
+          !description
+            .toLowerCase()
+            .includes(
+              "floor of building a",
+            ),
       );
-
-  const useful =
-    descriptions.find(
-      (description) =>
-        !description
-          .toLowerCase()
-          .includes(
-            "floor of building a"
-          )
-    );
 
   return (
     useful ||
@@ -3783,7 +4084,7 @@ function getFutureFloorDescription(
 }
 
 // ========================================
-// COMPONENTS
+// CONTAINER
 // ========================================
 
 function Container({
@@ -3791,61 +4092,80 @@ function Container({
   className = "",
 }: {
   children:
-  React.ReactNode;
+    React.ReactNode;
 
-  className?: string;
+  className?:
+    string;
 }) {
   return (
     <div
       className={`max-w-7xl mx-auto px-5 sm:px-6 ${className}`}
     >
-      {children}
+      {
+        children
+      }
     </div>
   );
 }
+
+// ========================================
+// SECTION
+// ========================================
 
 function Section({
   id,
   tone = "base",
   children,
 }: {
-  id?: string;
+  id?:
+    string;
 
   tone?:
-  | "base"
-  | "soft";
+    | "base"
+    | "soft";
 
   children:
-  React.ReactNode;
+    React.ReactNode;
 }) {
   return (
     <section
-      id={id}
+      id={
+        id
+      }
       className="relative py-14 md:py-20 scroll-mt-24"
     >
       {tone ===
         "soft" && (
           <div className="absolute inset-0 -z-10">
+
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FFF2C7]/28 to-transparent" />
           </div>
         )}
 
       <Container>
-        {children}
+        {
+          children
+        }
       </Container>
     </section>
   );
 }
 
+// ========================================
+// MEDIA CARD
+// ========================================
+
 function MediaCard({
   children,
 }: {
   children:
-  React.ReactNode;
+    React.ReactNode;
 }) {
   return (
     <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden">
-      {children}
+      {
+        children
+      }
     </div>
   );
 }
@@ -3860,36 +4180,48 @@ function SectionHeader({
   href,
   inquiryHref,
 }: {
-  title: string;
+  title:
+    string;
 
-  subtitle: string;
+  subtitle:
+    string;
 
-  href?: string;
+  href?:
+    string;
 
-  inquiryHref?: string;
+  inquiryHref?:
+    string;
 }) {
   return (
     <div className="py-16 md:py-20">
+
       <div className="max-w-7xl mx-auto px-5 sm:px-6">
+
         <div className="text-center">
+
           <h2
             data-reveal
             className="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900"
           >
-            {title}
+            {
+              title
+            }
           </h2>
 
           <p
             data-reveal
             className="mt-3 text-xs md:text-sm tracking-[0.22em] text-slate-500"
           >
-            {subtitle.toUpperCase()}
+            {
+              subtitle.toUpperCase()
+            }
           </p>
 
           <div
             data-reveal
             className="mt-6 flex flex-wrap justify-center gap-3"
           >
+
             {href && (
               <a
                 href={
@@ -3897,8 +4229,7 @@ function SectionHeader({
                 }
                 className="btn-secondary"
               >
-                View Dedicated
-                Page
+                View Dedicated Page
 
                 <ArrowRight className="h-4 w-4" />
               </a>
@@ -3925,185 +4256,509 @@ function SectionHeader({
   );
 }
 
+// ========================================
+// KICKER
+// ========================================
+
 function Kicker({
   text,
 }: {
-  text: string;
+  text:
+    string;
 }) {
   return (
     <div className="inline-flex items-center rounded-2xl border border-white/40 bg-white/90 px-4 py-2.5 text-[11px] font-bold tracking-[0.16em] text-slate-950 shadow-[0_12px_35px_rgba(15,23,42,0.16)] backdrop-blur-xl">
-      {text}
+      {
+        text
+      }
     </div>
   );
 }
+
+// ========================================
+// TWO COLUMN
+// ========================================
 
 function TwoCol({
   left,
   right,
 }: {
   left:
-  React.ReactNode;
+    React.ReactNode;
 
   right:
-  React.ReactNode;
-
-  reverse?: boolean;
+    React.ReactNode;
 }) {
   return (
     <div className="group relative mx-auto max-w-5xl rounded-[36px] bg-white/65 p-2 shadow-[0_32px_100px_rgba(15,23,42,0.14)] ring-1 ring-black/[0.08] backdrop-blur-sm transition duration-500 hover:-translate-y-1 hover:shadow-[0_38px_120px_rgba(15,23,42,0.19)]">
+
       <div className="building-visual">
-        {right}
+        {
+          right
+        }
       </div>
 
       <div className="pointer-events-none absolute inset-2 rounded-[28px] bg-gradient-to-b from-slate-950/35 via-transparent to-transparent" />
 
       <div className="building-copy absolute left-2 top-2 z-10 p-5 md:p-8">
+
         <div>
-          {left}
+          {
+            left
+          }
         </div>
       </div>
     </div>
   );
 }
 
+// ========================================
+// FLOOR COPY
+// ========================================
+
+function FloorCopy({
+  floor,
+  building,
+  floorTenants,
+  effectiveStatus,
+}: {
+  floor:
+    FloorData;
+
+  building:
+    BuildingData;
+
+  floorTenants:
+    TenantData[];
+
+  effectiveStatus:
+    FloorStatus;
+}) {
+  return (
+    <>
+      <Kicker
+        text={`${floor.name.toUpperCase()} • ${building.name.toUpperCase()}`}
+      />
+
+      <h3
+        data-reveal
+        className="text-3xl md:text-4xl font-extrabold tracking-tight"
+      >
+        {getFloorTitle(
+          floor,
+          floorTenants,
+        )}
+      </h3>
+
+      <div
+        data-reveal
+        className="space-y-1"
+      >
+        {floorTenants.length >
+        0 ? (
+          floorTenants.map(
+            (
+              tenant,
+            ) => (
+              <FeatureRow
+                key={
+                  tenant.id
+                }
+                icon={getTenantIcon(
+                  tenant,
+                )}
+                title={
+                  tenant.name
+                }
+                desc={
+                  tenant.short_description ||
+                  tenant.description ||
+                  `${tenant.name} operates from ${floor.name} of ${building.name}.`
+                }
+              />
+            ),
+          )
+        ) : (
+          <FeatureRow
+            icon={
+              <Building2 className="h-5 w-5" />
+            }
+            title={formatStatus(
+              effectiveStatus,
+            )}
+            desc={
+              floor.description ||
+              getFloorStatusDescription(
+                floor,
+                floorTenants,
+              )
+            }
+          />
+        )}
+      </div>
+
+      {effectiveStatus ===
+        "available" && (
+          <div
+            data-reveal
+            className="pt-3"
+          >
+            <a
+              href={getFloorInquiryUrl(
+                floor,
+              )}
+              className="inline-flex items-center gap-2 rounded-2xl bg-amber-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_18px_45px_rgba(252,211,77,0.22)] transition hover:-translate-y-[1px]"
+            >
+              Request Viewing for{" "}
+              {
+                floor.name
+              }
+
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+        )}
+    </>
+  );
+}
+
+// ========================================
+// MOBILE BUILDING MENU
+// ========================================
+
+function MobileBuildingMenu({
+  title,
+  floors,
+  inquiryHref,
+  onSelect,
+}: {
+  title:
+    string;
+
+  floors: {
+    label:
+      string;
+
+    id:
+      string;
+  }[];
+
+  inquiryHref:
+    string;
+
+  onSelect:
+    (
+      id:
+        string,
+    ) => void;
+}) {
+  return (
+    <div className="rounded-2xl bg-white/70 ring-1 ring-black/10 overflow-hidden">
+
+      <p className="px-4 pt-3 pb-1 text-[10px] tracking-[0.2em] font-bold text-slate-400">
+        {title.toUpperCase()}
+      </p>
+
+      <div className="border-t border-black/5">
+
+        {floors.map(
+          (
+            floor,
+          ) => (
+            <button
+              key={
+                floor.id
+              }
+              type="button"
+              onClick={() =>
+                onSelect(
+                  floor.id,
+                )
+              }
+              className="flex w-full items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-black/[0.03] transition border-b border-black/5 last:border-0"
+            >
+              {
+                floor.label
+              }
+            </button>
+          ),
+        )}
+      </div>
+
+      <a
+        href={
+          inquiryHref
+        }
+        className="flex items-center justify-between border-t border-black/5 px-4 py-3 text-sm font-bold text-slate-900"
+      >
+        Request Viewing
+
+        <ArrowRight className="h-4 w-4" />
+      </a>
+    </div>
+  );
+}
+
+// ========================================
+// INFO TILE
+// ========================================
+
 function InfoTile({
   title,
   value,
   icon,
 }: {
-  title: string;
+  title:
+    string;
 
-  value: string;
+  value:
+    string;
 
   icon:
-  React.ReactNode;
+    React.ReactNode;
 }) {
   return (
     <div className="rounded-3xl bg-white/55 ring-1 ring-black/10 px-4 py-4 shadow-[0_14px_40px_rgba(15,23,42,0.06)] hover:-translate-y-[2px] hover:shadow-[0_22px_70px_rgba(15,23,42,0.10)] transition">
+
       <div className="flex items-center gap-2 text-xs tracking-[0.18em] text-slate-500 font-semibold">
+
         <span className="text-slate-500">
-          {icon}
+          {
+            icon
+          }
         </span>
 
         {title.toUpperCase()}
       </div>
 
       <div className="mt-2 text-base font-semibold text-slate-900">
-        {value}
+        {
+          value
+        }
       </div>
     </div>
   );
 }
+
+// ========================================
+// MINI STAT
+// ========================================
 
 function MiniStat({
   title,
   value,
   icon,
 }: {
-  title: string;
+  title:
+    string;
 
-  value: string;
+  value:
+    string;
 
   icon:
-  React.ReactNode;
+    React.ReactNode;
 }) {
   return (
     <div className="rounded-2xl bg-black/[0.03] ring-1 ring-black/10 p-3 hover:-translate-y-[1px] transition">
+
       <div className="flex items-center justify-between">
+
         <p className="text-xs tracking-[0.18em] text-slate-500 font-semibold">
           {title.toUpperCase()}
         </p>
 
         <span className="text-slate-500">
-          {icon}
+          {
+            icon
+          }
         </span>
       </div>
 
       <p className="mt-2 font-semibold text-slate-900">
-        {value}
+        {
+          value
+        }
       </p>
     </div>
   );
 }
+
+// ========================================
+// NO FLOOR IMAGE
+// ========================================
+
+function NoFloorImage({
+  floor,
+  floorTenants,
+  heightClass =
+    "h-80",
+}: {
+  floor:
+    FloorData;
+
+  floorTenants:
+    TenantData[];
+
+  heightClass?:
+    string;
+}) {
+  const effectiveStatus =
+    getEffectiveFloorStatus(
+      floor,
+      floorTenants,
+    );
+
+  const tenantName =
+    floorTenants
+      .map(
+        (
+          tenant,
+        ) =>
+          tenant.name,
+      )
+      .join(
+        " & ",
+      );
+
+  return (
+    <MediaCard>
+
+      <div
+        className={`relative ${heightClass} flex items-center justify-center overflow-hidden bg-slate-900`}
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(255,255,255,0.12),transparent_58%)]" />
+
+        <div className="relative z-10 max-w-sm px-6 text-center">
+
+          <p className="text-xs font-bold tracking-[0.18em] text-white/60">
+            {floor.name.toUpperCase()}
+          </p>
+
+          <p className="mt-4 text-3xl font-extrabold tracking-tight text-white">
+
+            {effectiveStatus ===
+            "available"
+              ? "Available"
+              : tenantName ||
+                formatStatus(
+                  effectiveStatus,
+                )}
+          </p>
+
+          {effectiveStatus !==
+            "available" &&
+            tenantName && (
+              <p className="mt-3 text-sm text-white/55">
+                Tenant image has not been added yet.
+              </p>
+            )}
+        </div>
+      </div>
+    </MediaCard>
+  );
+}
+
+// ========================================
+// IMAGE CARD
+// ========================================
 
 function ImageCard({
   src,
   alt,
   footerLeft,
   footerRight,
-  crop = "object-center",
-  heightClass = "h-80",
-  zoom = "scale-110",
-  fit = "cover",
+  crop =
+    "object-center",
+  heightClass =
+    "h-80",
+  zoom =
+    "scale-110",
+  fit =
+    "cover",
 }: {
-  src: string;
+  src:
+    string;
 
-  alt: string;
+  alt:
+    string;
 
-  footerLeft?: string;
+  footerLeft?:
+    string;
 
-  footerRight?: string;
+  footerRight?:
+    string;
 
-  crop?: string;
+  crop?:
+    string;
 
-  heightClass?: string;
+  heightClass?:
+    string;
 
-  zoom?: string;
+  zoom?:
+    string;
 
   fit?:
-  | "cover"
-  | "contain";
+    | "cover"
+    | "contain";
 }) {
   const lowerSrc =
     src.toLowerCase();
 
   const backdropClass =
     lowerSrc.includes(
-      "fhi"
+      "fhi",
     )
       ? "bg-[#293b4b]"
       : lowerSrc.includes(
-        "bengal"
-      ) ||
+          "bengal",
+        ) ||
         lowerSrc.includes(
-          "swopna"
+          "swopna",
         )
         ? "bg-[#050505]"
         : lowerSrc.includes(
-          "vairav"
-        )
+            "vairav",
+          )
           ? "bg-[#edf4f6]"
           : lowerSrc.includes(
-            "sigma"
-          )
+              "sigma",
+            )
             ? "bg-[#edf8f7]"
             : lowerSrc.includes(
-              "moon"
-            )
+                "moon",
+              )
               ? "bg-[#f1f3f5]"
               : "bg-[#fffdfa]";
 
   return (
     <MediaCard>
+
       <div
         className={`relative ${heightClass} overflow-hidden ${backdropClass}`}
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(255,255,255,0.16),transparent_58%)]" />
 
         <img
-          src={src}
-          alt={alt}
+          src={
+            src
+          }
+          alt={
+            alt
+          }
           className={[
             "absolute inset-0 h-full w-full",
 
-            fit === "contain"
+            fit ===
+            "contain"
               ? "object-contain p-4"
               : "object-cover",
 
             crop,
 
             zoom,
-          ].join(" ")}
+          ].join(
+            " ",
+          )}
         />
 
         <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
@@ -4111,25 +4766,31 @@ function ImageCard({
 
       {(footerLeft ||
         footerRight) && (
-          <div className="p-5 border-t border-black/5">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
-                {
-                  footerLeft
-                }
-              </span>
+        <div className="p-5 border-t border-black/5">
 
-              <span className="font-semibold text-slate-900">
-                {
-                  footerRight
-                }
-              </span>
-            </div>
+          <div className="flex items-center justify-between text-sm">
+
+            <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
+              {
+                footerLeft
+              }
+            </span>
+
+            <span className="font-semibold text-slate-900">
+              {
+                footerRight
+              }
+            </span>
           </div>
-        )}
+        </div>
+      )}
     </MediaCard>
   );
 }
+
+// ========================================
+// FEATURE ROW
+// ========================================
 
 function FeatureRow({
   icon,
@@ -4137,25 +4798,35 @@ function FeatureRow({
   desc,
 }: {
   icon:
-  React.ReactNode;
+    React.ReactNode;
 
-  title: string;
+  title:
+    string;
 
-  desc: string;
+  desc:
+    string;
 }) {
   return (
     <div className="flex gap-4 border-t border-white/10 py-5 first:border-t-0">
+
       <div className="shrink-0 self-start rounded-xl bg-amber-300 p-2.5 text-slate-950 shadow-[0_10px_30px_rgba(252,211,77,0.18)]">
-        {icon}
+        {
+          icon
+        }
       </div>
 
       <div className="min-w-0">
+
         <h4 className="font-bold tracking-tight text-white">
-          {title}
+          {
+            title
+          }
         </h4>
 
         <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
-          {desc}
+          {
+            desc
+          }
         </p>
       </div>
     </div>
@@ -4171,14 +4842,18 @@ function AvailableFloorCard({
   onView,
   inquiryHref,
 }: {
-  floor: FloorData;
+  floor:
+    FloorData;
 
-  onView: () => void;
+  onView:
+    () => void;
 
-  inquiryHref: string;
+  inquiryHref:
+    string;
 }) {
   return (
     <div className="relative rounded-[28px] bg-white/60 ring-1 ring-black/10 p-7 shadow-[0_20px_70px_rgba(15,23,42,0.08)] transition hover:-translate-y-[2px] hover:shadow-[0_30px_95px_rgba(15,23,42,0.12)]">
+
       <div className="absolute top-4 right-4 rounded-full bg-slate-900 text-white px-4 py-2 text-[10px] font-bold tracking-[0.18em]">
         AVAILABLE
       </div>
@@ -4188,31 +4863,38 @@ function AvailableFloorCard({
       </p>
 
       <h3 className="mt-4 text-2xl font-extrabold tracking-tight">
-        {floor.name}
+        {
+          floor.name
+        }
       </h3>
 
       <p className="mt-2 text-slate-700">
+
         {floor.description ||
           "Premium commercial space currently available for occupancy."}
       </p>
 
       <div className="mt-6 border-t border-black/5 pt-4">
+
         <div className="flex items-center justify-between text-sm">
+
           <span className="text-xs font-semibold tracking-[0.14em] text-slate-500">
             FLOOR AREA
           </span>
 
           <span className="font-semibold">
+
             {floor.area_sqft
               ? `${Number(
-                floor.area_sqft
-              ).toLocaleString()} sq. ft.`
+                  floor.area_sqft,
+                ).toLocaleString()} sq. ft.`
               : "Contact us"}
           </span>
         </div>
       </div>
 
       <div className="mt-6 flex flex-col gap-3">
+
         <a
           href={
             inquiryHref
@@ -4240,16 +4922,23 @@ function AvailableFloorCard({
   );
 }
 
+// ========================================
+// DROPDOWN PILL
+// ========================================
+
 function DropdownPill({
   label,
   active,
   onClick,
 }: {
-  label: string;
+  label:
+    string;
 
-  active?: boolean;
+  active?:
+    boolean;
 
-  onClick: () => void;
+  onClick:
+    () => void;
 }) {
   return (
     <button
@@ -4263,42 +4952,58 @@ function DropdownPill({
         active
           ? "bg-[#E8DFC8] text-slate-900 shadow-[0_4px_14px_rgba(15,23,42,0.08)]"
           : "text-slate-700 hover:bg-black/[0.04] hover:text-slate-900",
-      ].join(" ")}
+      ].join(
+        " ",
+      )}
     >
       <span>
-        {label}
+        {
+          label
+        }
       </span>
 
       <ChevronDown
-        className={`h-3.5 w-3.5 transition-transform duration-200 ${active
+        className={`h-3.5 w-3.5 transition-transform duration-200 ${
+          active
             ? "rotate-180"
             : ""
-          }`}
+        }`}
       />
     </button>
   );
 }
+
+// ========================================
+// DROPDOWN MENU
+// ========================================
 
 function DropdownMenu({
   items,
   onSelect,
 }: {
   items: {
-    label: string;
-    id: string;
+    label:
+      string;
+
+    id:
+      string;
   }[];
 
-  onSelect: (
-    id: string
-  ) => void;
+  onSelect:
+    (
+      id:
+        string,
+    ) => void;
 }) {
   return (
     <div className="absolute left-0 top-[42px] z-50 w-[200px] overflow-hidden rounded-2xl border border-black/10 bg-[#F7F7F7]/95 shadow-[0_12px_40px_rgba(15,23,42,0.14)] backdrop-blur-xl">
+
       <div className="py-1">
+
         {items.map(
           (
             item,
-            index
+            index,
           ) => (
             <button
               key={
@@ -4307,7 +5012,7 @@ function DropdownMenu({
               type="button"
               onClick={() =>
                 onSelect(
-                  item.id
+                  item.id,
                 )
               }
               className={[
@@ -4315,16 +5020,18 @@ function DropdownMenu({
 
                 index !==
                   items.length -
-                  1
+                    1
                   ? "border-b border-black/5"
                   : "",
-              ].join(" ")}
+              ].join(
+                " ",
+              )}
             >
               {
                 item.label
               }
             </button>
-          )
+          ),
         )}
       </div>
     </div>
