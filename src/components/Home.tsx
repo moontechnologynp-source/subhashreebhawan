@@ -2209,8 +2209,6 @@ export default function Home() {
                 data-reveal
                 className="inline-flex items-center gap-2 rounded-full bg-white/55 ring-1 ring-black/10 px-4 py-2 text-xs font-semibold text-slate-700"
               >
-                <Star className="h-4 w-4 text-slate-900" />
-
                 Premium commercial complex
               </div>
 
@@ -4090,7 +4088,7 @@ function getFutureFloorDescription(
 
   return (
     useful ||
-    "Three floors of wellness and future-ready fitness amenities."
+    "Three Spacious floors with built-in pool infrastructure, ready for a modern wellness center."
   );
 }
 
