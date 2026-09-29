@@ -61,24 +61,24 @@ interface BuildingData {
   slug: string;
 
   short_description:
-    | string
-    | null;
+  | string
+  | null;
 
   description:
-    | string
-    | null;
+  | string
+  | null;
 
   address:
-    | string
-    | null;
+  | string
+  | null;
 
   total_floors: number;
 
   status: string;
 
   featured_image:
-    | string
-    | null;
+  | string
+  | null;
 
   is_featured: number;
 
@@ -101,24 +101,24 @@ interface FloorData {
   slug: string;
 
   description:
-    | string
-    | null;
+  | string
+  | null;
 
   area_sqft:
-    | number
-    | string
-    | null;
+  | number
+  | string
+  | null;
 
   status:
-    FloorStatus;
+  FloorStatus;
 
   tenant_name:
-    | string
-    | null;
+  | string
+  | null;
 
   featured_image:
-    | string
-    | null;
+  | string
+  | null;
 
   sort_order: number;
 }
@@ -133,33 +133,33 @@ interface TenantData {
   slug: string;
 
   short_description:
-    | string
-    | null;
+  | string
+  | null;
 
   description:
-    | string
-    | null;
+  | string
+  | null;
 
   logo:
-    | string
-    | null;
+  | string
+  | null;
 
   website_url:
-    | string
-    | null;
+  | string
+  | null;
 
   phone:
-    | string
-    | null;
+  | string
+  | null;
 
   email:
-    | string
-    | null;
+  | string
+  | null;
 
   status:
-    | "active"
-    | "inactive"
-    | "coming_soon";
+  | "active"
+  | "inactive"
+  | "coming_soon";
 
   sort_order: number;
 
@@ -180,36 +180,36 @@ interface GalleryItem {
   id: number;
 
   building_id:
-    | number
-    | null;
+  | number
+  | null;
 
   floor_id:
-    | number
-    | null;
+  | number
+  | null;
 
   tenant_id:
-    | number
-    | null;
+  | number
+  | null;
 
   title:
-    | string
-    | null;
+  | string
+  | null;
 
   description:
-    | string
-    | null;
+  | string
+  | null;
 
   image_url: string;
 
   alt_text:
-    | string
-    | null;
+  | string
+  | null;
 
   category:
-    | "general"
-    | "building"
-    | "floor"
-    | "tenant";
+  | "general"
+  | "building"
+  | "floor"
+  | "tenant";
 
   is_featured: number;
 
@@ -218,16 +218,16 @@ interface GalleryItem {
   is_active: number;
 
   building_name:
-    | string
-    | null;
+  | string
+  | null;
 
   floor_name:
-    | string
-    | null;
+  | string
+  | null;
 
   tenant_name:
-    | string
-    | null;
+  | string
+  | null;
 }
 
 interface FloorVisual {
@@ -236,8 +236,8 @@ interface FloorVisual {
   alt: string;
 
   fit:
-    | "cover"
-    | "contain";
+  | "cover"
+  | "contain";
 }
 
 // ========================================
@@ -327,265 +327,265 @@ const fallbackBuildingB:
 
 const fallbackFloorsA:
   FloorData[] = [
-  {
-    id: -101,
+    {
+      id: -101,
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
+      building_slug:
+        "building-a",
 
-    name:
-      "Ground Floor",
+      name:
+        "Ground Floor",
 
-    floor_number: 0,
+      floor_number: 0,
 
-    slug:
-      "ground-floor",
+      slug:
+        "ground-floor",
 
-    description:
-      null,
+      description:
+        null,
 
-    area_sqft:
-      null,
+      area_sqft:
+        null,
 
-    status:
-      "occupied",
+      status:
+        "occupied",
 
-    tenant_name:
-      null,
+      tenant_name:
+        null,
 
-    featured_image:
-      null,
+      featured_image:
+        null,
 
-    sort_order: 0,
-  },
+      sort_order: 0,
+    },
 
-  {
-    id: -102,
+    {
+      id: -102,
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
+      building_slug:
+        "building-a",
 
-    name:
-      "1st Floor",
+      name:
+        "1st Floor",
 
-    floor_number: 1,
+      floor_number: 1,
 
-    slug:
-      "1st-floor",
+      slug:
+        "1st-floor",
 
-    description:
-      null,
+      description:
+        null,
 
-    area_sqft:
-      3500,
+      area_sqft:
+        3500,
 
-    status:
-      "occupied",
+      status:
+        "occupied",
 
-    tenant_name:
-      null,
+      tenant_name:
+        null,
 
-    featured_image:
-      null,
+      featured_image:
+        null,
 
-    sort_order: 1,
-  },
+      sort_order: 1,
+    },
 
-  {
-    id: -103,
+    {
+      id: -103,
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
+      building_slug:
+        "building-a",
 
-    name:
-      "2nd Floor",
+      name:
+        "2nd Floor",
 
-    floor_number: 2,
+      floor_number: 2,
 
-    slug:
-      "2nd-floor",
+      slug:
+        "2nd-floor",
 
-    description:
-      null,
+      description:
+        null,
 
-    area_sqft:
-      3500,
+      area_sqft:
+        3500,
 
-    status:
-      "occupied",
+      status:
+        "occupied",
 
-    tenant_name:
-      null,
+      tenant_name:
+        null,
 
-    featured_image:
-      null,
+      featured_image:
+        null,
 
-    sort_order: 2,
-  },
+      sort_order: 2,
+    },
 
-  {
-    id: -104,
+    {
+      id: -104,
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
+      building_slug:
+        "building-a",
 
-    name:
-      "3rd Floor",
+      name:
+        "3rd Floor",
 
-    floor_number: 3,
+      floor_number: 3,
 
-    slug:
-      "3rd-floor",
+      slug:
+        "3rd-floor",
 
-    description:
-      null,
+      description:
+        null,
 
-    area_sqft:
-      3500,
+      area_sqft:
+        3500,
 
-    status:
-      "occupied",
+      status:
+        "occupied",
 
-    tenant_name:
-      null,
+      tenant_name:
+        null,
 
-    featured_image:
-      null,
+      featured_image:
+        null,
 
-    sort_order: 3,
-  },
+      sort_order: 3,
+    },
 
-  {
-    id: -105,
+    {
+      id: -105,
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
+      building_slug:
+        "building-a",
 
-    name:
-      "4th Floor",
+      name:
+        "4th Floor",
 
-    floor_number: 4,
+      floor_number: 4,
 
-    slug:
-      "4th-floor",
+      slug:
+        "4th-floor",
 
-    description:
-      null,
+      description:
+        null,
 
-    area_sqft:
-      null,
+      area_sqft:
+        null,
 
-    status:
-      "coming_soon",
+      status:
+        "coming_soon",
 
-    tenant_name:
-      null,
+      tenant_name:
+        null,
 
-    featured_image:
-      null,
+      featured_image:
+        null,
 
-    sort_order: 4,
-  },
+      sort_order: 4,
+    },
 
-  {
-    id: -106,
+    {
+      id: -106,
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
+      building_slug:
+        "building-a",
 
-    name:
-      "5th Floor",
+      name:
+        "5th Floor",
 
-    floor_number: 5,
+      floor_number: 5,
 
-    slug:
-      "5th-floor",
+      slug:
+        "5th-floor",
 
-    description:
-      null,
+      description:
+        null,
 
-    area_sqft:
-      null,
+      area_sqft:
+        null,
 
-    status:
-      "coming_soon",
+      status:
+        "coming_soon",
 
-    tenant_name:
-      null,
+      tenant_name:
+        null,
 
-    featured_image:
-      null,
+      featured_image:
+        null,
 
-    sort_order: 5,
-  },
+      sort_order: 5,
+    },
 
-  {
-    id: -107,
+    {
+      id: -107,
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
+      building_slug:
+        "building-a",
 
-    name:
-      "6th Floor",
+      name:
+        "6th Floor",
 
-    floor_number: 6,
+      floor_number: 6,
 
-    slug:
-      "6th-floor",
+      slug:
+        "6th-floor",
 
-    description:
-      null,
+      description:
+        null,
 
-    area_sqft:
-      null,
+      area_sqft:
+        null,
 
-    status:
-      "coming_soon",
+      status:
+        "coming_soon",
 
-    tenant_name:
-      null,
+      tenant_name:
+        null,
 
-    featured_image:
-      null,
+      featured_image:
+        null,
 
-    sort_order: 6,
-  },
-];
+      sort_order: 6,
+    },
+  ];
 
 // ========================================
 // FALLBACK FLOORS — BUILDING B
@@ -593,117 +593,117 @@ const fallbackFloorsA:
 
 const fallbackFloorsB:
   FloorData[] = [
-  {
-    id: -201,
+    {
+      id: -201,
 
-    building_id: -2,
+      building_id: -2,
 
-    building_name:
-      "Building B",
+      building_name:
+        "Building B",
 
-    building_slug:
-      "building-b",
+      building_slug:
+        "building-b",
 
-    name:
-      "Ground Floor",
+      name:
+        "Ground Floor",
 
-    floor_number: 0,
+      floor_number: 0,
 
-    slug:
-      "ground-floor",
+      slug:
+        "ground-floor",
 
-    description:
-      null,
+      description:
+        null,
 
-    area_sqft:
-      null,
+      area_sqft:
+        null,
 
-    status:
-      "occupied",
+      status:
+        "occupied",
 
-    tenant_name:
-      null,
+      tenant_name:
+        null,
 
-    featured_image:
-      null,
+      featured_image:
+        null,
 
-    sort_order: 0,
-  },
+      sort_order: 0,
+    },
 
-  {
-    id: -202,
+    {
+      id: -202,
 
-    building_id: -2,
+      building_id: -2,
 
-    building_name:
-      "Building B",
+      building_name:
+        "Building B",
 
-    building_slug:
-      "building-b",
+      building_slug:
+        "building-b",
 
-    name:
-      "1st Floor",
+      name:
+        "1st Floor",
 
-    floor_number: 1,
+      floor_number: 1,
 
-    slug:
-      "1st-floor",
+      slug:
+        "1st-floor",
 
-    description:
-      null,
+      description:
+        null,
 
-    area_sqft:
-      null,
+      area_sqft:
+        null,
 
-    status:
-      "occupied",
+      status:
+        "occupied",
 
-    tenant_name:
-      null,
+      tenant_name:
+        null,
 
-    featured_image:
-      null,
+      featured_image:
+        null,
 
-    sort_order: 1,
-  },
+      sort_order: 1,
+    },
 
-  {
-    id: -203,
+    {
+      id: -203,
 
-    building_id: -2,
+      building_id: -2,
 
-    building_name:
-      "Building B",
+      building_name:
+        "Building B",
 
-    building_slug:
-      "building-b",
+      building_slug:
+        "building-b",
 
-    name:
-      "2nd Floor",
+      name:
+        "2nd Floor",
 
-    floor_number: 2,
+      floor_number: 2,
 
-    slug:
-      "2nd-floor",
+      slug:
+        "2nd-floor",
 
-    description:
-      null,
+      description:
+        null,
 
-    area_sqft:
-      null,
+      area_sqft:
+        null,
 
-    status:
-      "occupied",
+      status:
+        "occupied",
 
-    tenant_name:
-      null,
+      tenant_name:
+        null,
 
-    featured_image:
-      null,
+      featured_image:
+        null,
 
-    sort_order: 2,
-  },
-];
+      sort_order: 2,
+    },
+  ];
 
 // ========================================
 // FALLBACK TENANTS
@@ -711,415 +711,415 @@ const fallbackFloorsB:
 
 const fallbackTenants:
   TenantData[] = [
-  {
-    id: -301,
+    {
+      id: -301,
 
-    floor_id: -101,
+      floor_id: -101,
 
-    name:
-      "Himalayan Java",
+      name:
+        "Himalayan Java",
 
-    slug:
-      "himalayan-java",
+      slug:
+        "himalayan-java",
 
-    short_description:
-      "Premium coffee experience with warm Nepali hospitality.",
+      short_description:
+        "Premium coffee experience with warm Nepali hospitality.",
 
-    description:
-      null,
+      description:
+        null,
 
-    logo:
-      null,
+      logo:
+        null,
 
-    website_url:
-      null,
+      website_url:
+        null,
 
-    phone:
-      null,
+      phone:
+        null,
 
-    email:
-      null,
+      email:
+        null,
 
-    status:
-      "active",
+      status:
+        "active",
 
-    sort_order: 1,
+      sort_order: 1,
 
-    floor_name:
-      "Ground Floor",
+      floor_name:
+        "Ground Floor",
 
-    floor_number: 0,
+      floor_number: 0,
 
-    floor_slug:
-      "ground-floor",
+      floor_slug:
+        "ground-floor",
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
-  },
+      building_slug:
+        "building-a",
+    },
 
-  {
-    id: -302,
+    {
+      id: -302,
 
-    floor_id: -101,
+      floor_id: -101,
 
-    name:
-      "Tesla Clinic",
+      name:
+        "Tesla Clinic",
 
-    slug:
-      "tesla-clinic",
+      slug:
+        "tesla-clinic",
 
-    short_description:
-      "Professional healthcare services with modern facilities and experienced practitioners.",
+      short_description:
+        "Professional healthcare services with modern facilities and experienced practitioners.",
 
-    description:
-      null,
+      description:
+        null,
 
-    logo:
-      null,
+      logo:
+        null,
 
-    website_url:
-      null,
+      website_url:
+        null,
 
-    phone:
-      null,
+      phone:
+        null,
 
-    email:
-      null,
+      email:
+        null,
 
-    status:
-      "active",
+      status:
+        "active",
 
-    sort_order: 2,
+      sort_order: 2,
 
-    floor_name:
-      "Ground Floor",
+      floor_name:
+        "Ground Floor",
 
-    floor_number: 0,
+      floor_number: 0,
 
-    floor_slug:
-      "ground-floor",
+      floor_slug:
+        "ground-floor",
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
-  },
+      building_slug:
+        "building-a",
+    },
 
-  {
-    id: -303,
+    {
+      id: -303,
 
-    floor_id: -102,
+      floor_id: -102,
 
-    name:
-      "Vairav Tech",
+      name:
+        "Vairav Tech",
 
-    slug:
-      "vairav-tech",
+      slug:
+        "vairav-tech",
 
-    short_description:
-      "Vairav Technology is a powerhouse of cybersecurity.",
+      short_description:
+        "Vairav Technology is a powerhouse of cybersecurity.",
 
-    description:
-      null,
+      description:
+        null,
 
-    logo:
-      null,
+      logo:
+        null,
 
-    website_url:
-      null,
+      website_url:
+        null,
 
-    phone:
-      null,
+      phone:
+        null,
 
-    email:
-      null,
+      email:
+        null,
 
-    status:
-      "active",
+      status:
+        "active",
 
-    sort_order: 1,
+      sort_order: 1,
 
-    floor_name:
-      "1st Floor",
+      floor_name:
+        "1st Floor",
 
-    floor_number: 1,
+      floor_number: 1,
 
-    floor_slug:
-      "1st-floor",
+      floor_slug:
+        "1st-floor",
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
-  },
+      building_slug:
+        "building-a",
+    },
 
-  {
-    id: -304,
+    {
+      id: -304,
 
-    floor_id: -103,
+      floor_id: -103,
 
-    name:
-      "Family Health International 360",
+      name:
+        "Family Health International 360",
 
-    slug:
-      "family-health-international-360",
+      slug:
+        "family-health-international-360",
 
-    short_description:
-      "The 2nd floor is currently occupied by Family Health International 360.",
+      short_description:
+        "The 2nd floor is currently occupied by Family Health International 360.",
 
-    description:
-      null,
+      description:
+        null,
 
-    logo:
-      null,
+      logo:
+        null,
 
-    website_url:
-      null,
+      website_url:
+        null,
 
-    phone:
-      null,
+      phone:
+        null,
 
-    email:
-      null,
+      email:
+        null,
 
-    status:
-      "active",
+      status:
+        "active",
 
-    sort_order: 1,
+      sort_order: 1,
 
-    floor_name:
-      "2nd Floor",
+      floor_name:
+        "2nd Floor",
 
-    floor_number: 2,
+      floor_number: 2,
 
-    floor_slug:
-      "2nd-floor",
+      floor_slug:
+        "2nd-floor",
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
-  },
+      building_slug:
+        "building-a",
+    },
 
-  {
-    id: -305,
+    {
+      id: -305,
 
-    floor_id: -104,
+      floor_id: -104,
 
-    name:
-      "Sigma Capital",
+      name:
+        "Sigma Capital",
 
-    slug:
-      "sigma-capital",
+      slug:
+        "sigma-capital",
 
-    short_description:
-      "This floor was occupied by Sigma Capital.",
+      short_description:
+        "This floor was occupied by Sigma Capital.",
 
-    description:
-      null,
+      description:
+        null,
 
-    logo:
-      null,
+      logo:
+        null,
 
-    website_url:
-      null,
+      website_url:
+        null,
 
-    phone:
-      null,
+      phone:
+        null,
 
-    email:
-      null,
+      email:
+        null,
 
-    // Sigma has moved out.
-    status:
-      "inactive",
+      // Sigma has moved out.
+      status:
+        "inactive",
 
-    sort_order: 1,
+      sort_order: 1,
 
-    floor_name:
-      "3rd Floor",
+      floor_name:
+        "3rd Floor",
 
-    floor_number: 3,
+      floor_number: 3,
 
-    floor_slug:
-      "3rd-floor",
+      floor_slug:
+        "3rd-floor",
 
-    building_id: -1,
+      building_id: -1,
 
-    building_name:
-      "Building A",
+      building_name:
+        "Building A",
 
-    building_slug:
-      "building-a",
-  },
+      building_slug:
+        "building-a",
+    },
 
-  {
-    id: -306,
+    {
+      id: -306,
 
-    floor_id: -201,
+      floor_id: -201,
 
-    name:
-      "The Bengal Restaurant",
+      name:
+        "The Bengal Restaurant",
 
-    slug:
-      "the-bengal-restaurant",
+      slug:
+        "the-bengal-restaurant",
 
-    short_description:
-      "Contemporary Nepali and international cuisine crafted with premium service.",
+      short_description:
+        "Contemporary Nepali and international cuisine crafted with premium service.",
 
-    description:
-      null,
+      description:
+        null,
 
-    logo:
-      null,
+      logo:
+        null,
 
-    website_url:
-      "https://thebengalrestaurantandbar.com/",
+      website_url:
+        "https://thebengalrestaurantandbar.com/",
 
-    phone:
-      null,
+      phone:
+        null,
 
-    email:
-      null,
+      email:
+        null,
 
-    status:
-      "active",
+      status:
+        "active",
 
-    sort_order: 1,
+      sort_order: 1,
 
-    floor_name:
-      "Ground Floor",
+      floor_name:
+        "Ground Floor",
 
-    floor_number: 0,
+      floor_number: 0,
 
-    floor_slug:
-      "ground-floor",
+      floor_slug:
+        "ground-floor",
 
-    building_id: -2,
+      building_id: -2,
 
-    building_name:
-      "Building B",
+      building_name:
+        "Building B",
 
-    building_slug:
-      "building-b",
-  },
+      building_slug:
+        "building-b",
+    },
 
-  {
-    id: -307,
+    {
+      id: -307,
 
-    floor_id: -202,
+      floor_id: -202,
 
-    name:
-      "Swopna Chitra",
+      name:
+        "Swopna Chitra",
 
-    slug:
-      "swopna-chitra",
+      slug:
+        "swopna-chitra",
 
-    short_description:
-      "Dreams into Frames.",
+      short_description:
+        "Dreams into Frames.",
 
-    description:
-      null,
+      description:
+        null,
 
-    logo:
-      null,
+      logo:
+        null,
 
-    website_url:
-      "https://swopnachitra.com/",
+      website_url:
+        "https://swopnachitra.com/",
 
-    phone:
-      null,
+      phone:
+        null,
 
-    email:
-      null,
+      email:
+        null,
 
-    status:
-      "active",
+      status:
+        "active",
 
-    sort_order: 1,
+      sort_order: 1,
 
-    floor_name:
-      "1st Floor",
+      floor_name:
+        "1st Floor",
 
-    floor_number: 1,
+      floor_number: 1,
 
-    floor_slug:
-      "1st-floor",
+      floor_slug:
+        "1st-floor",
 
-    building_id: -2,
+      building_id: -2,
 
-    building_name:
-      "Building B",
+      building_name:
+        "Building B",
 
-    building_slug:
-      "building-b",
-  },
+      building_slug:
+        "building-b",
+    },
 
-  {
-    id: -308,
+    {
+      id: -308,
 
-    floor_id: -203,
+      floor_id: -203,
 
-    name:
-      "Moon Technology",
+      name:
+        "Moon Technology",
 
-    slug:
-      "moon-technology",
+      slug:
+        "moon-technology",
 
-    short_description:
-      "Software, cloud and technology services for modern organizations.",
+      short_description:
+        "Software, cloud and technology services for modern organizations.",
 
-    description:
-      null,
+      description:
+        null,
 
-    logo:
-      null,
+      logo:
+        null,
 
-    website_url:
-      "https://www.moontechnology.com.np/",
+      website_url:
+        "https://www.moontechnology.com.np/",
 
-    phone:
-      null,
+      phone:
+        null,
 
-    email:
-      null,
+      email:
+        null,
 
-    status:
-      "active",
+      status:
+        "active",
 
-    sort_order: 1,
+      sort_order: 1,
 
-    floor_name:
-      "2nd Floor",
+      floor_name:
+        "2nd Floor",
 
-    floor_number: 2,
+      floor_number: 2,
 
-    floor_slug:
-      "2nd-floor",
+      floor_slug:
+        "2nd-floor",
 
-    building_id: -2,
+      building_id: -2,
 
-    building_name:
-      "Building B",
+      building_name:
+        "Building B",
 
-    building_slug:
-      "building-b",
-  },
-];
+      building_slug:
+        "building-b",
+    },
+  ];
 
 // ========================================
 // HOME
@@ -1338,7 +1338,7 @@ export default function Home() {
           setTenants(
             (
               tenantData as
-                TenantData[]
+              TenantData[]
             )
               .filter(
                 (
@@ -1353,16 +1353,16 @@ export default function Home() {
                   b,
                 ) =>
                   a.sort_order -
-                    b.sort_order ||
+                  b.sort_order ||
                   a.id -
-                    b.id,
+                  b.id,
               ),
           );
 
           setGalleryA(
             (
               galleryAData as
-                GalleryItem[]
+              GalleryItem[]
             ).filter(
               (
                 item,
@@ -1376,7 +1376,7 @@ export default function Home() {
           setGalleryB(
             (
               galleryBData as
-                GalleryItem[]
+              GalleryItem[]
             ).filter(
               (
                 item,
@@ -1387,7 +1387,7 @@ export default function Home() {
             ),
           );
         } catch (
-          error
+        error
         ) {
           console.error(
             "Homepage backend load error:",
@@ -1708,8 +1708,8 @@ export default function Home() {
       ) => {
         const target =
           event.target as
-            | HTMLElement
-            | null;
+          | HTMLElement
+          | null;
 
         const anchor =
           target?.closest(
@@ -1772,7 +1772,7 @@ export default function Home() {
           dropdownRef.current &&
           !dropdownRef.current.contains(
             event.target as
-              Node,
+            Node,
           )
         ) {
           setOpenMenu(
@@ -1836,7 +1836,7 @@ export default function Home() {
               ) {
                 (
                   entry.target as
-                    HTMLElement
+                  HTMLElement
                 ).classList.add(
                   "reveal-in",
                 );
@@ -2054,7 +2054,12 @@ export default function Home() {
                     />
                   )}
               </div>
-
+              <Link
+                href="/gallery"
+                className="px-3 py-2 text-[12px] tracking-[0.18em] font-semibold text-slate-700 hover:text-slate-900 rounded-2xl hover:bg-black/[0.04] transition"
+              >
+                GALLERY
+              </Link>
               {availableFloors.length >
                 0 && (
                   <a
@@ -2146,7 +2151,15 @@ export default function Home() {
                     )
                   }
                 />
-
+                <Link
+                  href="/gallery"
+                  onClick={() =>
+                    setMenuOpen(false)
+                  }
+                  className="block rounded-2xl bg-black/[0.03] ring-1 ring-black/10 px-4 py-3 text-sm font-semibold"
+                >
+                  Gallery
+                </Link>
                 {availableFloors.length >
                   0 && (
                     <a
@@ -2815,11 +2828,11 @@ export default function Home() {
                         floor.building_slug ===
                           "building-b"
                           ? getBuildingBSectionId(
-                              floor,
-                            )
+                            floor,
+                          )
                           : getBuildingASectionId(
-                              floor,
-                            ),
+                            floor,
+                          ),
                       )
                     }
                   />
@@ -3181,9 +3194,9 @@ function sortFloors(
       b,
     ) =>
       a.sort_order -
-        b.sort_order ||
+      b.sort_order ||
       a.floor_number -
-        b.floor_number,
+      b.floor_number,
   );
 }
 
@@ -3256,7 +3269,7 @@ function formatStatus(
     FloorStatus,
 ) {
   switch (
-    status
+  status
   ) {
     case "available":
       return "Available";
@@ -3300,9 +3313,9 @@ function getEffectiveFloorStatus(
 
   if (
     floor.status ===
-      "coming_soon" ||
+    "coming_soon" ||
     floor.status ===
-      "inactive"
+    "inactive"
   ) {
     return floor.status;
   }
@@ -3380,7 +3393,7 @@ function getFloorStatusDescription(
     );
 
   switch (
-    status
+  status
   ) {
     case "available":
       return `${floor.name} is currently available for occupancy.`;
@@ -3411,13 +3424,13 @@ function getFloorFooterValue(
 ) {
   if (
     floor.area_sqft !==
-      null &&
+    null &&
     floor.area_sqft !==
-      undefined &&
+    undefined &&
     Number(
       floor.area_sqft,
     ) >
-      0
+    0
   ) {
     return `${Number(
       floor.area_sqft,
@@ -3428,12 +3441,11 @@ function getFloorFooterValue(
     floorTenants.length >
     0
   ) {
-    return `${floorTenants.length} ${
-      floorTenants.length ===
+    return `${floorTenants.length} ${floorTenants.length ===
       1
-        ? "Tenant"
-        : "Tenants"
-    }`;
+      ? "Tenant"
+      : "Tenants"
+      }`;
   }
 
   return formatStatus(
@@ -3682,7 +3694,7 @@ function getFloorVisual(
         item,
       ) =>
         item.tenant_id !==
-          null &&
+        null &&
         tenantIds.includes(
           Number(
             item.tenant_id,
@@ -3750,7 +3762,7 @@ function getFloorVisual(
 
     if (
       floor.floor_number ===
-        0 &&
+      0 &&
       (
         tenantSearch.includes(
           "himalayan java",
@@ -3780,7 +3792,7 @@ function getFloorVisual(
 
     if (
       floor.floor_number ===
-        1 &&
+      1 &&
       tenantSearch.includes(
         "vairav",
       )
@@ -3802,7 +3814,7 @@ function getFloorVisual(
 
     if (
       floor.floor_number ===
-        2 &&
+      2 &&
       (
         tenantSearch.includes(
           "family health",
@@ -3833,7 +3845,7 @@ function getFloorVisual(
 
     if (
       floor.floor_number ===
-        3 &&
+      3 &&
       tenantSearch.includes(
         "sigma",
       )
@@ -3864,7 +3876,7 @@ function getFloorVisual(
 
     if (
       floor.floor_number ===
-        0 &&
+      0 &&
       tenantSearch.includes(
         "bengal",
       )
@@ -3886,7 +3898,7 @@ function getFloorVisual(
 
     if (
       floor.floor_number ===
-        1 &&
+      1 &&
       tenantSearch.includes(
         "swopna",
       )
@@ -3908,7 +3920,7 @@ function getFloorVisual(
 
     if (
       floor.floor_number ===
-        2 &&
+      2 &&
       tenantSearch.includes(
         "moon",
       )
@@ -3964,7 +3976,7 @@ function getFutureFloorMenuLabel(
   const last =
     floors[
       floors.length -
-        1
+      1
     ].name.replace(
       " Floor",
       "",
@@ -3993,12 +4005,11 @@ function getFutureFloorRangeLabel(
   return `${floors[0].name.replace(
     " Floor",
     "",
-  )} – ${
-    floors[
-      floors.length -
-        1
-    ].name
-  }`;
+  )} – ${floors[
+    floors.length -
+    1
+  ].name
+    }`;
 }
 
 function getCombinedFutureStatus(
@@ -4092,10 +4103,10 @@ function Container({
   className = "",
 }: {
   children:
-    React.ReactNode;
+  React.ReactNode;
 
   className?:
-    string;
+  string;
 }) {
   return (
     <div
@@ -4118,14 +4129,14 @@ function Section({
   children,
 }: {
   id?:
-    string;
+  string;
 
   tone?:
-    | "base"
-    | "soft";
+  | "base"
+  | "soft";
 
   children:
-    React.ReactNode;
+  React.ReactNode;
 }) {
   return (
     <section
@@ -4159,7 +4170,7 @@ function MediaCard({
   children,
 }: {
   children:
-    React.ReactNode;
+  React.ReactNode;
 }) {
   return (
     <div className="rounded-[28px] bg-white/55 ring-1 ring-black/10 shadow-[0_30px_90px_rgba(15,23,42,0.10)] overflow-hidden">
@@ -4181,16 +4192,16 @@ function SectionHeader({
   inquiryHref,
 }: {
   title:
-    string;
+  string;
 
   subtitle:
-    string;
+  string;
 
   href?:
-    string;
+  string;
 
   inquiryHref?:
-    string;
+  string;
 }) {
   return (
     <div className="py-16 md:py-20">
@@ -4264,7 +4275,7 @@ function Kicker({
   text,
 }: {
   text:
-    string;
+  string;
 }) {
   return (
     <div className="inline-flex items-center rounded-2xl border border-white/40 bg-white/90 px-4 py-2.5 text-[11px] font-bold tracking-[0.16em] text-slate-950 shadow-[0_12px_35px_rgba(15,23,42,0.16)] backdrop-blur-xl">
@@ -4284,10 +4295,10 @@ function TwoCol({
   right,
 }: {
   left:
-    React.ReactNode;
+  React.ReactNode;
 
   right:
-    React.ReactNode;
+  React.ReactNode;
 }) {
   return (
     <div className="group relative mx-auto max-w-5xl rounded-[36px] bg-white/65 p-2 shadow-[0_32px_100px_rgba(15,23,42,0.14)] ring-1 ring-black/[0.08] backdrop-blur-sm transition duration-500 hover:-translate-y-1 hover:shadow-[0_38px_120px_rgba(15,23,42,0.19)]">
@@ -4323,16 +4334,16 @@ function FloorCopy({
   effectiveStatus,
 }: {
   floor:
-    FloorData;
+  FloorData;
 
   building:
-    BuildingData;
+  BuildingData;
 
   floorTenants:
-    TenantData[];
+  TenantData[];
 
   effectiveStatus:
-    FloorStatus;
+  FloorStatus;
 }) {
   return (
     <>
@@ -4355,7 +4366,7 @@ function FloorCopy({
         className="space-y-1"
       >
         {floorTenants.length >
-        0 ? (
+          0 ? (
           floorTenants.map(
             (
               tenant,
@@ -4433,24 +4444,24 @@ function MobileBuildingMenu({
   onSelect,
 }: {
   title:
-    string;
+  string;
 
   floors: {
     label:
-      string;
+    string;
 
     id:
-      string;
+    string;
   }[];
 
   inquiryHref:
-    string;
+  string;
 
   onSelect:
-    (
-      id:
-        string,
-    ) => void;
+  (
+    id:
+      string,
+  ) => void;
 }) {
   return (
     <div className="rounded-2xl bg-white/70 ring-1 ring-black/10 overflow-hidden">
@@ -4509,13 +4520,13 @@ function InfoTile({
   icon,
 }: {
   title:
-    string;
+  string;
 
   value:
-    string;
+  string;
 
   icon:
-    React.ReactNode;
+  React.ReactNode;
 }) {
   return (
     <div className="rounded-3xl bg-white/55 ring-1 ring-black/10 px-4 py-4 shadow-[0_14px_40px_rgba(15,23,42,0.06)] hover:-translate-y-[2px] hover:shadow-[0_22px_70px_rgba(15,23,42,0.10)] transition">
@@ -4550,13 +4561,13 @@ function MiniStat({
   icon,
 }: {
   title:
-    string;
+  string;
 
   value:
-    string;
+  string;
 
   icon:
-    React.ReactNode;
+  React.ReactNode;
 }) {
   return (
     <div className="rounded-2xl bg-black/[0.03] ring-1 ring-black/10 p-3 hover:-translate-y-[1px] transition">
@@ -4591,16 +4602,16 @@ function NoFloorImage({
   floor,
   floorTenants,
   heightClass =
-    "h-80",
+  "h-80",
 }: {
   floor:
-    FloorData;
+  FloorData;
 
   floorTenants:
-    TenantData[];
+  TenantData[];
 
   heightClass?:
-    string;
+  string;
 }) {
   const effectiveStatus =
     getEffectiveFloorStatus(
@@ -4637,12 +4648,12 @@ function NoFloorImage({
           <p className="mt-4 text-3xl font-extrabold tracking-tight text-white">
 
             {effectiveStatus ===
-            "available"
+              "available"
               ? "Available"
               : tenantName ||
-                formatStatus(
-                  effectiveStatus,
-                )}
+              formatStatus(
+                effectiveStatus,
+              )}
           </p>
 
           {effectiveStatus !==
@@ -4668,38 +4679,38 @@ function ImageCard({
   footerLeft,
   footerRight,
   crop =
-    "object-center",
+  "object-center",
   heightClass =
-    "h-80",
+  "h-80",
   zoom =
-    "scale-110",
+  "scale-110",
   fit =
-    "cover",
+  "cover",
 }: {
   src:
-    string;
+  string;
 
   alt:
-    string;
+  string;
 
   footerLeft?:
-    string;
+  string;
 
   footerRight?:
-    string;
+  string;
 
   crop?:
-    string;
+  string;
 
   heightClass?:
-    string;
+  string;
 
   zoom?:
-    string;
+  string;
 
   fit?:
-    | "cover"
-    | "contain";
+  | "cover"
+  | "contain";
 }) {
   const lowerSrc =
     src.toLowerCase();
@@ -4710,23 +4721,23 @@ function ImageCard({
     )
       ? "bg-[#293b4b]"
       : lowerSrc.includes(
-          "bengal",
-        ) ||
+        "bengal",
+      ) ||
         lowerSrc.includes(
           "swopna",
         )
         ? "bg-[#050505]"
         : lowerSrc.includes(
-            "vairav",
-          )
+          "vairav",
+        )
           ? "bg-[#edf4f6]"
           : lowerSrc.includes(
-              "sigma",
-            )
+            "sigma",
+          )
             ? "bg-[#edf8f7]"
             : lowerSrc.includes(
-                "moon",
-              )
+              "moon",
+            )
               ? "bg-[#f1f3f5]"
               : "bg-[#fffdfa]";
 
@@ -4749,7 +4760,7 @@ function ImageCard({
             "absolute inset-0 h-full w-full",
 
             fit ===
-            "contain"
+              "contain"
               ? "object-contain p-4"
               : "object-cover",
 
@@ -4766,24 +4777,24 @@ function ImageCard({
 
       {(footerLeft ||
         footerRight) && (
-        <div className="p-5 border-t border-black/5">
+          <div className="p-5 border-t border-black/5">
 
-          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-sm">
 
-            <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
-              {
-                footerLeft
-              }
-            </span>
+              <span className="text-slate-500 tracking-[0.14em] text-xs font-semibold">
+                {
+                  footerLeft
+                }
+              </span>
 
-            <span className="font-semibold text-slate-900">
-              {
-                footerRight
-              }
-            </span>
+              <span className="font-semibold text-slate-900">
+                {
+                  footerRight
+                }
+              </span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </MediaCard>
   );
 }
@@ -4798,13 +4809,13 @@ function FeatureRow({
   desc,
 }: {
   icon:
-    React.ReactNode;
+  React.ReactNode;
 
   title:
-    string;
+  string;
 
   desc:
-    string;
+  string;
 }) {
   return (
     <div className="flex gap-4 border-t border-white/10 py-5 first:border-t-0">
@@ -4843,13 +4854,13 @@ function AvailableFloorCard({
   inquiryHref,
 }: {
   floor:
-    FloorData;
+  FloorData;
 
   onView:
-    () => void;
+  () => void;
 
   inquiryHref:
-    string;
+  string;
 }) {
   return (
     <div className="relative rounded-[28px] bg-white/60 ring-1 ring-black/10 p-7 shadow-[0_20px_70px_rgba(15,23,42,0.08)] transition hover:-translate-y-[2px] hover:shadow-[0_30px_95px_rgba(15,23,42,0.12)]">
@@ -4886,8 +4897,8 @@ function AvailableFloorCard({
 
             {floor.area_sqft
               ? `${Number(
-                  floor.area_sqft,
-                ).toLocaleString()} sq. ft.`
+                floor.area_sqft,
+              ).toLocaleString()} sq. ft.`
               : "Contact us"}
           </span>
         </div>
@@ -4932,13 +4943,13 @@ function DropdownPill({
   onClick,
 }: {
   label:
-    string;
+  string;
 
   active?:
-    boolean;
+  boolean;
 
   onClick:
-    () => void;
+  () => void;
 }) {
   return (
     <button
@@ -4963,11 +4974,10 @@ function DropdownPill({
       </span>
 
       <ChevronDown
-        className={`h-3.5 w-3.5 transition-transform duration-200 ${
-          active
-            ? "rotate-180"
-            : ""
-        }`}
+        className={`h-3.5 w-3.5 transition-transform duration-200 ${active
+          ? "rotate-180"
+          : ""
+          }`}
       />
     </button>
   );
@@ -4983,17 +4993,17 @@ function DropdownMenu({
 }: {
   items: {
     label:
-      string;
+    string;
 
     id:
-      string;
+    string;
   }[];
 
   onSelect:
-    (
-      id:
-        string,
-    ) => void;
+  (
+    id:
+      string,
+  ) => void;
 }) {
   return (
     <div className="absolute left-0 top-[42px] z-50 w-[200px] overflow-hidden rounded-2xl border border-black/10 bg-[#F7F7F7]/95 shadow-[0_12px_40px_rgba(15,23,42,0.14)] backdrop-blur-xl">
@@ -5020,7 +5030,7 @@ function DropdownMenu({
 
                 index !==
                   items.length -
-                    1
+                  1
                   ? "border-b border-black/5"
                   : "",
               ].join(
