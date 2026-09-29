@@ -781,11 +781,6 @@ export default function GalleryPage() {
                 <h2 className="mt-5 text-2xl font-extrabold">
                   No images yet
                 </h2>
-
-                <p className="mt-3 text-slate-500">
-                  Gallery images added from the admin panel will appear
-                  here automatically.
-                </p>
               </div>
             )}
 
