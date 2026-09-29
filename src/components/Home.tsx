@@ -387,7 +387,7 @@ const fallbackFloorsA:
         null,
 
       area_sqft:
-        3500,
+        3250,
 
       status:
         "occupied",
