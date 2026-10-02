@@ -4,10 +4,26 @@ import {
   FormEvent,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
+
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+
+import {
+  ArrowLeft,
+  Eye,
+  Link2,
+  Plus,
+  Save,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
+
+import {
+  useRouter,
+} from "next/navigation";
 
 import {
   Blog,
@@ -20,7 +36,7 @@ import BlogContent from "@/components/BlogContent";
 // TYPES
 // ========================================
 
-type Form = Pick<
+type BlogForm = Pick<
   Blog,
   | "title"
   | "slug"
@@ -31,562 +47,1554 @@ type Form = Pick<
   | "status"
 >;
 
+interface ArticleSection {
+  id: string;
+
+  heading: string;
+
+  body: string;
+
+  linkText: string;
+
+  linkUrl: string;
+}
+
 // ========================================
-// EMPTY FORM
+// EMPTY VALUES
 // ========================================
 
-const empty: Form = {
+const emptyForm:
+  BlogForm = {
   title: "",
+
   slug: "",
+
   excerpt: "",
-  category: "Property insights",
+
+  category:
+    "Property insights",
+
   image: "",
+
   content: "",
-  status: "draft",
+
+  status:
+    "draft",
 };
+
+function emptySection(
+  index:
+    number,
+): ArticleSection {
+  return {
+    id:
+      `section-${index}`,
+
+    heading: "",
+
+    body: "",
+
+    linkText: "",
+
+    linkUrl: "",
+  };
+}
 
 // ========================================
 // STYLES
 // ========================================
 
 const inputClass =
-  "mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200";
+  "mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100";
+
+const textareaClass =
+  "mt-2 w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100";
+
+// ========================================
+// HELPERS
+// ========================================
+
+function slugify(
+  value:
+    string,
+) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(
+      /[^a-z0-9]+/g,
+      "-",
+    )
+    .replace(
+      /^-+|-+$/g,
+      "",
+    );
+}
+
+function safeLinkUrl(
+  value:
+    string,
+) {
+  const url =
+    value.trim();
+
+  if (
+    !url
+  ) {
+    return true;
+  }
+
+  return (
+    url.startsWith("/") ||
+    url.startsWith("#") ||
+    /^https?:\/\//i.test(
+      url,
+    ) ||
+    /^mailto:/i.test(
+      url,
+    ) ||
+    /^tel:/i.test(
+      url,
+    )
+  );
+}
+
+function safeLinkText(
+  value:
+    string,
+) {
+  return value
+    .replace(
+      /\[/g,
+      "(",
+    )
+    .replace(
+      /\]/g,
+      ")",
+    )
+    .trim();
+}
+
+// ========================================
+// BUILD BLOG CONTENT
+// ========================================
+
+function buildContent(
+  introduction:
+    string,
+
+  sections:
+    ArticleSection[],
+) {
+  const blocks:
+    string[] =
+    [];
+
+  if (
+    introduction.trim()
+  ) {
+    blocks.push(
+      introduction.trim(),
+    );
+  }
+
+  sections.forEach(
+    (
+      section,
+    ) => {
+      if (
+        section.heading.trim()
+      ) {
+        blocks.push(
+          `## ${section.heading.trim()}`,
+        );
+      }
+
+      if (
+        section.body.trim()
+      ) {
+        blocks.push(
+          section.body.trim(),
+        );
+      }
+
+      if (
+        section.linkText.trim() &&
+        section.linkUrl.trim()
+      ) {
+        blocks.push(
+          `[${safeLinkText(
+            section.linkText,
+          )}](${section.linkUrl.trim()})`,
+        );
+      }
+    },
+  );
+
+  return blocks.join(
+    "\n\n",
+  );
+}
+
+// ========================================
+// READ EXISTING BLOG CONTENT
+// ========================================
+
+function parseContent(
+  content:
+    string,
+) {
+  if (
+    !content.trim()
+  ) {
+    return {
+      introduction:
+        "",
+
+      sections: [
+        emptySection(
+          1,
+        ),
+      ],
+    };
+  }
+
+  const blocks =
+    content
+      .split(
+        /\n\s*\n/,
+      )
+      .filter(
+        (
+          block,
+        ) =>
+          block.trim(),
+      );
+
+  const introductionBlocks:
+    string[] =
+    [];
+
+  const parsedSections:
+    ArticleSection[] =
+    [];
+
+  let current:
+    ArticleSection |
+    null =
+    null;
+
+  const pushCurrent =
+    () => {
+      if (
+        current
+      ) {
+        parsedSections.push(
+          current,
+        );
+      }
+    };
+
+  blocks.forEach(
+    (
+      block,
+    ) => {
+      // HEADING
+
+      if (
+        block.startsWith(
+          "## ",
+        )
+      ) {
+        pushCurrent();
+
+        current = {
+          id:
+            `section-${
+              parsedSections.length +
+              1
+            }`,
+
+          heading:
+            block
+              .slice(
+                3,
+              )
+              .trim(),
+
+          body: "",
+
+          linkText: "",
+
+          linkUrl: "",
+        };
+
+        return;
+      }
+
+      // STANDALONE LINK
+
+      const linkMatch =
+        block.match(
+          /^\[([^\]]+)\]\(([^)]+)\)$/,
+        );
+
+      if (
+        current &&
+        linkMatch
+      ) {
+        current.linkText =
+          linkMatch[1];
+
+        current.linkUrl =
+          linkMatch[2];
+
+        return;
+      }
+
+      // SECTION BODY
+
+      if (
+        current
+      ) {
+        current.body =
+          current.body
+            ? `${current.body}\n\n${block}`
+            : block;
+
+        return;
+      }
+
+      // INTRODUCTION
+
+      introductionBlocks.push(
+        block,
+      );
+    },
+  );
+
+  pushCurrent();
+
+  if (
+    parsedSections.length ===
+    0
+  ) {
+    parsedSections.push(
+      emptySection(
+        1,
+      ),
+    );
+  }
+
+  return {
+    introduction:
+      introductionBlocks.join(
+        "\n\n",
+      ),
+
+    sections:
+      parsedSections,
+  };
+}
 
 // ========================================
 // PAGE
 // ========================================
 
 export default function AdminBlogsPage() {
-  const router = useRouter();
+  const router =
+    useRouter();
 
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [form, setForm] = useState<Form>({ ...empty });
+  const [
+    blogs,
+    setBlogs,
+  ] =
+    useState<
+      Blog[]
+    >([]);
 
-  const [editing, setEditing] =
-    useState<string | null>(null);
+  const [
+    form,
+    setForm,
+  ] =
+    useState<
+      BlogForm
+    >({
+      ...emptyForm,
+    });
 
-  const [loading, setLoading] =
+  const [
+    introduction,
+    setIntroduction,
+  ] =
+    useState("");
+
+  const [
+    sections,
+    setSections,
+  ] =
+    useState<
+      ArticleSection[]
+    >([
+      emptySection(
+        1,
+      ),
+    ]);
+
+  const [
+    editing,
+    setEditing,
+  ] =
+    useState<
+      string |
+      null
+    >(null);
+
+  const [
+    loading,
+    setLoading,
+  ] =
     useState(true);
 
-  const [ready, setReady] =
-    useState(false);
-
-  const [saving, setSaving] =
+  const [
+    saving,
+    setSaving,
+  ] =
     useState(false);
 
   const [
     savingAction,
     setSavingAction,
-  ] = useState<
-    "draft" | "published" | null
-  >(null);
+  ] =
+    useState<
+      "draft" |
+      "published" |
+      null
+    >(null);
 
   const [
-    deletingId,
-    setDeletingId,
-  ] = useState<string | null>(null);
-
-  const [error, setError] =
-    useState("");
-
-  const [message, setMessage] =
-    useState("");
-
-  const [preview, setPreview] =
+    deleting,
+    setDeleting,
+  ] =
     useState(false);
 
   const [
-    imageUploading,
-    setImageUploading,
-  ] = useState(false);
+    preview,
+    setPreview,
+  ] =
+    useState(false);
 
   const [
-    imageUploadMessage,
-    setImageUploadMessage,
-  ] = useState("");
+    error,
+    setError,
+  ] =
+    useState("");
+
+  const [
+    message,
+    setMessage,
+  ] =
+    useState("");
 
   // ========================================
-  // REQUEST HELPER
+  // IMAGE
   // ========================================
 
-  const request = useCallback(
-    async (
-      path: string,
-      options: RequestInit = {},
-    ) => {
-      const token = localStorage.getItem(
-        "subhashree_admin_token",
-      );
+  const [
+    selectedImage,
+    setSelectedImage,
+  ] =
+    useState<
+      File |
+      null
+    >(null);
 
-      if (!token) {
-        router.replace("/admin/login");
-        throw new Error(
-          "Please sign in to continue.",
-        );
-      }
+  const [
+    selectedPreview,
+    setSelectedPreview,
+  ] =
+    useState("");
 
-      const response = await fetch(
-        `${BLOG_API_URL}${path}`,
-        {
-          ...options,
-          cache: "no-store",
-          headers: {
-            "Content-Type":
-              "application/json",
-            Authorization: `Bearer ${token}`,
-            ...options.headers,
-          },
-        },
-      );
+  const [
+    uploading,
+    setUploading,
+  ] =
+    useState(false);
 
-      if (response.status === 401) {
-        localStorage.removeItem(
-          "subhashree_admin_token",
-        );
-        localStorage.removeItem(
-          "subhashree_admin",
-        );
-        router.replace("/admin/login");
+  // ========================================
+  // AUTH REQUEST
+  // ========================================
 
-        throw new Error(
-          "Your login has expired. Please sign in again.",
-        );
-      }
+  const request =
+    useCallback(
+      async (
+        path:
+          string,
 
-      let data: any = {};
+        options:
+          RequestInit = {},
+      ) => {
+        const token =
+          localStorage.getItem(
+            "subhashree_admin_token",
+          );
 
-      try {
-        data = await response.json();
-      } catch {
-        data = {};
-      }
+        if (
+          !token
+        ) {
+          router.replace(
+            "/admin/login",
+          );
 
-      if (!response.ok) {
-        throw new Error(
-          data.message ||
-            "Unable to complete the request.",
-        );
-      }
+          throw new Error(
+            "Please sign in to continue.",
+          );
+        }
 
-      return data;
-    },
-    [router],
-  );
+        const response =
+          await fetch(
+            `${BLOG_API_URL}${path}`,
+            {
+              ...options,
+
+              cache:
+                "no-store",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                Authorization:
+                  `Bearer ${token}`,
+
+                ...options.headers,
+              },
+            },
+          );
+
+        if (
+          response.status ===
+          401
+        ) {
+          localStorage.removeItem(
+            "subhashree_admin_token",
+          );
+
+          localStorage.removeItem(
+            "subhashree_admin",
+          );
+
+          router.replace(
+            "/admin/login",
+          );
+
+          throw new Error(
+            "Your login has expired. Please sign in again.",
+          );
+        }
+
+        const data =
+          await response.json();
+
+        if (
+          !response.ok
+        ) {
+          throw new Error(
+            data.message ||
+            "Unable to complete this request.",
+          );
+        }
+
+        return data;
+      },
+      [
+        router,
+      ],
+    );
 
   // ========================================
   // LOAD BLOGS
   // ========================================
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
+  const loadBlogs =
+    useCallback(
+      async () => {
+        setLoading(
+          true,
+        );
 
-    try {
-      await request("/auth/me");
+        setError(
+          "",
+        );
 
-      const data = await request(
-        "/blogs/admin",
-      );
+        try {
+          await request(
+            "/auth/me",
+          );
 
-      setBlogs(
-        Array.isArray(data.blogs)
-          ? data.blogs
-          : [],
-      );
+          const data =
+            await request(
+              "/blogs/admin",
+            );
 
-      setReady(true);
-    } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Unable to load blogs.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [request]);
+          setBlogs(
+            data.blogs ||
+            [],
+          );
+        } catch (
+          loadError
+        ) {
+          setError(
+            loadError instanceof
+              Error
+              ? loadError.message
+              : "Unable to load blogs.",
+          );
+        } finally {
+          setLoading(
+            false,
+          );
+        }
+      },
+      [
+        request,
+      ],
+    );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useEffect(
+    () => {
+      void loadBlogs();
+    },
+    [
+      loadBlogs,
+    ],
+  );
 
   // ========================================
-  // IMAGE UPLOAD
+  // IMAGE PREVIEW CLEANUP
   // ========================================
 
-  const handleImageUpload = async (
-    file: File,
-  ) => {
-    if (!file) {
-      return;
-    }
+  useEffect(
+    () => {
+      if (
+        !selectedImage
+      ) {
+        setSelectedPreview(
+          "",
+        );
 
-    if (!file.type.startsWith("image/")) {
-      setError(
-        "Please select a valid image file.",
-      );
-      return;
-    }
-
-    try {
-      setImageUploading(true);
-      setError("");
-      setMessage("");
-      setImageUploadMessage("");
-
-      const token = localStorage.getItem(
-        "subhashree_admin_token",
-      );
-
-      if (!token) {
-        router.replace("/admin/login");
         return;
       }
 
-      const prepareResponse = await fetch(
-        `${BLOG_API_URL}/uploads/image-url`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            purpose: "blog",
-            contentType:
-              file.type ||
-              "application/octet-stream",
-            fileSize: file.size,
-            fileName: file.name,
-          }),
-        },
+      const url =
+        URL.createObjectURL(
+          selectedImage,
+        );
+
+      setSelectedPreview(
+        url,
       );
 
-      const prepareData =
-        await prepareResponse.json();
+      return () => {
+        URL.revokeObjectURL(
+          url,
+        );
+      };
+    },
+    [
+      selectedImage,
+    ],
+  );
 
-      if (prepareResponse.status === 401) {
-        localStorage.removeItem(
-          "subhashree_admin_token",
+  // ========================================
+  // CURRENT CONTENT
+  // ========================================
+
+  const generatedContent =
+    useMemo(
+      () =>
+        buildContent(
+          introduction,
+          sections,
+        ),
+      [
+        introduction,
+        sections,
+      ],
+    );
+
+  const readingTime =
+    useMemo(
+      () => {
+        const words =
+          generatedContent
+            .trim()
+            .split(
+              /\s+/,
+            )
+            .filter(
+              Boolean,
+            ).length;
+
+        return Math.max(
+          1,
+          Math.ceil(
+            words /
+            200,
+          ),
         );
-        localStorage.removeItem(
-          "subhashree_admin",
+      },
+      [
+        generatedContent,
+      ],
+    );
+
+  // ========================================
+  // RESET
+  // ========================================
+
+  const resetEditor =
+    () => {
+      setEditing(
+        null,
+      );
+
+      setForm({
+        ...emptyForm,
+      });
+
+      setIntroduction(
+        "",
+      );
+
+      setSections([
+        emptySection(
+          1,
+        ),
+      ]);
+
+      setSelectedImage(
+        null,
+      );
+
+      setPreview(
+        false,
+      );
+
+      setError(
+        "",
+      );
+
+      setMessage(
+        "",
+      );
+    };
+
+  // ========================================
+  // OPEN BLOG
+  // ========================================
+
+  const openBlog =
+    (
+      blog:
+        Blog,
+    ) => {
+      if (
+        !window.confirm(
+          "Open this article? Any unsaved changes in the editor will be lost.",
+        )
+      ) {
+        return;
+      }
+
+      const parsed =
+        parseContent(
+          blog.content,
         );
-        router.replace("/admin/login");
+
+      setEditing(
+        blog._id,
+      );
+
+      setForm({
+        title:
+          blog.title,
+
+        slug:
+          blog.slug,
+
+        excerpt:
+          blog.excerpt,
+
+        category:
+          blog.category,
+
+        image:
+          blog.image,
+
+        content:
+          blog.content,
+
+        status:
+          blog.status,
+      });
+
+      setIntroduction(
+        parsed.introduction,
+      );
+
+      setSections(
+        parsed.sections,
+      );
+
+      setSelectedImage(
+        null,
+      );
+
+      setPreview(
+        false,
+      );
+
+      setError(
+        "",
+      );
+
+      setMessage(
+        "",
+      );
+
+      window.scrollTo({
+        top: 0,
+
+        behavior:
+          "smooth",
+      });
+    };
+
+  // ========================================
+  // NEW BLOG
+  // ========================================
+
+  const newBlog =
+    () => {
+      if (
+        !window.confirm(
+          "Create a new article? Any unsaved changes will be lost.",
+        )
+      ) {
+        return;
+      }
+
+      resetEditor();
+
+      window.scrollTo({
+        top: 0,
+
+        behavior:
+          "smooth",
+      });
+    };
+
+  // ========================================
+  // CHANGE TITLE
+  // ========================================
+
+  const changeTitle =
+    (
+      title:
+        string,
+    ) => {
+      setForm(
+        (
+          current,
+        ) => ({
+          ...current,
+
+          title,
+
+          slug:
+            editing
+              ? current.slug
+              : slugify(
+                  title,
+                ),
+        }),
+      );
+    };
+
+  // ========================================
+  // SECTIONS
+  // ========================================
+
+  const updateSection =
+    (
+      id:
+        string,
+
+      field:
+        keyof Omit<
+          ArticleSection,
+          "id"
+        >,
+
+      value:
+        string,
+    ) => {
+      setSections(
+        (
+          current,
+        ) =>
+          current.map(
+            (
+              section,
+            ) =>
+              section.id ===
+              id
+                ? {
+                    ...section,
+
+                    [field]:
+                      value,
+                  }
+                : section,
+          ),
+      );
+    };
+
+  const addSection =
+    () => {
+      setSections(
+        (
+          current,
+        ) => [
+          ...current,
+
+          {
+            id:
+              `section-${Date.now()}`,
+
+            heading: "",
+
+            body: "",
+
+            linkText: "",
+
+            linkUrl: "",
+          },
+        ],
+      );
+    };
+
+  const removeSection =
+    (
+      id:
+        string,
+    ) => {
+      if (
+        sections.length ===
+        1
+      ) {
+        setSections([
+          emptySection(
+            1,
+          ),
+        ]);
+
+        return;
+      }
+
+      setSections(
+        (
+          current,
+        ) =>
+          current.filter(
+            (
+              section,
+            ) =>
+              section.id !==
+              id,
+          ),
+      );
+    };
+
+  // ========================================
+  // ADD BULLET
+  // ========================================
+
+  const addBullet =
+    (
+      id:
+        string,
+    ) => {
+      setSections(
+        (
+          current,
+        ) =>
+          current.map(
+            (
+              section,
+            ) => {
+              if (
+                section.id !==
+                id
+              ) {
+                return section;
+              }
+
+              const body =
+                section.body;
+
+              return {
+                ...section,
+
+                body:
+                  body.trim()
+                    ? `${body}\n- `
+                    : "- ",
+              };
+            },
+          ),
+      );
+    };
+
+  // ========================================
+  // IMAGE SELECTION
+  // ========================================
+
+  const chooseImage =
+    (
+      file:
+        File |
+        null,
+    ) => {
+      if (
+        !file
+      ) {
+        return;
+      }
+
+      const allowed =
+        new Set([
+          "image/jpeg",
+          "image/png",
+          "image/webp",
+          "image/avif",
+        ]);
+
+      if (
+        !allowed.has(
+          file.type,
+        )
+      ) {
+        setError(
+          "Please select a JPG, PNG, WebP or AVIF image.",
+        );
+
         return;
       }
 
       if (
-        !prepareResponse.ok ||
-        !prepareData.success ||
-        !prepareData.uploadUrl
+        file.size >
+        10 *
+          1024 *
+          1024
+      ) {
+        setError(
+          "Cover image must be 10 MB or smaller.",
+        );
+
+        return;
+      }
+
+      setSelectedImage(
+        file,
+      );
+
+      setError(
+        "",
+      );
+    };
+
+  // ========================================
+  // BLOB UPLOAD
+  // ========================================
+
+  const uploadCoverImage =
+    async (
+      file:
+        File,
+    ) => {
+      const token =
+        localStorage.getItem(
+          "subhashree_admin_token",
+        );
+
+      if (
+        !token
       ) {
         throw new Error(
-          prepareData.message ||
-            "Unable to prepare image upload.",
+          "Please sign in again.",
         );
       }
 
-      const uploadResponse = await fetch(
-        prepareData.uploadUrl,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type":
-              file.type ||
-              "application/octet-stream",
-          },
-          body: file,
-        },
+      setUploading(
+        true,
       );
-
-      let uploadData: any = {};
 
       try {
-        uploadData =
-          await uploadResponse.json();
-      } catch {
-        uploadData = {};
-      }
+        // Ask backend for signed Vercel Blob URL.
 
-      if (!uploadResponse.ok) {
-        throw new Error(
-          uploadData.message ||
-            "Image upload failed.",
-        );
-      }
+        const prepareResponse =
+          await fetch(
+            `${BLOG_API_URL}/uploads/image-url`,
+            {
+              method:
+                "POST",
 
-      const finalUrl =
-        uploadData.url ||
-        uploadData.downloadUrl ||
-        prepareData.url ||
-        prepareData.publicUrl ||
-        "";
+              headers: {
+                "Content-Type":
+                  "application/json",
 
-      if (!finalUrl) {
-        throw new Error(
-          "Upload completed, but image URL was not returned.",
-        );
-      }
+                Authorization:
+                  `Bearer ${token}`,
+              },
 
-      setForm((current) => ({
-        ...current,
-        image: finalUrl,
-      }));
+              body:
+                JSON.stringify({
+                  purpose:
+                    "blog",
 
-      setImageUploadMessage(
-        "Image uploaded successfully.",
-      );
-    } catch (uploadError) {
-      setError(
-        uploadError instanceof Error
-          ? uploadError.message
-          : "Unable to upload image.",
-      );
-    } finally {
-      setImageUploading(false);
-    }
-  };
+                  contentType:
+                    file.type,
 
-  // ========================================
-  // CREATE NEW BLOG
-  // ========================================
+                  fileSize:
+                    file.size,
 
-  const openCreate = () => {
-    setEditing(null);
-    setForm({ ...empty });
-    setPreview(false);
-    setError("");
-    setMessage("");
-    setImageUploadMessage("");
+                  fileName:
+                    file.name,
+                }),
+            },
+          );
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
+        const prepareData =
+          await prepareResponse.json();
 
-  // ========================================
-  // EDIT BLOG
-  // ========================================
-
-  const openEdit = (blog: Blog) => {
-    setEditing(blog._id);
-
-    setForm({
-      title: blog.title || "",
-      slug: blog.slug || "",
-      excerpt: blog.excerpt || "",
-      category: blog.category || "",
-      image: blog.image || "",
-      content: blog.content || "",
-      status: blog.status,
-    });
-
-    setPreview(false);
-    setError("");
-    setMessage("");
-    setImageUploadMessage("");
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-  // ========================================
-  // SAVE BLOG
-  // ========================================
-
-  const save = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
-    event.preventDefault();
-
-    const nativeEvent =
-      event.nativeEvent as SubmitEvent;
-
-    const submitter =
-      nativeEvent.submitter as
-        | HTMLButtonElement
-        | null;
-
-    const requestedStatus =
-      submitter?.dataset.status ===
-      "published"
-        ? "published"
-        : "draft";
-
-    setSaving(true);
-    setSavingAction(requestedStatus);
-    setError("");
-    setMessage("");
-
-    try {
-      const payload: Form = {
-        ...form,
-        status: requestedStatus,
-      };
-
-      const data = await request(
-        editing
-          ? `/blogs/${editing}`
-          : "/blogs",
-        {
-          method: editing ? "PUT" : "POST",
-          body: JSON.stringify(payload),
-        },
-      );
-
-      const savedBlog =
-        data.blog as Blog;
-
-      setEditing(savedBlog._id);
-
-      setForm({
-        title: savedBlog.title,
-        slug: savedBlog.slug,
-        excerpt: savedBlog.excerpt,
-        category: savedBlog.category,
-        image: savedBlog.image,
-        content: savedBlog.content,
-        status: savedBlog.status,
-      });
-
-      setBlogs((current) => {
-        const exists = current.some(
-          (blog) =>
-            blog._id === savedBlog._id,
-        );
-
-        if (exists) {
-          return current.map((blog) =>
-            blog._id === savedBlog._id
-              ? savedBlog
-              : blog,
+        if (
+          !prepareResponse.ok ||
+          !prepareData.uploadUrl
+        ) {
+          throw new Error(
+            prepareData.message ||
+            "Unable to prepare image upload.",
           );
         }
 
-        return [savedBlog, ...current];
-      });
+        // Upload directly to Vercel Blob.
+
+        const uploadResponse =
+          await fetch(
+            prepareData.uploadUrl,
+            {
+              method:
+                "PUT",
+
+              headers: {
+                "Content-Type":
+                  file.type,
+              },
+
+              body:
+                file,
+            },
+          );
+
+        let uploadData:
+          Record<
+            string,
+            string
+          > =
+          {};
+
+        try {
+          uploadData =
+            await uploadResponse.json();
+        } catch {
+          uploadData =
+            {};
+        }
+
+        if (
+          !uploadResponse.ok
+        ) {
+          throw new Error(
+            "Image upload failed.",
+          );
+        }
+
+        const finalUrl =
+          uploadData.url ||
+          uploadData.downloadUrl ||
+          prepareData.url ||
+          prepareData.publicUrl ||
+          "";
+
+        if (
+          !finalUrl
+        ) {
+          throw new Error(
+            "The image uploaded, but its public URL was not returned.",
+          );
+        }
+
+        return finalUrl;
+      } finally {
+        setUploading(
+          false,
+        );
+      }
+    };
+
+  // ========================================
+  // VALIDATION
+  // ========================================
+
+  const validate =
+    () => {
+      if (
+        !form.title.trim()
+      ) {
+        throw new Error(
+          "Blog title is required.",
+        );
+      }
 
       if (
-        savedBlog.status === "published"
+        !form.slug.trim()
       ) {
-        setMessage(
-          editing
-            ? "Blog updated and published successfully."
-            : "Blog published successfully.",
-        );
-      } else {
-        setMessage(
-          editing
-            ? "Blog saved as draft successfully."
-            : "Draft saved successfully.",
+        throw new Error(
+          "Blog URL could not be generated.",
         );
       }
-    } catch (saveError) {
-      setError(
-        saveError instanceof Error
-          ? saveError.message
-          : "Unable to save blog.",
-      );
-    } finally {
-      setSaving(false);
-      setSavingAction(null);
-    }
-  };
 
-  // ========================================
-  // DELETE BLOG
-  // ========================================
+      if (
+        !form.excerpt.trim()
+      ) {
+        throw new Error(
+          "Short summary is required.",
+        );
+      }
 
-  const deleteBlog = async (
-    blog: Blog,
-  ) => {
-    const confirmed = window.confirm(
-      `Delete "${blog.title}"?\n\nThis action cannot be undone.`,
-    );
+      if (
+        !form.category.trim()
+      ) {
+        throw new Error(
+          "Category is required.",
+        );
+      }
 
-    if (!confirmed) {
-      return;
-    }
+      if (
+        !generatedContent.trim()
+      ) {
+        throw new Error(
+          "Please add some article content.",
+        );
+      }
 
-    setDeletingId(blog._id);
-    setError("");
-    setMessage("");
+      sections.forEach(
+        (
+          section,
+          index,
+        ) => {
+          const hasText =
+            Boolean(
+              section.linkText.trim(),
+            );
 
-    try {
-      await request(
-        `/blogs/${blog._id}`,
-        {
-          method: "DELETE",
+          const hasUrl =
+            Boolean(
+              section.linkUrl.trim(),
+            );
+
+          if (
+            hasText !==
+            hasUrl
+          ) {
+            throw new Error(
+              `Section ${
+                index +
+                1
+              }: provide both Link Text and Link URL, or leave both empty.`,
+            );
+          }
+
+          if (
+            hasUrl &&
+            !safeLinkUrl(
+              section.linkUrl,
+            )
+          ) {
+            throw new Error(
+              `Section ${
+                index +
+                1
+              }: link must begin with https://, http://, /, #, mailto: or tel:.`,
+            );
+          }
         },
       );
+    };
 
-      setBlogs((current) =>
-        current.filter(
-          (item) => item._id !== blog._id,
-        ),
+  // ========================================
+  // SAVE
+  // ========================================
+
+  const save =
+    async (
+      event:
+        FormEvent<HTMLFormElement>,
+    ) => {
+      event.preventDefault();
+
+      const submitter =
+        (
+          event.nativeEvent as SubmitEvent
+        ).submitter as
+          | HTMLButtonElement
+          | null;
+
+      const requestedStatus =
+        submitter?.dataset.status ===
+        "published"
+          ? "published"
+          : "draft";
+
+      setSaving(
+        true,
       );
 
-      if (editing === blog._id) {
-        setEditing(null);
-        setForm({ ...empty });
-        setPreview(false);
-      }
+      setSavingAction(
+        requestedStatus,
+      );
+
+      setError(
+        "",
+      );
 
       setMessage(
-        "Blog deleted successfully.",
+        "",
       );
-    } catch (deleteError) {
+
+      try {
+        validate();
+
+        let imageUrl =
+          form.image;
+
+        if (
+          selectedImage
+        ) {
+          imageUrl =
+            await uploadCoverImage(
+              selectedImage,
+            );
+        }
+
+        const payload:
+          BlogForm = {
+          ...form,
+
+          image:
+            imageUrl,
+
+          content:
+            generatedContent,
+
+          status:
+            requestedStatus,
+        };
+
+        const data =
+          await request(
+            editing
+              ? `/blogs/${editing}`
+              : "/blogs",
+            {
+              method:
+                editing
+                  ? "PUT"
+                  : "POST",
+
+              body:
+                JSON.stringify(
+                  payload,
+                ),
+            },
+          );
+
+        const savedBlog:
+          Blog =
+          data.blog;
+
+        setBlogs(
+          (
+            current,
+          ) => [
+            savedBlog,
+
+            ...current.filter(
+              (
+                blog,
+              ) =>
+                blog._id !==
+                savedBlog._id,
+            ),
+          ],
+        );
+
+        setEditing(
+          savedBlog._id,
+        );
+
+        setForm({
+          title:
+            savedBlog.title,
+
+          slug:
+            savedBlog.slug,
+
+          excerpt:
+            savedBlog.excerpt,
+
+          category:
+            savedBlog.category,
+
+          image:
+            savedBlog.image,
+
+          content:
+            savedBlog.content,
+
+          status:
+            savedBlog.status,
+        });
+
+        setSelectedImage(
+          null,
+        );
+
+        setMessage(
+          requestedStatus ===
+          "published"
+            ? "Article saved and published."
+            : "Draft saved.",
+        );
+      } catch (
+        saveError
+      ) {
+        setError(
+          saveError instanceof
+            Error
+            ? saveError.message
+            : "Unable to save blog.",
+        );
+      } finally {
+        setSaving(
+          false,
+        );
+
+        setSavingAction(
+          null,
+        );
+      }
+    };
+
+  // ========================================
+  // DELETE
+  // ========================================
+
+  const deleteBlog =
+    async () => {
+      if (
+        !editing
+      ) {
+        return;
+      }
+
+      if (
+        !window.confirm(
+          "Delete this blog permanently?",
+        )
+      ) {
+        return;
+      }
+
+      setDeleting(
+        true,
+      );
+
       setError(
-        deleteError instanceof Error
-          ? deleteError.message
-          : "Unable to delete blog.",
+        "",
       );
-    } finally {
-      setDeletingId(null);
-    }
-  };
 
-  // ========================================
-  // TITLE CHANGE
-  // ========================================
+      try {
+        await request(
+          `/blogs/${editing}`,
+          {
+            method:
+              "DELETE",
+          },
+        );
 
-  const handleTitleChange = (
-    value: string,
-  ) => {
-    const generatedSlug = value
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
+        setBlogs(
+          (
+            current,
+          ) =>
+            current.filter(
+              (
+                blog,
+              ) =>
+                blog._id !==
+                editing,
+            ),
+        );
 
-    if (!editing) {
-      setForm((current) => ({
-        ...current,
-        title: value,
-        slug: generatedSlug,
-      }));
-      return;
-    }
+        resetEditor();
 
-    setForm((current) => ({
-      ...current,
-      title: value,
-    }));
-  };
+        setMessage(
+          "Blog deleted.",
+        );
+      } catch (
+        deleteError
+      ) {
+        setError(
+          deleteError instanceof
+            Error
+            ? deleteError.message
+            : "Unable to delete blog.",
+        );
+      } finally {
+        setDeleting(
+          false,
+        );
+      }
+    };
 
   // ========================================
   // LOADING
   // ========================================
 
-  if (loading) {
+  if (
+    loading
+  ) {
     return (
-      <main className="min-h-screen bg-slate-50 p-12 text-center text-slate-600">
-        Loading blogs…
+      <main className="min-h-screen bg-slate-50 p-10">
+
+        <div className="mx-auto max-w-7xl">
+
+          <p className="text-center text-slate-500">
+            Loading blogs...
+          </p>
+        </div>
       </main>
     );
   }
@@ -596,259 +1604,283 @@ export default function AdminBlogsPage() {
   // ========================================
 
   return (
-    <main className="min-h-screen bg-slate-50 p-5 text-slate-900 md:p-10">
-      <div className="mx-auto max-w-7xl">
-        <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
+    <main className="min-h-screen bg-[#f7f7f5] p-5 text-slate-900 md:p-8">
+
+      <div className="mx-auto max-w-[1500px]">
+
+        {/* =================================
+            HEADER
+        ================================= */}
+
+        <header className="mb-7 flex flex-wrap items-center justify-between gap-4">
+
           <div>
+
             <Link
               href="/admin"
-              className="text-sm font-medium text-slate-600 hover:text-slate-900"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-slate-900"
             >
-              ← Dashboard
+              <ArrowLeft className="h-4 w-4" />
+
+              Admin Dashboard
             </Link>
 
-            <h1 className="mt-3 text-3xl font-bold">
-              Manage blogs
+            <h1 className="mt-3 text-3xl font-bold tracking-tight">
+              Blog Manager
             </h1>
 
             <p className="mt-2 text-slate-500">
-              Create, edit, publish and
-              delete website articles.
+              Create, edit and publish articles for Subha Shree Bhawan.
             </p>
           </div>
 
-          <Link
-            href="/blog"
-            target="_blank"
-            className="rounded-xl border border-slate-300 bg-white px-4 py-3 font-medium shadow-sm transition hover:bg-slate-50"
+          <button
+            type="button"
+            onClick={
+              newBlog
+            }
+            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-800"
           >
-            View blog ↗
-          </Link>
+            <Plus className="h-4 w-4" />
+
+            New Blog
+          </button>
         </header>
 
-        {error && (
-          <div
-            role="alert"
-            className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"
-          >
-            {error}
+        {/* =================================
+            ALERTS
+        ================================= */}
 
-            {!ready && (
-              <button
-                type="button"
-                onClick={() =>
-                  void load()
-                }
-                className="ml-4 font-semibold underline"
-              >
-                Retry
-              </button>
-            )}
+        {error && (
+          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
+            {
+              error
+            }
           </div>
         )}
 
         {message && (
-          <div
-            role="status"
-            className="mb-5 rounded-xl border border-green-200 bg-green-50 p-4 text-green-800"
-          >
-            {message}
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-700">
+            {
+              message
+            }
           </div>
         )}
 
-        {imageUploadMessage && (
-          <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-800">
-            {imageUploadMessage}
-          </div>
-        )}
+        {/* =================================
+            LAYOUT
+        ================================= */}
 
-        {ready && (
-          <div className="grid items-start gap-8 lg:grid-cols-[360px_1fr]">
-            <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+
+          {/* =================================
+              BLOG LIST
+          ================================= */}
+
+          <aside className="self-start rounded-[28px] border border-slate-200 bg-white p-4 lg:sticky lg:top-5">
+
+            <div className="mb-4 flex items-center justify-between">
+
+              <div>
+
+                <h2 className="font-bold">
+                  Articles
+                </h2>
+
+                <p className="text-xs text-slate-400">
+                  {
+                    blogs.length
+                  }{" "}
+                  total
+                </p>
+              </div>
+
               <button
                 type="button"
-                disabled={
-                  saving ||
-                  Boolean(deletingId)
+                onClick={
+                  newBlog
                 }
-                onClick={openCreate}
-                className="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white"
+                aria-label="New blog"
               >
-                + New blog
+                <Plus className="h-4 w-4" />
               </button>
+            </div>
 
-              <div className="mt-5 space-y-4">
-                {blogs.length === 0 && (
-                  <div className="rounded-xl border border-dashed border-slate-300 p-5 text-center">
-                    <p className="font-medium">
-                      No articles yet
-                    </p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      Create your first
-                      blog.
-                    </p>
-                  </div>
-                )}
+            <div className="max-h-[75vh] space-y-2 overflow-y-auto pr-1">
 
-                {blogs.map((blog) => (
-                  <div
-                    key={blog._id}
-                    className={`rounded-xl border p-4 transition ${
-                      editing === blog._id
-                        ? "border-amber-400 bg-amber-50"
-                        : "border-slate-200 bg-white"
-                    }`}
-                  >
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${
-                        blog.status ===
-                        "published"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-slate-100 text-slate-600"
-                      }`}
-                    >
-                      {blog.status}
-                    </span>
-
-                    <h3 className="mt-3 break-words font-semibold text-slate-900">
-                      {blog.title}
-                    </h3>
-
-                    <p className="mt-1 truncate text-xs text-slate-500">
-                      /blog/{blog.slug}
-                    </p>
-
-                    <div className="mt-4 flex gap-2">
-                      <button
-                        type="button"
-                        disabled={
-                          saving ||
-                          Boolean(deletingId)
-                        }
-                        onClick={() =>
-                          openEdit(blog)
-                        }
-                        className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        type="button"
-                        disabled={
-                          saving ||
-                          deletingId ===
-                            blog._id
-                        }
-                        onClick={() =>
-                          void deleteBlog(
-                            blog,
-                          )
-                        }
-                        className="flex-1 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 disabled:opacity-50"
-                      >
-                        {deletingId ===
-                        blog._id
-                          ? "Deleting…"
-                          : "Delete"}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </aside>
-
-            <form
-              onSubmit={save}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
-            >
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-2xl font-bold">
-                    {editing
-                      ? "Edit article"
-                      : "New article"}
-                  </h2>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Write the article,
-                    then save it as a
-                    draft or publish it
-                    directly.
-                  </p>
+              {blogs.length ===
+                0 && (
+                <div className="rounded-2xl bg-slate-50 p-5 text-sm text-slate-500">
+                  No articles yet.
                 </div>
+              )}
 
-                {editing && (
+              {blogs.map(
+                (
+                  blog,
+                ) => (
                   <button
+                    key={
+                      blog._id
+                    }
                     type="button"
-                    onClick={openCreate}
-                    disabled={saving}
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-                  >
-                    Cancel edit
-                  </button>
-                )}
-              </div>
+                    onClick={() =>
+                      openBlog(
+                        blog,
+                      )
+                    }
+                    className={[
+                      "w-full rounded-2xl border p-4 text-left transition",
 
-              <fieldset
-                disabled={saving}
-                className="space-y-5 disabled:opacity-60"
-              >
-                <label className="block font-medium">
-                  Title
+                      editing ===
+                      blog._id
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : "border-slate-200 bg-white hover:bg-slate-50",
+                    ].join(
+                      " ",
+                    )}
+                  >
+
+                    <p className="line-clamp-2 font-semibold">
+                      {
+                        blog.title
+                      }
+                    </p>
+
+                    <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+
+                      <span
+                        className={
+                          editing ===
+                          blog._id
+                            ? "text-white/60"
+                            : "text-slate-400"
+                        }
+                      >
+                        {
+                          blog.category
+                        }
+                      </span>
+
+                      <span
+                        className={[
+                          "rounded-full px-2 py-1 font-semibold",
+
+                          blog.status ===
+                          "published"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-amber-100 text-amber-700",
+                        ].join(
+                          " ",
+                        )}
+                      >
+                        {
+                          blog.status
+                        }
+                      </span>
+                    </div>
+                  </button>
+                ),
+              )}
+            </div>
+          </aside>
+
+          {/* =================================
+              EDITOR
+          ================================= */}
+
+          <form
+            onSubmit={
+              save
+            }
+            className="space-y-6"
+          >
+
+            {/* =================================
+                1 BASIC INFORMATION
+            ================================= */}
+
+            <EditorCard
+              number="1"
+              title="Basic blog information"
+              description="These details appear on the blog listing page and article header."
+            >
+
+              <div className="grid gap-5 md:grid-cols-2">
+
+                <label className="md:col-span-2 block font-medium">
+
+                  Blog title *
+
+                  <p className="mt-1 text-sm font-normal text-slate-500">
+                    Use a clear title that tells readers what the article is about.
+                  </p>
+
                   <input
                     required
-                    maxLength={200}
-                    className={inputClass}
-                    value={form.title}
+                    maxLength={
+                      200
+                    }
+                    value={
+                      form.title
+                    }
                     onChange={(
                       event,
                     ) =>
-                      handleTitleChange(
+                      changeTitle(
                         event.target.value,
                       )
                     }
+                    placeholder="Example: Choosing the Right Commercial Space in Kathmandu"
+                    className={
+                      inputClass
+                    }
                   />
                 </label>
 
-                <label className="block font-medium">
-                  URL slug
-                  <input
-                    required
-                    maxLength={200}
-                    pattern="[a-z0-9]+(-[a-z0-9]+)*"
-                    className={inputClass}
-                    value={form.slug}
-                    onChange={(
-                      event,
-                    ) =>
-                      setForm(
-                        (
-                          current,
-                        ) => ({
-                          ...current,
-                          slug: event
-                            .target
-                            .value,
-                        }),
-                      )
-                    }
-                  />
-                  <span className="mt-1 block text-xs font-normal text-slate-500">
+                {/* URL */}
+
+                <div className="md:col-span-2 rounded-2xl border border-cyan-900/15 bg-cyan-950/[0.04] p-5">
+
+                  <p className="text-xs font-bold tracking-[0.18em] text-cyan-900/60">
+                    BLOG ADDRESS GENERATED AUTOMATICALLY
+                  </p>
+
+                  <p className="mt-3 break-all text-lg font-semibold text-cyan-950">
                     /blog/
                     {form.slug ||
-                      "your-article"}
-                  </span>
-                </label>
+                      "your-blog-title"}
+                  </p>
 
-                <label className="block font-medium">
-                  Summary
+                  <p className="mt-2 text-sm text-slate-500">
+                    {editing
+                      ? "The URL is preserved while editing so existing links do not break."
+                      : "The URL is generated automatically from the title."}
+                  </p>
+                </div>
+
+                {/* SUMMARY */}
+
+                <label className="md:col-span-2 block font-medium">
+
+                  Short summary *
+
+                  <p className="mt-1 text-sm font-normal text-slate-500">
+                    Write one or two sentences. This appears on blog cards.
+                  </p>
+
                   <textarea
                     required
-                    rows={3}
-                    maxLength={600}
-                    className={inputClass}
-                    value={form.excerpt}
+                    rows={
+                      4
+                    }
+                    maxLength={
+                      600
+                    }
+                    value={
+                      form.excerpt
+                    }
                     onChange={(
                       event,
                     ) =>
@@ -857,23 +1889,33 @@ export default function AdminBlogsPage() {
                           current,
                         ) => ({
                           ...current,
+
                           excerpt:
-                            event
-                              .target
-                              .value,
+                            event.target.value,
                         }),
                       )
                     }
+                    placeholder="Briefly explain what readers will learn from this article."
+                    className={
+                      textareaClass
+                    }
                   />
                 </label>
+
+                {/* CATEGORY */}
 
                 <label className="block font-medium">
-                  Category
+
+                  Category *
+
                   <input
                     required
-                    maxLength={80}
-                    className={inputClass}
-                    value={form.category}
+                    maxLength={
+                      80
+                    }
+                    value={
+                      form.category
+                    }
                     onChange={(
                       event,
                     ) =>
@@ -882,254 +1924,637 @@ export default function AdminBlogsPage() {
                           current,
                         ) => ({
                           ...current,
+
                           category:
-                            event
-                              .target
-                              .value,
+                            event.target.value,
                         }),
+                      )
+                    }
+                    placeholder="Property insights"
+                    className={
+                      inputClass
+                    }
+                  />
+                </label>
+
+                {/* READING TIME */}
+
+                <div>
+
+                  <p className="font-medium">
+                    Reading time
+                  </p>
+
+                  <div className={`${inputClass} bg-slate-50`}>
+                    {
+                      readingTime
+                    }{" "}
+                    min read
+                  </div>
+                </div>
+              </div>
+            </EditorCard>
+
+            {/* =================================
+                2 COVER IMAGE
+            ================================= */}
+
+            <EditorCard
+              number="2"
+              title="Cover image"
+              description="Upload the main image shown on the blog card and article page."
+            >
+
+              <label className="block font-medium">
+
+                Blog cover image
+
+                <p className="mt-1 text-sm font-normal text-slate-500">
+                  JPG, PNG, WebP or AVIF. Maximum 10 MB.
+                </p>
+              </label>
+
+              {(selectedPreview ||
+                form.image) && (
+                <div className="mt-5 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100">
+
+                  <img
+                    src={
+                      selectedPreview ||
+                      form.image
+                    }
+                    alt="Blog cover preview"
+                    className="max-h-[420px] w-full object-cover"
+                  />
+                </div>
+              )}
+
+              <div className="mt-5 flex flex-wrap gap-3">
+
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">
+
+                  <Upload className="h-4 w-4" />
+
+                  {selectedPreview ||
+                  form.image
+                    ? "Replace Image"
+                    : "Upload Image"}
+
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,.avif,image/jpeg,image/png,image/webp,image/avif"
+                    className="hidden"
+                    onChange={(
+                      event,
+                    ) =>
+                      chooseImage(
+                        event.target.files?.[0] ||
+                        null,
                       )
                     }
                   />
                 </label>
 
-                <div className="rounded-2xl border border-slate-200 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <h3 className="font-semibold text-slate-900">
-                        Cover image
-                      </h3>
-                      <p className="mt-1 text-sm text-slate-500">
-                        Upload an image
-                        from your laptop
-                        or paste a URL
-                        manually.
-                      </p>
-                    </div>
+                {(selectedImage ||
+                  form.image) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedImage(
+                        null,
+                      );
 
-                    <label className="inline-flex cursor-pointer items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
-                      {imageUploading
-                        ? "Uploading..."
-                        : "Upload image"}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        disabled={
-                          imageUploading
-                        }
-                        onChange={async (
-                          event,
-                        ) => {
-                          const file =
-                            event.target
-                              .files?.[0];
-                          if (file) {
-                            await handleImageUpload(
-                              file,
-                            );
-                          }
-                          event.target.value =
-                            "";
-                        }}
-                      />
-                    </label>
-                  </div>
+                      setForm(
+                        (
+                          current,
+                        ) => ({
+                          ...current,
 
-                  <label className="mt-4 block font-medium">
-                    Cover image URL{" "}
-                    <span className="font-normal text-slate-500">
-                      (optional)
-                    </span>
-                    <input
-                      maxLength={2000}
-                      placeholder="Uploaded image URL will appear here"
-                      className={inputClass}
-                      value={form.image}
-                      onChange={(
-                        event,
-                      ) =>
-                        setForm(
-                          (
-                            current,
-                          ) => ({
-                            ...current,
-                            image: event
-                              .target
-                              .value,
-                          }),
-                        )
+                          image:
+                            "",
+                        }),
+                      );
+                    }}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-600"
+                  >
+                    <X className="h-4 w-4" />
+
+                    Remove
+                  </button>
+                )}
+              </div>
+            </EditorCard>
+
+            {/* =================================
+                3 INTRODUCTION
+            ================================= */}
+
+            <EditorCard
+              number="3"
+              title="Article introduction"
+              description="This is the opening paragraph readers see before the article sections."
+            >
+
+              <label className="block font-medium">
+
+                Introduction
+
+                <p className="mt-1 text-sm font-normal text-slate-500">
+                  Explain the topic, why it matters, and what the reader will learn.
+                </p>
+
+                <textarea
+                  rows={
+                    8
+                  }
+                  value={
+                    introduction
+                  }
+                  onChange={(
+                    event,
+                  ) =>
+                    setIntroduction(
+                      event.target.value,
+                    )
+                  }
+                  placeholder="Start your article with a clear and engaging introduction..."
+                  className={
+                    textareaClass
+                  }
+                />
+              </label>
+            </EditorCard>
+
+            {/* =================================
+                4 ARTICLE CONTENT
+            ================================= */}
+
+            <EditorCard
+              number="4"
+              title="Article content"
+              description="Break your article into sections. Every section can contain a heading, paragraphs, bullet points and an optional hyperlink."
+            >
+
+              <div className="space-y-5">
+
+                {sections.map(
+                  (
+                    section,
+                    index,
+                  ) => (
+                    <div
+                      key={
+                        section.id
                       }
-                    />
-                  </label>
+                      className="rounded-[26px] border border-slate-200 bg-slate-50/80 p-5 md:p-6"
+                    >
 
-                  {form.image && (
-                    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                      <img
-                        src={form.image}
-                        alt="Blog cover preview"
-                        className="max-h-64 w-full rounded-xl object-cover"
-                      />
+                      {/* SECTION HEADER */}
 
-                      <div className="mt-3 flex flex-wrap gap-3">
+                      <div className="flex items-start justify-between gap-4">
+
+                        <div>
+
+                          <h3 className="font-bold">
+                            Section{" "}
+                            {
+                              index +
+                              1
+                            }
+                          </h3>
+
+                          <p className="mt-1 text-sm text-slate-500">
+                            Add one topic or idea in this section.
+                          </p>
+                        </div>
+
                         <button
                           type="button"
                           onClick={() =>
-                            setForm(
-                              (
-                                current,
-                              ) => ({
-                                ...current,
-                                image: "",
-                              }),
+                            removeSection(
+                              section.id,
                             )
                           }
-                          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100"
+                          className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-white text-red-500 transition hover:bg-red-50"
+                          aria-label="Delete section"
                         >
-                          Remove image
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-                    </div>
-                  )}
-                </div>
 
-                <label className="block font-medium">
-                  Article content
-                  <textarea
-                    required
-                    rows={18}
-                    maxLength={100000}
-                    className={`${inputClass} font-mono text-sm`}
-                    value={form.content}
-                    onChange={(
-                      event,
-                    ) =>
-                      setForm(
-                        (
-                          current,
-                        ) => ({
-                          ...current,
-                          content:
-                            event
-                              .target
-                              .value,
-                        }),
-                      )
-                    }
-                  />
-                  <span className="mt-2 block text-sm font-normal text-slate-500">
-                    Use{" "}
-                    <strong>
-                      ## Heading
-                    </strong>{" "}
-                    for headings and{" "}
-                    <strong>
-                      - Item
-                    </strong>{" "}
-                    for bullet points.
-                  </span>
-                </label>
+                      {/* HEADING */}
+
+                      <label className="mt-6 block font-medium">
+
+                        Section heading
+
+                        <input
+                          value={
+                            section.heading
+                          }
+                          onChange={(
+                            event,
+                          ) =>
+                            updateSection(
+                              section.id,
+                              "heading",
+                              event.target.value,
+                            )
+                          }
+                          placeholder="Example: Why location matters"
+                          className={
+                            inputClass
+                          }
+                        />
+                      </label>
+
+                      {/* BODY */}
+
+                      <label className="mt-5 block font-medium">
+
+                        Section paragraphs
+
+                        <p className="mt-1 text-sm font-normal text-slate-500">
+                          Write paragraphs here. Use Add point to insert a bullet.
+                        </p>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            addBullet(
+                              section.id,
+                            )
+                          }
+                          className="mt-3 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold transition hover:bg-slate-50"
+                        >
+                          <Plus className="h-4 w-4" />
+
+                          Add point
+                        </button>
+
+                        <textarea
+                          rows={
+                            10
+                          }
+                          value={
+                            section.body
+                          }
+                          onChange={(
+                            event,
+                          ) =>
+                            updateSection(
+                              section.id,
+                              "body",
+                              event.target.value,
+                            )
+                          }
+                          placeholder={`Write your paragraph here...
+
+- First useful point
+- Second useful point`}
+                          className={`${textareaClass} font-normal`}
+                        />
+                      </label>
+
+                      {/* =================================
+                          SECTION LINK
+                      ================================= */}
+
+                      <div className="mt-6 rounded-2xl border border-cyan-900/15 bg-cyan-950/[0.04] p-5">
+
+                        <div className="flex items-center gap-2 text-cyan-950">
+
+                          <Link2 className="h-4 w-4" />
+
+                          <h4 className="font-semibold">
+                            Section link
+                          </h4>
+                        </div>
+
+                        <p className="mt-2 text-sm text-slate-500">
+                          Optional. Add a useful internal page or external source.
+                        </p>
+
+                        <div className="mt-5 grid gap-4 md:grid-cols-2">
+
+                          <label className="block font-medium">
+
+                            Link text
+
+                            <p className="mt-1 text-xs font-normal text-slate-500">
+                              The clickable words readers see.
+                            </p>
+
+                            <input
+                              value={
+                                section.linkText
+                              }
+                              onChange={(
+                                event,
+                              ) =>
+                                updateSection(
+                                  section.id,
+                                  "linkText",
+                                  event.target.value,
+                                )
+                              }
+                              placeholder="Example: View our Gallery"
+                              className={
+                                inputClass
+                              }
+                            />
+                          </label>
+
+                          <label className="block font-medium">
+
+                            Link URL
+
+                            <p className="mt-1 text-xs font-normal text-slate-500">
+                              Use / for this website or https:// for another website.
+                            </p>
+
+                            <input
+                              value={
+                                section.linkUrl
+                              }
+                              onChange={(
+                                event,
+                              ) =>
+                                updateSection(
+                                  section.id,
+                                  "linkUrl",
+                                  event.target.value,
+                                )
+                              }
+                              placeholder="/gallery or https://example.com"
+                              className={
+                                inputClass
+                              }
+                            />
+                          </label>
+                        </div>
+
+                        {section.linkText &&
+                          section.linkUrl &&
+                          safeLinkUrl(
+                            section.linkUrl,
+                          ) && (
+                            <p className="mt-4 text-sm text-slate-500">
+                              Preview:{" "}
+
+                              <a
+                                href={
+                                  section.linkUrl
+                                }
+                                target={
+                                  /^https?:\/\//i.test(
+                                    section.linkUrl,
+                                  )
+                                    ? "_blank"
+                                    : undefined
+                                }
+                                rel="noopener noreferrer"
+                                className="font-semibold text-amber-800 underline"
+                              >
+                                {
+                                  section.linkText
+                                }
+                              </a>
+                            </p>
+                          )}
+                      </div>
+                    </div>
+                  ),
+                )}
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setPreview(
-                      (current) =>
-                        !current,
-                    )
+                  onClick={
+                    addSection
                   }
-                  className="text-sm font-semibold underline"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 py-3 font-semibold transition hover:bg-slate-50"
                 >
-                  {preview
-                    ? "Hide preview"
-                    : "Preview content"}
+                  <Plus className="h-4 w-4" />
+
+                  Add Another Section
+                </button>
+              </div>
+            </EditorCard>
+
+            {/* =================================
+                5 PREVIEW + SAVE
+            ================================= */}
+
+            <EditorCard
+              number="5"
+              title="Preview and publish"
+              description="Review your article before publishing it."
+            >
+
+              <button
+                type="button"
+                onClick={() =>
+                  setPreview(
+                    (
+                      current,
+                    ) =>
+                      !current,
+                  )
+                }
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 py-3 font-semibold transition hover:bg-slate-50"
+              >
+                <Eye className="h-4 w-4" />
+
+                {preview
+                  ? "Hide Preview"
+                  : "Preview Article"}
+              </button>
+
+              {preview && (
+                <div className="mt-6 rounded-[28px] border border-slate-200 bg-[#FAF6EA] p-6 md:p-10">
+
+                  <p className="text-sm font-semibold text-amber-800">
+                    {
+                      form.category
+                    }
+                  </p>
+
+                  <h2 className="mt-3 text-3xl font-extrabold md:text-5xl">
+                    {form.title ||
+                      "Untitled Blog"}
+                  </h2>
+
+                  {form.excerpt && (
+                    <p className="mt-5 text-xl text-slate-600">
+                      {
+                        form.excerpt
+                      }
+                    </p>
+                  )}
+
+                  {(selectedPreview ||
+                    form.image) && (
+                    <img
+                      src={
+                        selectedPreview ||
+                        form.image
+                      }
+                      alt=""
+                      className="my-8 max-h-[500px] w-full rounded-3xl object-cover"
+                    />
+                  )}
+
+                  <BlogContent
+                    content={
+                      generatedContent
+                    }
+                  />
+                </div>
+              )}
+
+              <div className="mt-7 rounded-2xl border border-emerald-900/15 bg-emerald-950/[0.04] p-5">
+
+                <h3 className="font-semibold text-emerald-950">
+                  Final step: save the blog
+                </h3>
+
+                <p className="mt-2 text-sm text-slate-500">
+                  Save it as a draft while working, or publish it when it is ready for the website.
+                </p>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+
+                <button
+                  type="submit"
+                  data-status="draft"
+                  disabled={
+                    saving ||
+                    uploading
+                  }
+                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 py-3 font-semibold transition hover:bg-slate-50 disabled:opacity-50"
+                >
+                  <Save className="h-4 w-4" />
+
+                  {savingAction ===
+                  "draft"
+                    ? "Saving..."
+                    : "Save Draft"}
                 </button>
 
-                {preview && (
-                  <div className="rounded-xl border border-slate-200 bg-[#FAF6EA] p-6">
-                    {form.image && (
-                      <img
-                        src={form.image}
-                        alt="Preview cover"
-                        className="mb-6 max-h-72 w-full rounded-xl object-cover"
-                      />
-                    )}
+                <button
+                  type="submit"
+                  data-status="published"
+                  disabled={
+                    saving ||
+                    uploading
+                  }
+                  className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+                >
+                  <Save className="h-4 w-4" />
 
-                    <h3 className="mb-6 text-3xl font-bold">
-                      {form.title ||
-                        "Article preview"}
-                    </h3>
+                  {savingAction ===
+                  "published"
+                    ? "Publishing..."
+                    : editing
+                      ? "Update & Publish"
+                      : "Publish"}
+                </button>
 
-                    <BlogContent
-                      content={form.content}
-                    />
-                  </div>
-                )}
+                {editing &&
+                  form.status ===
+                    "published" && (
+                    <Link
+                      href={`/blog/${form.slug}`}
+                      target="_blank"
+                      className="inline-flex items-center gap-2 rounded-2xl bg-amber-100 px-5 py-3 font-semibold text-amber-900"
+                    >
+                      View Article ↗
+                    </Link>
+                  )}
+              </div>
 
-                {editing && (
-                  <div className="rounded-xl bg-slate-50 p-4">
-                    <p className="text-sm text-slate-500">
-                      Current status
-                    </p>
-                    <p className="mt-1 font-semibold capitalize">
-                      {form.status}
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-5">
-                  <button
-                    type="submit"
-                    data-status="draft"
-                    disabled={
-                      saving ||
-                      imageUploading
-                    }
-                    className="rounded-xl border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {saving &&
-                    savingAction ===
-                      "draft"
-                      ? "Saving…"
-                      : editing
-                        ? "Save as Draft"
-                        : "Save Draft"}
-                  </button>
+              {editing && (
+                <div className="mt-8 border-t border-slate-200 pt-6">
 
                   <button
-                    type="submit"
-                    data-status="published"
-                    disabled={
-                      saving ||
-                      imageUploading
+                    type="button"
+                    onClick={
+                      deleteBlog
                     }
-                    className="rounded-xl bg-green-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={
+                      deleting
+                    }
+                    className="inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-white px-5 py-3 font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
                   >
-                    {saving &&
-                    savingAction ===
-                      "published"
-                      ? "Publishing…"
-                      : editing
-                        ? "Update & Publish"
-                        : "Publish Blog"}
-                  </button>
+                    <Trash2 className="h-4 w-4" />
 
-                  {editing &&
-                    form.status ===
-                      "published" && (
-                      <Link
-                        href={`/blog/${form.slug}`}
-                        target="_blank"
-                        className="font-semibold text-slate-700 hover:text-slate-950"
-                      >
-                        View article ↗
-                      </Link>
-                    )}
+                    {deleting
+                      ? "Deleting..."
+                      : "Delete This Blog"}
+                  </button>
                 </div>
-              </fieldset>
-            </form>
-          </div>
-        )}
+              )}
+            </EditorCard>
+          </form>
+        </div>
       </div>
     </main>
+  );
+}
+
+// ========================================
+// EDITOR CARD
+// ========================================
+
+function EditorCard({
+  number,
+  title,
+  description,
+  children,
+}: {
+  number:
+    string;
+
+  title:
+    string;
+
+  description:
+    string;
+
+  children:
+    React.ReactNode;
+}) {
+  return (
+    <section className="rounded-[30px] border border-slate-200 bg-white p-5 shadow-sm md:p-7">
+
+      <div className="mb-7 flex items-start gap-4">
+
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-900 text-lg font-bold text-white">
+          {
+            number
+          }
+        </div>
+
+        <div>
+
+          <h2 className="text-2xl font-bold tracking-tight">
+            {
+              title
+            }
+          </h2>
+
+          <p className="mt-1 text-sm leading-6 text-slate-500">
+            {
+              description
+            }
+          </p>
+        </div>
+      </div>
+
+      {
+        children
+      }
+    </section>
   );
 }
