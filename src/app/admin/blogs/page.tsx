@@ -44,6 +44,7 @@ type BlogForm = Pick<
   | "category"
   | "image"
   | "content"
+  | "readingTime"
   | "status"
 >;
 
@@ -77,6 +78,8 @@ const emptyForm:
   image: "",
 
   content: "",
+  readingTime:
+    null,
 
   status:
     "draft",
@@ -310,9 +313,8 @@ function parseContent(
 
         current = {
           id:
-            `section-${
-              parsedSections.length +
-              1
+            `section-${parsedSections.length +
+            1
             }`,
 
           heading:
@@ -642,7 +644,7 @@ export default function AdminBlogsPage() {
             [],
           );
         } catch (
-          loadError
+        loadError
         ) {
           setError(
             loadError instanceof
@@ -720,32 +722,6 @@ export default function AdminBlogsPage() {
       [
         introduction,
         sections,
-      ],
-    );
-
-  const readingTime =
-    useMemo(
-      () => {
-        const words =
-          generatedContent
-            .trim()
-            .split(
-              /\s+/,
-            )
-            .filter(
-              Boolean,
-            ).length;
-
-        return Math.max(
-          1,
-          Math.ceil(
-            words /
-            200,
-          ),
-        );
-      },
-      [
-        generatedContent,
       ],
     );
 
@@ -834,6 +810,10 @@ export default function AdminBlogsPage() {
 
         content:
           blog.content,
+        readingTime:
+          blog.readingTime ??
+          null,
+
 
         status:
           blog.status,
@@ -916,8 +896,8 @@ export default function AdminBlogsPage() {
             editing
               ? current.slug
               : slugify(
-                  title,
-                ),
+                title,
+              ),
         }),
       );
     };
@@ -949,13 +929,13 @@ export default function AdminBlogsPage() {
               section,
             ) =>
               section.id ===
-              id
+                id
                 ? {
-                    ...section,
+                  ...section,
 
-                    [field]:
-                      value,
-                  }
+                  [field]:
+                    value,
+                }
                 : section,
           ),
       );
@@ -967,21 +947,21 @@ export default function AdminBlogsPage() {
         (
           current,
         ) => [
-          ...current,
+            ...current,
 
-          {
-            id:
-              `section-${Date.now()}`,
+            {
+              id:
+                `section-${Date.now()}`,
 
-            heading: "",
+              heading: "",
 
-            body: "",
+              body: "",
 
-            linkText: "",
+              linkText: "",
 
-            linkUrl: "",
-          },
-        ],
+              linkUrl: "",
+            },
+          ],
       );
     };
 
@@ -1096,8 +1076,8 @@ export default function AdminBlogsPage() {
       if (
         file.size >
         10 *
-          1024 *
-          1024
+        1024 *
+        1024
       ) {
         setError(
           "Cover image must be 10 MB or smaller.",
@@ -1299,6 +1279,27 @@ export default function AdminBlogsPage() {
           "Please add some article content.",
         );
       }
+      if (
+  form.readingTime ===
+    null ||
+  !Number.isInteger(
+    Number(
+      form.readingTime,
+    ),
+  ) ||
+  Number(
+    form.readingTime,
+  ) <
+    1 ||
+  Number(
+    form.readingTime,
+  ) >
+    120
+) {
+  throw new Error(
+    "Please enter a reading time between 1 and 120 minutes.",
+  );
+}
 
       sections.forEach(
         (
@@ -1320,9 +1321,8 @@ export default function AdminBlogsPage() {
             hasUrl
           ) {
             throw new Error(
-              `Section ${
-                index +
-                1
+              `Section ${index +
+              1
               }: provide both Link Text and Link URL, or leave both empty.`,
             );
           }
@@ -1334,9 +1334,8 @@ export default function AdminBlogsPage() {
             )
           ) {
             throw new Error(
-              `Section ${
-                index +
-                1
+              `Section ${index +
+              1
               }: link must begin with https://, http://, /, #, mailto: or tel:.`,
             );
           }
@@ -1359,12 +1358,12 @@ export default function AdminBlogsPage() {
         (
           event.nativeEvent as SubmitEvent
         ).submitter as
-          | HTMLButtonElement
-          | null;
+        | HTMLButtonElement
+        | null;
 
       const requestedStatus =
         submitter?.dataset.status ===
-        "published"
+          "published"
           ? "published"
           : "draft";
 
@@ -1439,16 +1438,16 @@ export default function AdminBlogsPage() {
           (
             current,
           ) => [
-            savedBlog,
+              savedBlog,
 
-            ...current.filter(
-              (
-                blog,
-              ) =>
-                blog._id !==
-                savedBlog._id,
-            ),
-          ],
+              ...current.filter(
+                (
+                  blog,
+                ) =>
+                  blog._id !==
+                  savedBlog._id,
+              ),
+            ],
         );
 
         setEditing(
@@ -1473,6 +1472,9 @@ export default function AdminBlogsPage() {
 
           content:
             savedBlog.content,
+          readingTime:
+            savedBlog.readingTime ??
+            null,
 
           status:
             savedBlog.status,
@@ -1484,12 +1486,12 @@ export default function AdminBlogsPage() {
 
         setMessage(
           requestedStatus ===
-          "published"
+            "published"
             ? "Article saved and published."
             : "Draft saved.",
         );
       } catch (
-        saveError
+      saveError
       ) {
         setError(
           saveError instanceof
@@ -1564,7 +1566,7 @@ export default function AdminBlogsPage() {
           "Blog deleted.",
         );
       } catch (
-        deleteError
+      deleteError
       ) {
         setError(
           deleteError instanceof
@@ -1711,10 +1713,10 @@ export default function AdminBlogsPage() {
 
               {blogs.length ===
                 0 && (
-                <div className="rounded-2xl bg-slate-50 p-5 text-sm text-slate-500">
-                  No articles yet.
-                </div>
-              )}
+                  <div className="rounded-2xl bg-slate-50 p-5 text-sm text-slate-500">
+                    No articles yet.
+                  </div>
+                )}
 
               {blogs.map(
                 (
@@ -1734,7 +1736,7 @@ export default function AdminBlogsPage() {
                       "w-full rounded-2xl border p-4 text-left transition",
 
                       editing ===
-                      blog._id
+                        blog._id
                         ? "border-slate-900 bg-slate-900 text-white"
                         : "border-slate-200 bg-white hover:bg-slate-50",
                     ].join(
@@ -1753,7 +1755,7 @@ export default function AdminBlogsPage() {
                       <span
                         className={
                           editing ===
-                          blog._id
+                            blog._id
                             ? "text-white/60"
                             : "text-slate-400"
                         }
@@ -1768,7 +1770,7 @@ export default function AdminBlogsPage() {
                           "rounded-full px-2 py-1 font-semibold",
 
                           blog.status ===
-                          "published"
+                            "published"
                             ? "bg-emerald-100 text-emerald-700"
                             : "bg-amber-100 text-amber-700",
                         ].join(
@@ -1939,19 +1941,60 @@ export default function AdminBlogsPage() {
 
                 {/* READING TIME */}
 
-                <div>
+                <label className="block font-medium">
 
-                  <p className="font-medium">
-                    Reading time
+                  Reading time *
+
+                  <p className="mt-1 text-sm font-normal text-slate-500">
+                    Enter the reading time you want visitors to see.
                   </p>
 
-                  <div className={`${inputClass} bg-slate-50`}>
-                    {
-                      readingTime
-                    }{" "}
-                    min read
+                  <div className="relative">
+
+                    <input
+                      type="number"
+                      required
+                      min={
+                        1
+                      }
+                      max={
+                        120
+                      }
+                      step={
+                        1
+                      }
+                      value={
+                        form.readingTime ??
+                        ""
+                      }
+                      onChange={(
+                        event,
+                      ) =>
+                        setForm(
+                          (
+                            current,
+                          ) => ({
+                            ...current,
+
+                            readingTime:
+                              event.target.value ===
+                                ""
+                                ? null
+                                : Number(
+                                  event.target.value,
+                                ),
+                          }),
+                        )
+                      }
+                      placeholder="5"
+                      className={`${inputClass} pr-24`}
+                    />
+
+                    <span className="pointer-events-none absolute bottom-3 right-4 text-sm font-medium text-slate-400">
+                      minutes
+                    </span>
                   </div>
-                </div>
+                </label>
               </div>
             </EditorCard>
 
@@ -1976,18 +2019,18 @@ export default function AdminBlogsPage() {
 
               {(selectedPreview ||
                 form.image) && (
-                <div className="mt-5 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100">
+                  <div className="mt-5 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100">
 
-                  <img
-                    src={
-                      selectedPreview ||
-                      form.image
-                    }
-                    alt="Blog cover preview"
-                    className="max-h-[420px] w-full object-cover"
-                  />
-                </div>
-              )}
+                    <img
+                      src={
+                        selectedPreview ||
+                        form.image
+                      }
+                      alt="Blog cover preview"
+                      className="max-h-[420px] w-full object-cover"
+                    />
+                  </div>
+                )}
 
               <div className="mt-5 flex flex-wrap gap-3">
 
@@ -1996,7 +2039,7 @@ export default function AdminBlogsPage() {
                   <Upload className="h-4 w-4" />
 
                   {selectedPreview ||
-                  form.image
+                    form.image
                     ? "Replace Image"
                     : "Upload Image"}
 
@@ -2017,31 +2060,31 @@ export default function AdminBlogsPage() {
 
                 {(selectedImage ||
                   form.image) && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedImage(
-                        null,
-                      );
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedImage(
+                          null,
+                        );
 
-                      setForm(
-                        (
-                          current,
-                        ) => ({
-                          ...current,
+                        setForm(
+                          (
+                            current,
+                          ) => ({
+                            ...current,
 
-                          image:
-                            "",
-                        }),
-                      );
-                    }}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-600"
-                  >
-                    <X className="h-4 w-4" />
+                            image:
+                              "",
+                          }),
+                        );
+                      }}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-600"
+                    >
+                      <X className="h-4 w-4" />
 
-                    Remove
-                  </button>
-                )}
+                      Remove
+                    </button>
+                  )}
               </div>
             </EditorCard>
 
@@ -2394,15 +2437,15 @@ export default function AdminBlogsPage() {
 
                   {(selectedPreview ||
                     form.image) && (
-                    <img
-                      src={
-                        selectedPreview ||
-                        form.image
-                      }
-                      alt=""
-                      className="my-8 max-h-[500px] w-full rounded-3xl object-cover"
-                    />
-                  )}
+                      <img
+                        src={
+                          selectedPreview ||
+                          form.image
+                        }
+                        alt=""
+                        className="my-8 max-h-[500px] w-full rounded-3xl object-cover"
+                      />
+                    )}
 
                   <BlogContent
                     content={
@@ -2437,7 +2480,7 @@ export default function AdminBlogsPage() {
                   <Save className="h-4 w-4" />
 
                   {savingAction ===
-                  "draft"
+                    "draft"
                     ? "Saving..."
                     : "Save Draft"}
                 </button>
@@ -2454,7 +2497,7 @@ export default function AdminBlogsPage() {
                   <Save className="h-4 w-4" />
 
                   {savingAction ===
-                  "published"
+                    "published"
                     ? "Publishing..."
                     : editing
                       ? "Update & Publish"
@@ -2463,7 +2506,7 @@ export default function AdminBlogsPage() {
 
                 {editing &&
                   form.status ===
-                    "published" && (
+                  "published" && (
                     <Link
                       href={`/blog/${form.slug}`}
                       target="_blank"
@@ -2514,16 +2557,16 @@ function EditorCard({
   children,
 }: {
   number:
-    string;
+  string;
 
   title:
-    string;
+  string;
 
   description:
-    string;
+  string;
 
   children:
-    React.ReactNode;
+  React.ReactNode;
 }) {
   return (
     <section className="rounded-[30px] border border-slate-200 bg-white p-5 shadow-sm md:p-7">

@@ -2272,10 +2272,10 @@ function getFloorVisual(
   ) {
     return {
       src:
-        "/vairav.png",
+        "/",
 
       alt:
-        "Vairav Tech",
+        "Available",
 
       fit:
         "contain",
